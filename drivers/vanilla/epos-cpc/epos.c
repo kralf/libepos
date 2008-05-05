@@ -5,9 +5,6 @@
 
 #undef ASL_DEBUG
 
-ALL_EPOS_READ epos_read;
-ALL_EPOS_SET epos_set;
-
 EPOS_ERROR_HISTORY error_history[MAXERRORHISTORY] = {
   { 0x0000, 0x00, "No error." },
   { 0x1000, 0x01, "Generic error." },

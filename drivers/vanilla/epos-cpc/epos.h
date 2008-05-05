@@ -63,14 +63,14 @@ typedef struct EPOS_ERROR_DEVICE{
   EPOS_ERROR_HISTORY history[5];
 } EPOS_ERROR_DEVICE;
 
-typedef struct EPOS_ERROR_SERIAL{
+typedef struct EPOS_ERROR_COMM{
   long int code;
   char *msg;
-} EPOS_ERROR_SERIAL;
+} EPOS_ERROR_COMM;
 
 typedef struct EPOS_ERROR {
   EPOS_ERROR_DEVICE device;
-  EPOS_ERROR_SERIAL serial;
+  EPOS_ERROR_COMM comm;
 } EPOS_ERROR;
 
 typedef struct EPOS_READ{
@@ -120,6 +120,9 @@ typedef struct EPOS_SET{
 typedef struct ALL_EPOS_SET {
   EPOS_SET number[NUMBER_OF_EPOS];
 } ALL_EPOS_SET;
+
+ALL_EPOS_READ epos_read;
+ALL_EPOS_SET epos_set;
 
 /* *************************** */
 /* INIT / CONTROL OPERATIONS   */
@@ -176,9 +179,6 @@ void set_RS232_baudrate(int id, int val);
 /* READ OPERATIONS             */
 /* *************************** */
 
-// message handler
-void can_read_message_handler(int handle, const CPC_MSG_T *cpcmsg);
-
 void get_mode_of_operation(int id); 		      // sets the control mode
 void get_mode_of_operation_display(int id);
 void get_position_control_parameter_set(int id);
@@ -217,5 +217,8 @@ void get_maximum_following_error(int id);
 void get_current_value(int id);			      // commanding value
 void get_current_actual_value(int id);		      // measured value
 void get_current_actual_value_averaged(int id);
+
+// message handler
+void can_read_message_handler(int handle, const CPC_MSG_T *cpcmsg);
 
 #endif
