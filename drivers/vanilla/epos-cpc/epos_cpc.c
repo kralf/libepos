@@ -34,7 +34,7 @@
 
 unsigned char btr0, btr1;
 int handle;
-unsigned char interface[32];
+char interface[32];
 int zchn, nfds, cpcfd;
 CPC_INIT_PARAMS_T *CPCInitParamsPtr;
 fd_set readfds, writefds;

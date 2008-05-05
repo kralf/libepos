@@ -1,7 +1,7 @@
 #ifndef _EPOS_CPC_H
 #define _EPOS_CPC_H
 
-#include "cpc.h"
+#include "cpclib.h"
 
 void can_init(void);
 void can_send_message(int can_id, char *msg);
