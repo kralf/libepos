@@ -1,15 +1,15 @@
 #ifndef _EPOS_H
 #define _EPOS_H
 
-#include "epos_cpc.h"
+#include "can.h"
 
 /* *************************** */
 /* DEFINES                     */
 /* *************************** */
 
-//#define OPERATION_MODE_PROFILE_VELOCITY 0x3
-//#define OPERATION_MODE_PROFILE_POSITION 0x1
-//#define OPERATION_MODE_CURRENT 0xFD
+#define OPERATION_MODE_PROFILE_VELOCITY 0x3
+#define OPERATION_MODE_PROFILE_POSITION 0x1
+#define OPERATION_MODE_CURRENT 0xFD
 
 #define WRITE_1_BYTE 0x2f
 #define WRITE_2_BYTE 0x2b
@@ -49,7 +49,6 @@ typedef struct EPOS_MOTOR_DATA_STR {
   unsigned int max_speed_in_current_mode;
   unsigned int thermal_time_constant_winding;
 } EPOS_MOTOR_DATA_STR;
-
 
 typedef struct EPOS_ERROR_HISTORY{
   int code;
@@ -98,7 +97,6 @@ typedef struct EPOS_READ{
 
   EPOS_ERROR error;                             // errors
 }EPOS_READ;
-
 
 typedef struct ALL_EPOS_READ {
   EPOS_READ number[NUMBER_OF_EPOS];
@@ -217,8 +215,5 @@ void get_maximum_following_error(int id);
 void get_current_value(int id);			      // commanding value
 void get_current_actual_value(int id);		      // measured value
 void get_current_actual_value_averaged(int id);
-
-// message handler
-void can_read_message_handler(int handle, const CPC_MSG_T *cpcmsg);
 
 #endif
