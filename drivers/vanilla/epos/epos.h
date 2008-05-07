@@ -7,8 +7,8 @@
 /* DEFINES                     */
 /* *************************** */
 
-#define OPERATION_MODE_PROFILE_VELOCITY 0x3
-#define OPERATION_MODE_PROFILE_POSITION 0x1
+#define OPERATION_MODE_POSITION 0x1
+#define OPERATION_MODE_VELOCITY 0x3
 #define OPERATION_MODE_CURRENT 0xFD
 
 #define WRITE_1_BYTE 0x2f
