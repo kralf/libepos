@@ -65,7 +65,7 @@ typedef struct {
 typedef struct {
   int count;
   unsigned char reg;
-  epos_error_history_t history[5];
+  epos_error_history_t history;
 } epos_error_device_t;
 
 typedef struct {

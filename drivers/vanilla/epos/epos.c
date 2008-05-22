@@ -1537,8 +1537,8 @@ void can_read_message_handler(const can_message_t* message)
   PDEBUG_SNIP("%x ",message->content[6]);
   PDEBUG_SNIP("%x \n",message->content[7]);
 
-  if ((message->id > 0x80)&& (message->id < 0x100)) {
-    //EMERGERNCY object
+  if ((message->id > 0x80) && (message->id < 0x100)) {
+    //EMERGENCY object
     PDEBUG("ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR\n");
     int errorfound=0;
 
@@ -1547,22 +1547,17 @@ void can_read_message_handler(const can_message_t* message)
     for (i = 0; i < EPOS_ERROR_HISTORY; i++) {
       if(errorcode == error_history[i].code)
       {
-      printf("Device ErrorCode 0x%04X: %s\n", error_history[i].code, error_history[i].msg);
-      epos_read.node[(message->id - 0x581)].error
-      .device.history[message->content[3]-1].code = error_history[i].code;
-      epos_read.node[(message->id - 0x581)].error
-      .device.history[message->content[3]-1].reg = error_history[i].reg;
-      epos_read.node[(message->id - 0x581)].error
-      .device.history[message->content[3]-1].msg = error_history[i].msg;
-      errorfound=1;
+        printf("Node %d error 0x%04X: %s\n", message->id-0x80,
+          error_history[i].code, error_history[i].msg);
+        epos_read.node[message->id-0x80].error.device.history.code =
+          error_history[i].code;
+        epos_read.node[message->id-0x80].error.device.history.reg =
+          error_history[i].reg;
+        epos_read.node[message->id-0x80].error.device.history.msg =
+          error_history[i].msg;
+        errorfound = 1;
       }
-      }
-
-      epos_faultreset(1);
-      epos_activate_position(1);
-      epos_faultreset(1);
-      epos_activate(1);
-      epos_faultreset(1);
+    }
   }
 
   if (message->content[0] == 0x80)
@@ -1578,12 +1573,11 @@ void can_read_message_handler(const can_message_t* message)
       PDEBUG_SNIP("%x ",message->content[5]);
       PDEBUG_SNIP("%x ",message->content[6]);
       PDEBUG_SNIP("%x \n",message->content[7]);
-
   }
   else
   {
 
-	if ((message->id >= 0x581)&&(message->id <= (0x581+EPOS_NUM_NODES-1)))
+	if ((message->id >= 0x581) && (message->id <= (0x581+EPOS_NUM_NODES-1)))
 	{
 
  	  if ((message->content[1]==0x7F)
@@ -1927,13 +1921,15 @@ void can_read_message_handler(const can_message_t* message)
 			{
 			  if(errorcode == error_history[i].code)
 			  {
-				printf("%s => Device ErrorCode 0x%04X: %s\n", __FILE__, error_history[i].code, error_history[i].msg);
-		    	epos_read.node[(message->id - 0x581)].error
-				.device.history[message->content[3]-1].code = error_history[i].code;
-		    	epos_read.node[(message->id - 0x581)].error
-				.device.history[message->content[3]-1].reg = error_history[i].reg;
-		    	epos_read.node[(message->id - 0x581)].error
-				.device.history[message->content[3]-1].msg = error_history[i].msg;
+                        printf("%s => Node %d error 0x%04X: %s\n",
+                          __FILE__, message->id - 0x581, error_history[i].code,
+                          error_history[i].msg);
+		    	epos_read.node[(message->id - 0x581)].error.device.history.code =
+                          error_history[i].code;
+		    	epos_read.node[(message->id - 0x581)].error.device.history.reg =
+                          error_history[i].reg;
+		    	epos_read.node[(message->id - 0x581)].error.device.history.msg =
+                          error_history[i].msg;
 			  }
 
 			}
