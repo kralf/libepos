@@ -683,6 +683,24 @@ void epos_set_controlword(int id, int val)
   can_send_message(&message);
 }
 
+void epos_set_home_position(int id, long int x)
+{
+  PDEBUG("set home position to ");
+  can_message_t message;
+
+  message.id = 0x600+id;
+  message.content[0]= EPOS_WRITE_4_BYTE;
+  message.content[1]= 0x81;
+  message.content[2]= 0x20;
+  message.content[3]= 0x00;
+  message.content[4]= (x & 0x000000ff);
+  message.content[5]= ((x & 0x0000ff00)>>8);
+  message.content[6]= ((x & 0x00ff0000)>>16);
+  message.content[7]= ((x & 0xff000000)>>24);
+  PDEBUG_SNIP("%ld\n",x);
+  can_send_message(&message);
+}
+
 void epos_set_home_offset(int id, long int x)
 {
   PDEBUG("set home offset position to ");
@@ -1238,6 +1256,23 @@ void epos_get_position_mode_setting_value(int id)
   can_send_message(&message);
 }
 
+void epos_get_digital_input(int id)
+{
+  PDEBUG("ask for digital input functionalities\n");
+  can_message_t message;
+
+  message.id = 0x600+id;
+  message.content[0]= EPOS_READ;
+  message.content[1]= 0x71;
+  message.content[2]= 0x20;
+  message.content[3]= 0x01;
+  message.content[4]= 0x00;
+  message.content[5]= 0x00;
+  message.content[6]= 0x00;
+  message.content[7]= 0x00;
+  can_send_message(&message);
+}
+
 void epos_get_statusword(int id)
 {
   PDEBUG("ask for actual statusword\n");
@@ -1734,6 +1769,15 @@ void can_read_message_handler(const can_message_t* message)
               && (message->content[3]==0x00))
             {
                 epos_read.node[(message->id - 0x581)].control
+                =message->content[4]
+                +(message->content[5]<<8);
+            }
+
+          if ((message->content[1]==0x71)
+              && (message->content[2]==0x20)
+              && (message->content[3]==0x01))
+            {
+                epos_read.node[(message->id - 0x581)].digital_input
                 =message->content[4]
                 +(message->content[5]<<8);
             }

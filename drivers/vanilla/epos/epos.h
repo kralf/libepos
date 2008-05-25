@@ -90,8 +90,9 @@ typedef struct {
   char operation_mode_display;
   short current_value;
 
-  int control;
-  int status;
+  short digital_input;
+  short control;
+  short status;
 
   unsigned int maximum_following_error;
   epos_motor_data_t motor_data;
@@ -171,6 +172,7 @@ void epos_set_target_position(int id, long int x);
 void epos_set_velocity_mode_setting_value(int id, long int v);
 void epos_set_position_mode_setting_value(int id, long int x);
 void epos_set_controlword(int id, int val);
+void epos_set_home_position(int id, long int x);
 void epos_set_home_offset(int id, long int x);
 void epos_set_homing_speed_switch_search(int id, long int v);
 void epos_set_homing_speed_zero_search(int id, long int v);
@@ -193,6 +195,7 @@ void epos_get_velocity_control_parameter_set(int id);
 void epos_get_maximum_profile_velocity(int id);
 void epos_get_velocity_mode_setting_value(int id);
 void epos_get_position_mode_setting_value(int id);
+void epos_get_digital_input(int id);
 void epos_get_statusword(int id);
 void epos_get_controlword(int id);
 void epos_get_home_offset(int id);
