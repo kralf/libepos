@@ -1,4 +1,4 @@
-CFLAGS += -I../can
+CFLAGS += -I../can -fPIC
 LDFLAGS += -L../can
 
 PREFIX = /usr/local
