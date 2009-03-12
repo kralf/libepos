@@ -129,8 +129,8 @@ typedef struct {
   epos_node_set_t number[EPOS_NUM_NODES];
 } epos_set_t;
 
-epos_read_t epos_read;
-epos_set_t epos_set;
+extern epos_read_t epos_read;
+extern epos_set_t epos_set;
 
 /* *************************** */
 /* INIT / CONTROL OPERATIONS   */

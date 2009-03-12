@@ -7,6 +7,9 @@
 
 #include "epos.h"
 
+epos_read_t epos_read;
+epos_set_t epos_set;
+
 epos_error_history_t error_history[EPOS_ERROR_HISTORY] = {
   { 0x0000, 0x00, "No error." },
   { 0x1000, 0x01, "Generic error." },
