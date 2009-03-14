@@ -100,6 +100,7 @@ typedef struct {
 
 typedef struct {
   short hw_version;
+  short sw_version;
 
   int sensed_velocity;
   int motion_profile_type;
@@ -211,6 +212,7 @@ void epos_set_RS232_baudrate(int id, int val);
 /* *************************** */
 
 void epos_get_hardware_version(int id);
+void epos_get_software_version(int id);
 void epos_get_mode_of_operation(int id);          // sets the control mode
 void epos_get_mode_of_operation_display(int id);
 void epos_get_position_control_parameter_set(int id);
@@ -225,7 +227,6 @@ void epos_get_home_offset(int id);
 void epos_get_homing_speed_switch_search(int id);
 void epos_get_homing_speed_zero_search(int id);
 void epos_get_homing_method(int id);
-void epos_get_software_version(int id);
 void epos_get_software_minimal_position_limit(int id);
 void epos_get_software_maximal_position_limit(int id);
 void epos_get_profile_acceleration(int id);

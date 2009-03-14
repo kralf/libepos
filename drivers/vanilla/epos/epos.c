@@ -868,13 +868,30 @@ void epos_set_RS232_baudrate(int id, int val) {
 /* *************************** */
 
 void epos_get_hardware_version(int id) {
+  //PDEBUG("ask for actual hardware version\n");
   can_message_t message;
 
   message.id = 0x600+id;
   message.content[0]= EPOS_READ;
-  message.content[1]= 0x60;
-  message.content[2]= 0x60;
-  message.content[3]= 0x00;
+  message.content[1]= 0x03;
+  message.content[2]= 0x20;
+  message.content[3]= 0x02;
+  message.content[4]= 0x00;
+  message.content[5]= 0x00;
+  message.content[6]= 0x00;
+  message.content[7]= 0x00;
+  can_send_message(&message);
+}
+
+void epos_get_software_version(int id) {
+  //PDEBUG("ask for actual software version\n");
+  can_message_t message;
+
+  message.id = 0x600+id;
+  message.content[0]= EPOS_READ;
+  message.content[1]= 0x03;
+  message.content[2]= 0x20;
+  message.content[3]= 0x01;
   message.content[4]= 0x00;
   message.content[5]= 0x00;
   message.content[6]= 0x00;
@@ -888,9 +905,9 @@ void epos_get_mode_of_operation(int id) {
 
   message.id = 0x600+id;
   message.content[0]= EPOS_READ;
-  message.content[1]= 0x03;
-  message.content[2]= 0x20;
-  message.content[3]= 0x02;
+  message.content[1]= 0x60;
+  message.content[2]= 0x60;
+  message.content[3]= 0x00;
   message.content[4]= 0x00;
   message.content[5]= 0x00;
   message.content[6]= 0x00;
@@ -1349,22 +1366,6 @@ void epos_get_homing_method(int id) {
   can_send_message(&message);
 }
 
-void epos_get_software_version(int id) {
-  //PDEBUG("ask for actual software version\n");
-  can_message_t message;
-
-  message.id = 0x600+id;
-  message.content[0]= EPOS_READ;
-  message.content[1]= 0x03;
-  message.content[2]= 0x20;
-  message.content[3]= 0x01;
-  message.content[4]= 0x00;
-  message.content[5]= 0x00;
-  message.content[6]= 0x00;
-  message.content[7]= 0x00;
-  can_send_message(&message);
-}
-
 void epos_get_software_minimal_position_limit(int id) {
   PDEBUG("ask for actual software minimal position limit\n");
   can_message_t message;
@@ -1595,6 +1596,16 @@ void can_read_message_handler(const can_message_t* message) {
     =message->content[4]
     +(message->content[5]<<8);
         //PDEBUG_SNIP("ox%x\n",epos_read.node[(message->id - 0x581)].hw_version);
+      }
+
+    if ((message->content[1]==0x03)
+        && (message->content[2]==0x20)
+        && (message->content[3]==0x01)) {
+        //PDEBUG("received software version ");
+        epos_read.node[(message->id - 0x581)].sw_version
+    =message->content[4]
+    +(message->content[5]<<8);
+        //PDEBUG_SNIP("ox%x\n",epos_read.node[(message->id - 0x581)].sw_version);
       }
 
 	  if ((message->content[1]==0x64)

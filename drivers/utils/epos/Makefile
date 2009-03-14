@@ -3,7 +3,7 @@ LDFLAGS = -L ../../vanilla/epos -lepos
 
 PREFIX = /usr/local
 
-OBJS = epos_init
+OBJS = epos_init epos_version epos_pos
 
 all: $(OBJS)
 
