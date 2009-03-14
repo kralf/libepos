@@ -1,13 +1,13 @@
 CFLAGS += -I../can -fPIC
-LDFLAGS += -L../can
+LDFLAGS += -L../can -lcan
 
 PREFIX = /usr/local
 
 libepos.so: epos.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -Wall -shared -o libepos.so epos.c -lcan
+	$(CC) $(CFLAGS) $(LDFLAGS) -shared -o libepos.so epos.c
 
 install: libepos.so
-	install -c -m 644 libepos.so $(PREFIX)/lib
+	install -c -m 755 libepos.so $(PREFIX)/lib
 
 clean:
 	rm -f *.o

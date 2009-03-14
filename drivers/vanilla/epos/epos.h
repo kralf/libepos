@@ -79,6 +79,8 @@ typedef struct {
 } epos_error_t;
 
 typedef struct {
+  short hw_version;
+
   int sensed_velocity;
   int motion_profile_type;
   int actual_velocity;
@@ -188,6 +190,7 @@ void epos_set_RS232_baudrate(int id, int val);
 /* READ OPERATIONS             */
 /* *************************** */
 
+void epos_get_hardware_version(int id);
 void epos_get_mode_of_operation(int id);          // sets the control mode
 void epos_get_mode_of_operation_display(int id);
 void epos_get_position_control_parameter_set(int id);
