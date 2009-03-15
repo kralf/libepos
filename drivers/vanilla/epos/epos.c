@@ -247,6 +247,22 @@ void epos_start_homing_operation(int id) {
 /* SET OPERATIONS              */
 /* *************************** */
 
+void epos_set_position_sensor_type(int id, short type) {
+  PDEBUG("set position sensor type to 0x%x\n",type);
+  can_message_t message;
+
+  message.id = 0x600+id;
+  message.content[0]= EPOS_WRITE_2_BYTE;
+  message.content[1]= 0x10;
+  message.content[2]= 0x22;
+  message.content[3]= 0x02;
+  message.content[4]= (type & 0x00ff);
+  message.content[5]= ((type & 0xff00)>>8);
+  message.content[6]= 0x00;
+  message.content[7]= 0x00;
+  can_send_message(&message);
+}
+
 /* sets the control mode */
 void epos_set_mode_of_operation(int id, int mode) {
   PDEBUG("set mode of operation to 0x%x\n",mode);
@@ -1463,13 +1479,13 @@ void epos_get_error_history(int id, int index) {
 }
 
 void epos_get_error(int id) {
-  char index;
+  int index;
   PDEBUG("ask for error\n");
 
   epos_get_error_register(id);
 
-  for(index=0;index<6;index++) epos_get_error_history(id, index);
-
+  for (index = 1; index < 6; index++)
+    epos_get_error_history(id, index);
 }
 
 void epos_get_continous_current_limit(int id) {
@@ -1907,7 +1923,7 @@ void can_read_message_handler(const can_message_t* message) {
 			for(i=0;i<EPOS_ERROR_HISTORY;i++) {
 			  if(errorcode == error_history[i].code) {
                         printf("%s => Node %d error 0x%04X: %s\n",
-                          __FILE__, message->id - 0x581, error_history[i].code,
+                          __FILE__, message->id-0x581+1, error_history[i].code,
                           error_history[i].msg);
 		    	epos_read.node[(message->id - 0x581)].error.device.history.code =
                           error_history[i].code;

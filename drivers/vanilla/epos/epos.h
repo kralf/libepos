@@ -25,6 +25,10 @@
 /* DEFINES                     */
 /* *************************** */
 
+#define EPOS_POSITION_SENSOR_3CHAN 0x01
+#define EPOS_POSITION_SENSOR_2CHAN 0x02
+#define EPOS_POSITION_SENSOR_HALL 0x03
+
 #define EPOS_OPERATION_MODE_POSITION 0xFF
 #define EPOS_OPERATION_MODE_VELOCITY 0xFE
 #define EPOS_OPERATION_MODE_PROFILE_POSITION 0x01
@@ -129,7 +133,7 @@ typedef struct {
   int max_profile_velocity;
 
   epos_error_t error;                             // errors
-} epos_node_read_t;
+} epos_node_read_t, *epos_node_read_p;
 
 typedef struct {
   epos_node_read_t node[EPOS_NUM_NODES];
@@ -174,6 +178,7 @@ void epos_start_homing_operation(int id);
 /* SET OPERATIONS              */
 /* *************************** */
 
+void epos_set_position_sensor_type(int id, short type);
 void epos_set_mode_of_operation(int id, int mode);  // sets the control mode
 void epos_set_profile_acceleration(int id, long int a);
 void epos_set_profile_deceleration(int id, long int a);

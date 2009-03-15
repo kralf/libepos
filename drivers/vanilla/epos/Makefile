@@ -3,7 +3,7 @@ LDFLAGS += -L../can -lcan
 
 PREFIX = /usr/local
 
-libepos.so: epos.c
+libepos.so: epos.h epos.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -shared -o libepos.so epos.c
 
 install: libepos.so

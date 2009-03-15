@@ -19,38 +19,40 @@
  ***************************************************************************/
 
 #include <stdio.h>
-#include <signal.h>
+#include <stdlib.h>
 
 #include <epos.h>
 
-int quit = 0;
-
-void epos_signaled(int signal) {
-  quit = 1;
-}
+#define STATUS_TARGET_REACHED 0x0408
 
 int main(int argc, char **argv) {
-  if ((argc < 2) || (argc > 3)) {
-    fprintf(stderr, "Usage: %s DEV [ID]\n", argv[0]);
+  if ((argc < 4) || (argc > 5)) {
+    fprintf(stderr, "Usage: %s DEV POS VEL [ID]\n", argv[0]);
     return -1;
   }
 
   int id = 1;
-  if (argc == 3)
-    id = atoi(argv[2]);
-
-  signal(SIGINT, epos_signaled);
+  if (argc == 5)
+    id = atoi(argv[4]);
+  int pos = atoi(argv[2]);
+  int vel = atoi(argv[3]);
 
   can_init(argv[1]);
   epos_fault_reset(id);
-  while (!quit) {
-    epos_get_actual_position(id);
-    fprintf(stdout, "\rposition [tiks]: %d",
-      epos_read.node[id-1].actual_position);
-    fflush(stdout);
-    usleep(100000);
+
+  epos_shutdown(id);
+  epos_enable_operation(id);
+  epos_set_mode_of_operation(id, EPOS_OPERATION_MODE_PROFILE_POSITION);
+  epos_set_profile_velocity(id, vel);
+  epos_set_target_position(id, pos);
+  epos_activate_position(id);
+
+  do {
+    epos_get_statusword(id);
   }
-  printf("\n");
+  while (!(epos_read.node[id-1].status & STATUS_TARGET_REACHED));
+
+  epos_shutdown(id);
   can_close();
 
   return 0;
