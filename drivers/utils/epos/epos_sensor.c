@@ -19,23 +19,28 @@
  ***************************************************************************/
 
 #include <stdio.h>
+#include <signal.h>
 
 #include <epos.h>
 
+int quit = 0;
+
+void epos_signaled(int signal) {
+  quit = 1;
+}
+
 int main(int argc, char **argv) {
-  if ((argc < 2) || (argc > 3)) {
-    fprintf(stderr, "Usage: %s DEV [ID]\n", argv[0]);
-    return -1;
+  epos_node_t node;
+  signal(SIGINT, epos_signaled);
+
+  epos_init_arg(&node, argc, argv);
+  while (!quit) {
+    fprintf(stdout, "\rEPOS sensor position: %10d steps",
+      epos_sensor_get_position(&node.sensor));
+    fflush(stdout);
   }
-
-  int id = 1;
-  if (argc == 3)
-    id = atoi(argv[2]);
-
-  epos_device_t dev;
-
-  epos_device_init(&dev, argv[1], id);
-  epos_device_close(&dev);
+  fprintf(stdout, "\n");
+  epos_close(&node);
 
   return 0;
 }

@@ -19,23 +19,25 @@
  ***************************************************************************/
 
 #include <stdio.h>
+#include <signal.h>
 
 #include <epos.h>
 
+int quit = 0;
+
+void epos_signaled(int signal) {
+  quit = 1;
+}
+
 int main(int argc, char **argv) {
-  if ((argc < 2) || (argc > 3)) {
-    fprintf(stderr, "Usage: %s DEV [ID]\n", argv[0]);
-    return -1;
-  }
+  epos_node_t node;
+  signal(SIGINT, epos_signaled);
 
-  int id = 1;
-  if (argc == 3)
-    id = atoi(argv[2]);
-
-  epos_device_t dev;
-
-  epos_device_init(&dev, argv[1], id);
-  epos_device_close(&dev);
+  epos_init_arg(&node, argc, argv);
+  epos_control_start(&node.control);
+  while (!quit);
+  epos_control_stop(&node.control);
+  epos_close(&node);
 
   return 0;
 }

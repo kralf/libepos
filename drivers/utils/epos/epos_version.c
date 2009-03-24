@@ -23,22 +23,12 @@
 #include <epos.h>
 
 int main(int argc, char **argv) {
-  if ((argc < 2) || (argc > 3)) {
-    fprintf(stderr, "Usage: %s DEV [ID]\n", argv[0]);
-    return -1;
-  }
+  epos_node_t node;
 
-  int id = 1;
-  if (argc == 3)
-    id = atoi(argv[2]);
-
-  can_init(argv[1]);
-  epos_get_hardware_version(id);
-  epos_get_software_version(id);
-
-  printf("hardware version: 0x%04X\n", epos_read.node[id-1].hw_version);
-  printf("software version: 0x%04X\n", epos_read.node[id-1].sw_version);
-  can_close();
+  epos_init_arg(&node, argc, argv);
+  printf("EPOS hardware version: 0x%04X\n", node.dev.hardware_version);
+  printf("EPOS software version: 0x%04X\n", node.dev.software_version);
+  epos_close(&node);
 
   return 0;
 }

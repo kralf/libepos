@@ -23,19 +23,30 @@
 #include <epos.h>
 
 int main(int argc, char **argv) {
-  if ((argc < 2) || (argc > 3)) {
-    fprintf(stderr, "Usage: %s DEV [ID]\n", argv[0]);
+  if (argc < 2) {
+    fprintf(stderr, "Usage: %s BAUDRATE [PARAMETERS]\n", argv[0]);
     return -1;
   }
 
-  int id = 1;
-  if (argc == 3)
-    id = atoi(argv[2]);
+  epos_node_t node;
 
-  epos_device_t dev;
+  epos_init_arg(&node, argc, argv);
+  printf("current EPOS baudrate: %d Baud\n", node.dev.rs232_baudrate);
+  if (argc > 2) {
+    int error = epos_device_set_rs232_baudrate(&node.dev, atoi(argv[1]));
+    if (error) {
+      printf("error setting new baudrate: %s\n", epos_device_errors[error]);
+      return -1;
+    }
+    error = epos_device_store_parameters(&node.dev);
+    if (error) {
+      printf("error storing parameters: %s\n", epos_device_errors[error]);
+      return -1;
+    }
 
-  epos_device_init(&dev, argv[1], id);
-  epos_device_close(&dev);
+    printf("new EPOS baudrate: %d Baud\n", atoi(argv[1]));
+  }
+  epos_close(&node);
 
   return 0;
 }

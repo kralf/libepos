@@ -1,9 +1,10 @@
-CFLAGS = -I../../vanilla/epos -I../../../posix/timer
+CFLAGS = -I../../vanilla/can -I../../vanilla/epos -I../../../posix/timer
 LDFLAGS = -L ../../vanilla/epos -L ../../../posix/timer -lepos -ltimer
 
 PREFIX = /usr/local
 
-OBJS = epos_init epos_version epos_status epos_vel epos_profile
+OBJS = epos_version epos_baudrate epos_sensor epos_control epos_init \
+	epos_status epos_vel epos_profile
 
 all: $(OBJS)
 
