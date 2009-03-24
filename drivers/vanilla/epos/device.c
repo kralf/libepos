@@ -269,6 +269,13 @@ int epos_device_set_control(epos_device_p dev, short control) {
     (unsigned char*)&control, sizeof(short));
 }
 
+unsigned char epos_device_get_error(epos_device_p dev) {
+  unsigned char error;
+  epos_device_read(dev, EPOS_DEVICE_INDEX_ERROR_REGISTER, 0, &error, 1);
+
+  return error;
+}
+
 int epos_device_reset(epos_device_p dev) {
   int result = epos_device_set_control(dev, EPOS_DEVICE_CONTROL_FAULT_RESET);
 

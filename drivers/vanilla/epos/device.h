@@ -47,6 +47,7 @@
 
 #define EPOS_DEVICE_ABORT                       0xC0
 
+#define EPOS_DEVICE_INDEX_ERROR_REGISTER        0x1001
 #define EPOS_DEVICE_INDEX_STORE                 0x1010
 #define EPOS_DEVICE_SUBINDEX_STORE              0x01
 #define EPOS_DEVICE_INDEX_RESTORE               0x1011
@@ -263,6 +264,13 @@ short epos_device_get_control(
 int epos_device_set_control(
   epos_device_p dev,
   short control);
+
+/** \brief Retrieve EPOS device error register
+  * \param[in] dev The EPOS device to retrieve the error register for.
+  * \return The error register value of the specified EPOS device.
+  */
+unsigned char epos_device_get_error(
+  epos_device_p dev);
 
 /** \brief Reset EPOS device in fault state
   * \param[in] dev The EPOS device to be reset.
