@@ -3,8 +3,8 @@ LDFLAGS = -L ../../vanilla/epos -L ../../../posix/timer -lepos -ltimer
 
 PREFIX = /usr/local
 
-OBJS = epos_version epos_baudrate epos_sensor epos_control epos_init \
-	epos_status epos_vel epos_profile
+OBJS = epos_version epos_error epos_baudrate epos_sensor epos_init \
+	epos_control epos_home epos_position
 
 all: $(OBJS)
 

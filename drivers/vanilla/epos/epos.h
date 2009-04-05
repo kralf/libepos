@@ -24,6 +24,7 @@
 #include "device.h"
 #include "sensor.h"
 #include "motor.h"
+#include "gear.h"
 #include "control.h"
 
 /** \brief Predefined EPOS constants
@@ -31,12 +32,14 @@
 #define EPOS_ARG_DEVICE                     "dev-"
 
 #define EPOS_PARAMETER_ID                   0
-#define EPOS_PARAMETER_SENSOR_TYPE          1
-#define EPOS_PARAMETER_SENSOR_POLARITY      2
-#define EPOS_PARAMETER_SENSOR_PULSES        3
-#define EPOS_PARAMETER_MOTOR_TYPE           4
-#define EPOS_PARAMETER_MOTOR_CURRENT        5
-#define EPOS_PARAMETER_CONTROL_TYPE         6
+#define EPOS_PARAMETER_RESET                1
+#define EPOS_PARAMETER_SENSOR_TYPE          2
+#define EPOS_PARAMETER_SENSOR_POLARITY      3
+#define EPOS_PARAMETER_SENSOR_PULSES        4
+#define EPOS_PARAMETER_MOTOR_TYPE           5
+#define EPOS_PARAMETER_MOTOR_CURRENT        6
+#define EPOS_PARAMETER_GEAR_TRANSMISSION    7
+#define EPOS_PARAMETER_CONTROL_TYPE         8
 
 /** \brief Predefined EPOS error codes
   */
@@ -66,8 +69,17 @@ typedef struct epos_node_t {
   epos_device_t dev;          //!< The EPOS node device.
   epos_sensor_t sensor;       //!< The EPOS position sensor.
   epos_motor_t motor;         //!< The EPOS motor.
+  epos_gear_t gear;           //!< The EPOS gear assembly.
   epos_control_t control;     //!< The EPOS controller.
 } epos_node_t, *epos_node_p;
+
+/** \brief Set EPOS parameters from command line arguments
+  * \param[in] argc The number of supplied command line arguments.
+  * \param[in] argv The list of supplied command line arguments.
+  */
+void epos_set_arg(
+  int argc,
+  char **argv);
 
 /** \brief Initialize EPOS node
   * \param[in] node The EPOS node to be initialized.
@@ -94,6 +106,13 @@ int epos_init_arg(
   * \return The resulting error code.
   */
 int epos_close(
+  epos_node_p node);
+
+/** \brief Retrieve the angular position of an EPOS node
+  * \param[in] node The EPOS node to retrieve the angular position for.
+  * \return The angular position of the specified EPOS node in [rad].
+  */
+float epos_get_position(
   epos_node_p node);
 
 #endif

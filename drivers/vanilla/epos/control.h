@@ -41,15 +41,15 @@ extern const char* epos_control_errors[];
 /** \brief EPOS controller types
   */
 typedef enum {
-  homing = 6,
-  profile_vel = 3,
-  profile_pos = 1,
-  position = -1,
-  velocity = -2,
-  current = -3,
-  diagnostic = -4,
-  master_enc = -5,
-  step_dir = -6
+  epos_homing = 6,
+  epos_profile_vel = 3,
+  epos_profile_pos = 1,
+  epos_position = -1,
+  epos_velocity = -2,
+  epos_current = -3,
+  epos_diagnostic = -4,
+  epos_master_enc = -5,
+  epos_step_dir = -6
 } epos_control_type_t;
 
 /** \brief Structure defining an EPOS controller

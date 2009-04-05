@@ -19,14 +19,32 @@
  ***************************************************************************/
 
 #include <stdio.h>
+#include <signal.h>
+#include <math.h>
 
 #include <epos.h>
+#include <position.h>
+
+int quit = 0;
+
+void epos_signaled(int signal) {
+  quit = 1;
+}
 
 int main(int argc, char **argv) {
   epos_node_t node;
+  epos_position_t pos;
+  signal(SIGINT, epos_signaled);
 
   if (epos_init_arg(&node, argc, argv))
     return -1;
+  epos_position_init(&pos, 0.0);
+  while (!quit) {
+    fprintf(stdout, "\rEPOS angular position: %8.2f deg",
+      epos_get_position(&node)*180.0/M_PI);
+    fflush(stdout);
+  }
+  fprintf(stdout, "\n");
   epos_close(&node);
 
   return 0;

@@ -92,7 +92,7 @@ epos_error_device_t epos_errors_device[] = {
 char* epos_error_comm_undefined_message = "undefined communication error";
 char* epos_error_device_undefined_message = "undefined device error";
 
-const char* epos_error_get_comm(int code) {
+const char* epos_error_comm(int code) {
   int i;
 
   for (i = 0; i < sizeof(epos_errors_comm)/ sizeof(epos_error_comm_t); ++i)
@@ -102,7 +102,7 @@ const char* epos_error_get_comm(int code) {
   return epos_error_comm_undefined_message;
 }
 
-const char* epos_error_get_device(short code) {
+const char* epos_error_device(int code) {
   int i;
 
   for (i = 0; i < sizeof(epos_errors_device)/ sizeof(epos_error_device_t); ++i)
@@ -110,4 +110,39 @@ const char* epos_error_get_device(short code) {
     return epos_errors_device[i].message;
 
   return epos_error_device_undefined_message;
+}
+
+unsigned char epos_error_get_history_length(epos_device_p dev) {
+  unsigned char length;
+  epos_device_read(dev, EPOS_ERROR_INDEX_HISTORY,
+    EPOS_ERROR_SUBINDEX_HISTORY_LENGTH, &length, 1);
+
+  return length;
+}
+
+unsigned char epos_error_get_history(epos_device_p dev,
+  epos_error_device_t history[]) {
+  int i, num = 0;
+  unsigned char length = epos_error_get_history_length(dev);
+
+  for (i = 0; i < length; ++i) {
+    int code;
+    if (!epos_device_read(dev, EPOS_ERROR_INDEX_HISTORY,
+      EPOS_ERROR_SUBINDEX_HISTORY_ENTRIES+i, (unsigned char*)&code,
+      sizeof(int))) {
+      history[num].code = code;
+      history[num].reg = 0;
+      history[num].message = epos_error_device(history[num].code);
+
+      ++num;
+    }
+  }
+
+  return num;
+}
+
+int epos_error_clear_history(epos_device_p dev) {
+  unsigned char length = 0;
+  return epos_device_write(dev, EPOS_ERROR_INDEX_HISTORY,
+    EPOS_ERROR_SUBINDEX_HISTORY_LENGTH, &length, 1);
 }

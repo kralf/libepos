@@ -23,10 +23,12 @@
 
 #include <can.h>
 
-#include "error.h"
+#include "global.h"
 
 /** \brief Predefined EPOS device constants
   */
+#define EPOS_DEVICE_WAIT_FOREVER                -1.0
+
 #define EPOS_DEVICE_INVALID_ID                  0x0000
 #define EPOS_DEVICE_MAX_ID                      0x007F
 #define EPOS_DEVICE_SEND_ID                     0x0600
@@ -61,6 +63,8 @@
 #define EPOS_DEVICE_INDEX_CONTROL               0x6040
 #define EPOS_DEVICE_INDEX_STATUS                0x6041
 
+#define EPOS_DEVICE_STATUS_HOMING_ATTAINED      0x1000
+
 #define EPOS_DEVICE_CONTROL_SWITCH_ON           0x0001
 #define EPOS_DEVICE_CONTROL_ENABLE_VOLTAGE      0x0003
 #define EPOS_DEVICE_CONTROL_SHUTDOWN            0x0006
@@ -82,6 +86,7 @@
 #define EPOS_DEVICE_ERROR_WRITE                 9
 #define EPOS_DEVICE_ERROR_INVALID_BITRATE       10
 #define EPOS_DEVICE_ERROR_INVALID_BAURATE       11
+#define EPOS_DEVICE_ERROR_WAIT_TIMEOUT          12
 
 /** \brief Predefined EPOS device error descriptions
   */
@@ -108,6 +113,7 @@ typedef struct epos_device_t {
   * \param[in] dev The EPOS device to be initialized.
   * \param[in] name The name of the EPOS device to be initialized.
   * \param[in] node_id The identifier of the EPOS node to be initialized.
+  * \param[in] reset Reset the EPOS node upon initialization.
   * \param[in] parameters An array of CAN parameters.
   * \param[in] num_parameters The number of CAN parameters.
   * \return The resulting error code.
@@ -115,6 +121,7 @@ typedef struct epos_device_t {
 int epos_device_init(
   epos_device_p dev,
   int node_id,
+  int reset,
   can_parameter_t parameters[],
   ssize_t num_parameters);
 
@@ -248,6 +255,18 @@ short epos_device_get_software_version(
   */
 short epos_device_get_status(
   epos_device_p dev);
+
+/** \brief Wait for an EPOS device status
+  * \param[in] dev The EPOS device to wait for.
+  * \param[in] status The status word mask to be used.
+  * \param[in] timeout The timeout of the wait operation in [s].
+  *   A negative value will be interpreted as an eternal wait.
+  * \return The resulting error code.
+  */
+int epos_device_wait_status(
+  epos_device_p dev,
+  short status,
+  double timeout);
 
 /** \brief Retrieve control information of an EPOS device
   * \param[in] dev The EPOS device to retrieve the control information for.

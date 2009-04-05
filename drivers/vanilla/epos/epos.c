@@ -31,12 +31,14 @@ const char* epos_errors[] = {
 };
 
 epos_parameter_t epos_parameters[] = {
-  {"id", "0"},
+  {"node-id", "0"},
+  {"node-reset", "1"},
   {"enc-type", "1"},
   {"enc-polarity", "0"},
   {"enc-pulses", "1024"},
   {"motor-type", "1"},
-  {"motor-current", "1000"},
+  {"motor-current", "2000"},
+  {"gear-trans", "1"},
   {"control-type", "6"},
 };
 
@@ -80,7 +82,8 @@ int epos_init_arg(epos_node_p node, int argc, char **argv) {
   }
 
   if (!epos_device_init(&node->dev,
-      atoi(epos_parameters[EPOS_PARAMETER_ID].value), dev_parameters,
+      atoi(epos_parameters[EPOS_PARAMETER_ID].value),
+      atoi(epos_parameters[EPOS_PARAMETER_RESET].value), dev_parameters,
       num_devp) &&
     !epos_sensor_init(&node->dev, &node->sensor,
       atoi(epos_parameters[EPOS_PARAMETER_SENSOR_TYPE].value),
@@ -89,6 +92,8 @@ int epos_init_arg(epos_node_p node, int argc, char **argv) {
     !epos_motor_init(&node->dev, &node->motor,
       atoi(epos_parameters[EPOS_PARAMETER_MOTOR_TYPE].value),
       atoi(epos_parameters[EPOS_PARAMETER_MOTOR_CURRENT].value)) &&
+    !epos_gear_init(&node->sensor, &node->gear,
+      atof(epos_parameters[EPOS_PARAMETER_GEAR_TRANSMISSION].value)) &&
     !epos_control_init(&node->dev, &node->control,
       atoi(epos_parameters[EPOS_PARAMETER_CONTROL_TYPE].value)))
     return EPOS_ERROR_NONE;
@@ -98,10 +103,16 @@ int epos_init_arg(epos_node_p node, int argc, char **argv) {
 
 int epos_close(epos_node_p node) {
   if (!epos_control_close(&node->control) &&
+    !epos_gear_close(&node->gear) &&
     !epos_motor_close(&node->motor) &&
     !epos_sensor_close(&node->sensor) &&
     !epos_device_close(&node->dev))
     return EPOS_ERROR_NONE;
   else
     return EPOS_ERROR_CLOSE;
+}
+
+float epos_get_position(epos_node_p node) {
+  int num_steps = epos_position_get_actual(&node->dev);
+  return epos_gear_steps_to_angle(&node->gear, num_steps);
 }

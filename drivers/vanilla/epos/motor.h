@@ -43,9 +43,9 @@ extern const char* epos_motor_errors[];
 /** \brief EPOS motor types
   */
 typedef enum {
-  brushed_dc = 1,
-  brushless_ec_sin = 10,
-  brushless_ec_block = 11
+  epos_brushed_dc = 1,
+  epos_brushless_ec_sin = 10,
+  epos_brushless_ec_block = 11
 } epos_motor_type_t;
 
 /** \brief Structure defining an EPOS motor

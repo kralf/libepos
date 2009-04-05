@@ -20,8 +20,10 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #include "device.h"
+#include "error.h"
 
 const char* epos_device_errors[] = {
   "success",
@@ -36,6 +38,7 @@ const char* epos_device_errors[] = {
   "error writing to EPOS device",
   "invalid CAN bitrate",
   "invalid RS232 baudrate",
+  "wait operation timed out",
 };
 
 int epos_device_can_bitrates[] = {
@@ -57,8 +60,9 @@ int epos_device_rs232_baudrates[] = {
   115200,
 };
 
-int epos_device_init(epos_device_p dev, int node_id, can_parameter_t
+int epos_device_init(epos_device_p dev, int node_id, int reset, can_parameter_t
   parameters[], ssize_t num_parameters) {
+  dev->node_id = node_id;
   if (!can_init(&dev->can_dev, parameters, num_parameters)) {
     dev->num_read = 0;
     dev->num_written = 0;
@@ -71,7 +75,10 @@ int epos_device_init(epos_device_p dev, int node_id, can_parameter_t
     dev->hardware_version = epos_device_get_hardware_version(dev);
     dev->software_version = epos_device_get_software_version(dev);
 
-    return epos_device_reset(dev);
+    if (reset)
+      return epos_device_reset(dev);
+    else
+      return EPOS_DEVICE_ERROR_NONE;
   }
   else {
     fprintf(stderr, "Node %d connection error\n", node_id);
@@ -104,7 +111,7 @@ int epos_device_receive_message(epos_device_p dev, can_message_p message) {
       memcpy(&code, &message->content[0], sizeof(code));
       fprintf(stderr, "Node %d device error: %s\n",
         message->id-EPOS_DEVICE_EMERGENCY_ID,
-        epos_error_get_device(code));
+        epos_error_device(code));
 
       return EPOS_DEVICE_ERROR_INTERNAL;
     }
@@ -114,7 +121,7 @@ int epos_device_receive_message(epos_device_p dev, can_message_p message) {
       memcpy(&code, &message->content[4], sizeof(code));
       fprintf(stderr, "Node %d communication error: %s\n",
         message->id-EPOS_DEVICE_RECEIVE_ID,
-        epos_error_get_comm(code));
+        epos_error_comm(code));
 
       return EPOS_DEVICE_ERROR_ABORT;
     }
@@ -254,6 +261,22 @@ short epos_device_get_status(epos_device_p dev) {
     (unsigned char*)&status, sizeof(short));
 
   return status;
+}
+
+int epos_device_wait_status(epos_device_p dev, short status, double timeout) {
+  struct timeval tv;
+  gettimeofday(&tv, 0);
+  double time = tv.tv_sec+tv.tv_usec/1e6;
+
+  while (!(status & epos_device_get_status(dev))) {
+    if (timeout >= 0.0) {
+      gettimeofday(&tv, 0);
+      if (tv.tv_sec+tv.tv_usec/1e6-time > timeout)
+        return EPOS_DEVICE_ERROR_WAIT_TIMEOUT;
+    }
+  }
+
+  return EPOS_DEVICE_ERROR_NONE;
 }
 
 short epos_device_get_control(epos_device_p dev) {

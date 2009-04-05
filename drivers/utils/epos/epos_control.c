@@ -33,7 +33,8 @@ int main(int argc, char **argv) {
   epos_node_t node;
   signal(SIGINT, epos_signaled);
 
-  epos_init_arg(&node, argc, argv);
+  if (epos_init_arg(&node, argc, argv))
+    return -1;
   epos_control_start(&node.control);
   while (!quit);
   epos_control_stop(&node.control);

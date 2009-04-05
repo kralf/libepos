@@ -19,14 +19,27 @@
  ***************************************************************************/
 
 #include <stdio.h>
+#include <signal.h>
 
 #include <epos.h>
+#include <error.h>
 
 int main(int argc, char **argv) {
+  int i;
   epos_node_t node;
 
   if (epos_init_arg(&node, argc, argv))
     return -1;
+  int num_errors = epos_error_get_history_length(&node.dev);
+  fprintf(stdout, "EPOS error history has length %d\n", num_errors);
+
+  if (num_errors) {
+    epos_error_device_t history[num_errors];
+    epos_error_get_history(&node.dev, history);
+    for (i = 0; i < num_errors; ++i)
+      fprintf(stdout, "%2d: (0x%04X) %s\n", i, history[i].code,
+      history[i].message);
+  }
   epos_close(&node);
 
   return 0;

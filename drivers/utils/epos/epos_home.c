@@ -19,14 +19,29 @@
  ***************************************************************************/
 
 #include <stdio.h>
+#include <signal.h>
 
 #include <epos.h>
+#include <home.h>
+
+int quit = 0;
+
+void epos_signaled(int signal) {
+  quit = 1;
+}
 
 int main(int argc, char **argv) {
   epos_node_t node;
+  epos_home_t home;
+  signal(SIGINT, epos_signaled);
 
   if (epos_init_arg(&node, argc, argv))
     return -1;
+  epos_home_init(&home, epos_neg_current_index, 1000, 50, 0);
+  if (!epos_home_start(&node, &home)) {
+    while (!quit && epos_home_wait(&node, 0.1));
+    epos_home_stop(&node);
+  }
   epos_close(&node);
 
   return 0;
