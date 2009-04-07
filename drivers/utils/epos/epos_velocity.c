@@ -23,7 +23,7 @@
 #include <math.h>
 
 #include <epos.h>
-#include <position.h>
+#include <velocity.h>
 
 int quit = 0;
 
@@ -33,26 +33,26 @@ void epos_signaled(int signal) {
 
 int main(int argc, char **argv) {
   epos_node_t node;
-  epos_position_t pos;
+  epos_velocity_t vel;
   signal(SIGINT, epos_signaled);
 
   if (argc < 2) {
-    fprintf(stderr, "usage: %s POS [PARAMS]\n", argv[0]);
+    fprintf(stderr, "usage: %s VEL [PARAMS]\n", argv[0]);
     return -1;
   }
   float target_value = atof(argv[1]);
 
   if (epos_init_arg(&node, argc, argv))
     return -1;
-  epos_position_init(&pos, target_value);
-  if (!epos_position_start(&node, &pos)) {
+  epos_velocity_init(&vel, target_value*M_PI/180.0);
+  if (!epos_velocity_start(&node, &vel)) {
     while (!quit) {
-      fprintf(stdout, "\rEPOS angular position: %8.2f deg",
-        epos_get_position(&node)*180.0/M_PI);
+      fprintf(stdout, "\rEPOS angular velocity: %8.2f deg/s",
+        epos_get_velocity(&node)*180.0/M_PI);
       fflush(stdout);
     }
     fprintf(stdout, "\n");
-    epos_position_stop(&node);
+    epos_velocity_stop(&node);
   }
   epos_close(&node);
 

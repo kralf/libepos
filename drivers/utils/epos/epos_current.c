@@ -19,10 +19,11 @@
  ***************************************************************************/
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <signal.h>
+#include <math.h>
 
 #include <epos.h>
+#include <current.h>
 
 int quit = 0;
 
@@ -31,29 +32,29 @@ void epos_signaled(int signal) {
 }
 
 int main(int argc, char **argv) {
-  if ((argc < 3) || (argc > 4)) {
-    fprintf(stderr, "Usage: %s DEV VEL [ID]\n", argv[0]);
+  epos_node_t node;
+  epos_current_t curr;
+  signal(SIGINT, epos_signaled);
+
+  if (argc < 2) {
+    fprintf(stderr, "usage: %s CURR [PARAMS]\n", argv[0]);
     return -1;
   }
+  float target_value = atof(argv[1]);
 
-  int id = 1;
-  if (argc == 4)
-    id = atoi(argv[3]);
-  int vel = atoi(argv[2]);
-
-  can_init(argv[1]);
-  epos_fault_reset(id);
-
-  epos_shutdown(id);
-  epos_enable_operation(id);
-  epos_set_mode_of_operation(id, EPOS_OPERATION_MODE_VELOCITY);
-  epos_set_velocity_mode_setting_value(id, vel);
-
-  signal(SIGINT, epos_signaled);
-  while (!quit);
-
-  epos_shutdown(id);
-  can_close();
+  if (epos_init_arg(&node, argc, argv))
+    return -1;
+  epos_current_init(&curr, target_value);
+  if (!epos_current_start(&node, &curr)) {
+    while (!quit) {
+      fprintf(stdout, "\rEPOS current: %8.4f A",
+        epos_get_current(&node));
+      fflush(stdout);
+    }
+    fprintf(stdout, "\n");
+    epos_current_stop(&node);
+  }
+  epos_close(&node);
 
   return 0;
 }

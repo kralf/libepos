@@ -61,24 +61,48 @@ int epos_gear_init(
 int epos_gear_close(
   epos_gear_p gear);
 
-/** \brief Convert EPOS position sensor steps to angle
+/** \brief Convert EPOS position units to radian space angle
   * \param[in] gear The EPOS gear assembly to be used for conversion.
-  * \param[in] num_steps The number of EPOS position sensor steps to be
-  *   converted into an angle.
-  * \return The angle corresponding to the specified number of steps in [rad].
+  * \param[in] pos The number of EPOS position units to be converted
+  *   into an angle.
+  * \return The angle corresponding to the specified number of EPOS
+  *   position units in [rad].
   */
-float epos_gear_steps_to_angle(
+float epos_gear_to_angle(
   epos_gear_p gear,
-  int num_steps);
+  int pos);
 
-/** \brief Convert an angle to EPOS position sensor steps
+/** \brief Convert radian space angle to EPOS position units
   * \param[in] gear The EPOS gear assembly to be used for conversion.
-  * \param[in] angle The angle to be converted into EPOS position sensor
-  *   steps in [rad].
-  * \return The number of steps corresponding to the specified angle.
+  * \param[in] angle The angle to be converted into EPOS position
+  *   units in [rad].
+  * \return The number of EPOS position units corresponding to the
+  *   specified angle.
   */
-int epos_gear_angle_to_steps(
+int epos_gear_from_angle(
   epos_gear_p gear,
   float angle);
+
+/** \brief Convert EPOS velocity units to radian space angular velocity
+  * \param[in] gear The EPOS gear assembly to be used for conversion.
+  * \param[in] vel The number of EPOS velocity units to be converted
+  *   into an angular velocity.
+  * \return The angular velocity corresponding to the specified number of
+  *   EPOS velocity units in [rad/s].
+  */
+float epos_gear_to_angular_velocity(
+  epos_gear_p gear,
+  int vel);
+
+/** \brief Convert radian space angular velocity to EPOS velocity units
+  * \param[in] gear The EPOS gear assembly to be used for conversion.
+  * \param[in] angular_vel The angular velocity to be converted into EPOS
+  *   velocity units in [rad/s].
+  * \return The number of EPOS velocity units corresponding to the
+  *   specified angular velocity.
+  */
+int epos_gear_from_angular_velocity(
+  epos_gear_p gear,
+  float angular_vel);
 
 #endif

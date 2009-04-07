@@ -115,4 +115,18 @@ int epos_close(
 float epos_get_position(
   epos_node_p node);
 
+/** \brief Retrieve the angular velocity of an EPOS node
+  * \param[in] node The EPOS node to retrieve the angular velocity for.
+  * \return The angular velocity of the specified EPOS node in [rad/s].
+  */
+float epos_get_velocity(
+  epos_node_p node);
+
+/** \brief Retrieve the current of an EPOS node
+  * \param[in] node The EPOS node to retrieve the current for.
+  * \return The current of the specified EPOS node in [A].
+  */
+float epos_get_current(
+  epos_node_p node);
+
 #endif

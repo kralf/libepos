@@ -19,53 +19,45 @@
  ***************************************************************************/
 
 #include <stdio.h>
-#include <math.h>
-#include <limits.h>
-#include <float.h>
 
-#include "gear.h"
+#include "current.h"
 
-#define min(a,b) ((a) < (b) ? (a) : (b))
-#define max(a,b) ((a) > (b) ? (a) : (b))
-#define clip(a, b, c) max(min(a, c), b)
-
-const char* epos_gear_errors[] = {
-  "success",
-  "error initializing EPOS gear",
-  "error closing EPOS gear",
-};
-
-int epos_gear_init(epos_sensor_p sensor, epos_gear_p gear, float
-  transmission) {
-  gear->sensor = sensor;
-  gear->transmission = transmission;
-
-  return EPOS_GEAR_ERROR_NONE;
+void epos_current_init(epos_current_p current, float target_value) {
+  current->target_value = target_value;
 }
 
-int epos_gear_close(epos_gear_p gear) {
-  if (gear->sensor) {
-    gear->sensor = 0;
-    return EPOS_GEAR_ERROR_NONE;
-  }
+int epos_current_start(epos_node_p node, epos_current_p current) {
+  int result;
+  short curr = current->target_value*1e3;
+
+  if (!(result = epos_control_set_type(&node->control, epos_current)) &&
+    !(result = epos_control_start(&node->control)))
+    return epos_current_set_demand(&node->dev, curr);
   else
-    return EPOS_GEAR_ERROR_CLOSE;
+    return result;
 }
 
-float epos_gear_to_angle(epos_gear_p gear, int pos) {
-  return 2.0*M_PI*pos/(4.0*gear->sensor->num_pulses*gear->transmission);
+int epos_current_stop(epos_node_p node) {
+  return epos_control_stop(&node->control);
 }
 
-int epos_gear_from_angle(epos_gear_p gear, float angle) {
-  return clip(angle*4.0*gear->sensor->num_pulses*gear->transmission/(2.0*M_PI),
-    INT_MIN, INT_MAX);
+short epos_current_get_actual(epos_device_p dev) {
+  short current;
+  epos_device_read(dev, EPOS_CURRENT_INDEX_ACTUAL_VALUE, 0,
+    (unsigned char*)&current, sizeof(short));
+
+  return current;
 }
 
-float epos_gear_to_angular_velocity(epos_gear_p gear, int vel) {
-  return 2.0*M_PI*vel/(60.0*gear->transmission);
+short epos_current_get_average(epos_device_p dev) {
+  short current;
+  epos_device_read(dev, EPOS_CURRENT_INDEX_AVERAGE_VALUE, 0,
+    (unsigned char*)&current, sizeof(short));
+
+  return current;
 }
 
-int epos_gear_from_angular_velocity(epos_gear_p gear, float angular_vel) {
-  return clip(angular_vel*60.0*gear->transmission/(2.0*M_PI),
-    INT_MIN, INT_MAX);
+int epos_current_set_demand(epos_device_p dev, short curr) {
+  return epos_device_write(dev, EPOS_CURRENT_INDEX_SETTING_VALUE, 0,
+    (unsigned char*)&curr, sizeof(short));
 }

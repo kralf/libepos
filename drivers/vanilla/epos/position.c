@@ -24,28 +24,34 @@
 #include "position.h"
 #include "gear.h"
 
-void epos_position_init(epos_position_p position, float angle) {
-  epos_position_init_limits(position, angle, -FLT_MAX, FLT_MAX);
+void epos_position_init(epos_position_p position, float target_value) {
+  epos_position_init_limits(position, target_value, -FLT_MAX, FLT_MAX);
 }
 
-void epos_position_init_limits(epos_position_p position, float angle,
-  float min_angle, float max_angle) {
-  position->angle = angle;
+void epos_position_init_limits(epos_position_p position, float target_value,
+  float min_value, float max_value) {
+  position->target_value = target_value;
 
-  position->min_angle = min_angle;
-  position->max_angle = max_angle;
+  position->min_value = min_value;
+  position->max_value = max_value;
+}
+
+void epos_position_setup(epos_node_p node, epos_position_config_p config) {
+  int result;
+
+  /** TODO: Hier geht's weiter! */
 }
 
 int epos_position_start(epos_node_p node, epos_position_p position) {
   int result;
-  int num_steps = epos_gear_angle_to_steps(&node->gear, position->angle);
-  int min_steps = epos_gear_angle_to_steps(&node->gear, position->min_angle);
-  int max_steps = epos_gear_angle_to_steps(&node->gear, position->max_angle);
+  int pos = epos_gear_from_angle(&node->gear, position->target_value);
+  int min_pos = epos_gear_from_angle(&node->gear, position->min_value);
+  int max_pos = epos_gear_from_angle(&node->gear, position->max_value);
 
   if (!(result = epos_control_set_type(&node->control, epos_position)) &&
-    !(result = epos_position_set_limits(&node->dev, min_steps, max_steps)) &&
-    !(result = epos_position_set_demand(&node->dev, num_steps)))
-    return epos_control_start(&node->control);
+    !(result = epos_position_set_limits(&node->dev, min_pos, max_pos)) &&
+    !(result = epos_control_start(&node->control)))
+    return epos_position_set_demand(&node->dev, pos);
   else
     return result;
 }
@@ -54,34 +60,34 @@ int epos_position_stop(epos_node_p node) {
   return epos_control_stop(&node->control);
 }
 
-int epos_position_set_limits(epos_device_p dev, int min_steps, int max_steps) {
+int epos_position_set_limits(epos_device_p dev, int min_pos, int max_pos) {
   int result;
 
   if (!(result = epos_device_write(dev, EPOS_POSITION_INDEX_SOFTWARE_LIMIT,
-    EPOS_POSITION_SUBINDEX_NEG_LIMIT, (unsigned char*)&min_steps, sizeof(int))))
+    EPOS_POSITION_SUBINDEX_NEG_LIMIT, (unsigned char*)&min_pos, sizeof(int))))
     return epos_device_write(dev, EPOS_POSITION_INDEX_SOFTWARE_LIMIT,
-    EPOS_POSITION_SUBINDEX_POS_LIMIT, (unsigned char*)&max_steps, sizeof(int));
+    EPOS_POSITION_SUBINDEX_POS_LIMIT, (unsigned char*)&max_pos, sizeof(int));
   else
     return result;
 }
 
 int epos_position_get_actual(epos_device_p dev) {
-  int num_steps;
+  int pos;
   epos_device_read(dev, EPOS_POSITION_INDEX_ACTUAL_VALUE, 0,
-    (unsigned char*)&num_steps, sizeof(int));
+    (unsigned char*)&pos, sizeof(int));
 
-  return num_steps;
+  return pos;
 }
 
-int epos_position_set_demand(epos_device_p dev, int num_steps) {
+int epos_position_set_demand(epos_device_p dev, int pos) {
   return epos_device_write(dev, EPOS_POSITION_INDEX_SETTING_VALUE, 0,
-    (unsigned char*)&num_steps, sizeof(int));
+    (unsigned char*)&pos, sizeof(int));
 }
 
 int epos_position_get_demand(epos_device_p dev) {
-  int num_steps;
+  int pos;
   epos_device_read(dev, EPOS_POSITION_INDEX_DEMAND_VALUE, 0,
-    (unsigned char*)&num_steps, sizeof(int));
+    (unsigned char*)&pos, sizeof(int));
 
-  return num_steps;
+  return pos;
 }

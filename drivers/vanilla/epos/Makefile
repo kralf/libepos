@@ -2,13 +2,13 @@ CFLAGS += -I../can -fPIC
 LDFLAGS += -L../can -lcan
 
 PREFIX = /usr/local
+HEADERS = error.h device.h sensor.h motor.h gear.h control.h home.h \
+	position.h velocity.h current.h epos.h
+SOURCES = error.c device.c sensor.c motor.c gear.c control.c home.c \
+	position.c velocity.c current.c epos.c
 
-libepos.so: error.h error.c device.h device.c sensor.h sensor.c \
-	motor.h motor.c gear.h gear.c control.h control.c home.h home.c \
-	position.h position.c epos.h epos.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -shared -o libepos.so \
-	error.c device.c sensor.c motor.c gear.c control.c home.c position.c \
-	epos.c
+libepos.so: $(HEADERS) $(SOURCES)
+	$(CC) $(CFLAGS) $(LDFLAGS) -shared -o libepos.so $(SOURCES)
 
 install: libepos.so
 	install -c -m 755 libepos.so $(PREFIX)/lib

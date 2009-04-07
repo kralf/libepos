@@ -22,6 +22,9 @@
 #include <string.h>
 
 #include "epos.h"
+#include "position.h"
+#include "velocity.h"
+#include "current.h"
 
 const char* epos_errors[] = {
   "success",
@@ -113,6 +116,15 @@ int epos_close(epos_node_p node) {
 }
 
 float epos_get_position(epos_node_p node) {
-  int num_steps = epos_position_get_actual(&node->dev);
-  return epos_gear_steps_to_angle(&node->gear, num_steps);
+  int pos = epos_position_get_actual(&node->dev);
+  return epos_gear_to_angle(&node->gear, pos);
+}
+
+float epos_get_velocity(epos_node_p node) {
+  int vel = epos_velocity_get_average(&node->dev);
+  return epos_gear_to_angular_velocity(&node->gear, vel);
+}
+
+float epos_get_current(epos_node_p node) {
+  return 1e-3*epos_current_get_average(&node->dev);
 }
