@@ -29,6 +29,16 @@
 #define EPOS_VELOCITY_INDEX_DEMAND_VALUE            0x606B
 #define EPOS_VELOCITY_INDEX_ACTUAL_VALUE            0x606C
 #define EPOS_VELOCITY_INDEX_AVERAGE_VALUE           0x2028
+#define EPOS_VELOCITY_INDEX_CONTROL_PARAMETERS      0x60F9
+#define EPOS_VELOCITY_SUBINDEX_P_GAIN               0x01
+#define EPOS_VELOCITY_SUBINDEX_I_GAIN               0x02
+
+/** \brief Structure defining an EPOS velocity control configuration
+  */
+typedef struct epos_velocity_config_t {
+  short p_gain;         //!< The velocity controller's P-gain.
+  short i_gain;         //!< The velocity controller's I-gain.
+} epos_velocity_config_t, *epos_velocity_config_p;
 
 /** \brief Structure defining an EPOS velocity control operation
   */
@@ -43,6 +53,16 @@ typedef struct epos_velocity_t {
 void epos_velocity_init(
   epos_velocity_p velocity,
   float target_value);
+
+/** \brief Setup EPOS velocity control
+  * \param[in] node The EPOS node to setup velocity control for.
+  * \param[in] config The configuration to be used for setting up the
+  *   EPOS velocity controller.
+  * \return The resulting device error code.
+  */
+int epos_velocity_setup(
+  epos_node_p node,
+  epos_velocity_config_p config);
 
 /** \brief Start EPOS velocity control operation
   * \param[in] node The EPOS node to start the velocity control operation for.
@@ -76,12 +96,13 @@ int epos_velocity_get_average(
 
 /** \brief Set the demanded velocity of an EPOS device
   * \param[in] dev The EPOS device to set the demanded velocity for.
-  * \param[in] vel The demanded velocity for the specified EPOS device in [vu].
+  * \param[in] velocity The demanded velocity for the specified EPOS
+  *   device in [vu].
   * \return The resulting device error code.
   */
 int epos_velocity_set_demand(
   epos_device_p dev,
-  int vel);
+  int velocity);
 
 /** \brief Retrieve the demanded velocity of an EPOS device
   * \param[in] dev The EPOS device to retrieve the demanded velocity for.
@@ -89,5 +110,25 @@ int epos_velocity_set_demand(
   */
 int epos_velocity_get_demand(
   epos_device_p dev);
+
+/** \brief Set the velocity control P-gain of an EPOS device
+  * \param[in] dev The EPOS device to set the velocity control P-gain for.
+  * \param[in] p_gain The velocity control P-gain for the specified EPOS
+  *   device.
+  * \return The resulting device error code.
+  */
+int epos_velocity_set_p_gain(
+  epos_device_p dev,
+  short p_gain);
+
+/** \brief Set the velocity control I-gain of an EPOS device
+  * \param[in] dev The EPOS device to set the velocity control I-gain for.
+  * \param[in] i_gain The velocity control I-gain for the specified EPOS
+  *   device.
+  * \return The resulting device error code.
+  */
+int epos_velocity_set_i_gain(
+  epos_device_p dev,
+  short i_gain);
 
 #endif

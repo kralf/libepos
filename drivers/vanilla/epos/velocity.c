@@ -27,6 +27,15 @@ void epos_velocity_init(epos_velocity_p velocity, float target_value) {
   velocity->target_value = target_value;
 }
 
+int epos_velocity_setup(epos_node_p node, epos_velocity_config_p config) {
+  int result;
+
+  if (!(result = epos_velocity_set_p_gain(&node->dev, config->p_gain)))
+    return epos_velocity_set_i_gain(&node->dev, config->i_gain);
+  else
+    return result;
+}
+
 int epos_velocity_start(epos_node_p node, epos_velocity_p velocity) {
   int result;
   int vel = epos_gear_from_angular_velocity(&node->gear,
@@ -59,9 +68,9 @@ int epos_velocity_get_average(epos_device_p dev) {
   return vel;
 }
 
-int epos_velocity_set_demand(epos_device_p dev, int vel) {
+int epos_velocity_set_demand(epos_device_p dev, int velocity) {
   return epos_device_write(dev, EPOS_VELOCITY_INDEX_SETTING_VALUE, 0,
-    (unsigned char*)&vel, sizeof(int));
+    (unsigned char*)&velocity, sizeof(int));
 }
 
 int epos_velocity_get_demand(epos_device_p dev) {
@@ -70,4 +79,14 @@ int epos_velocity_get_demand(epos_device_p dev) {
     (unsigned char*)&vel, sizeof(int));
 
   return vel;
+}
+
+int epos_velocity_set_p_gain(epos_device_p dev, short p_gain) {
+  return epos_device_write(dev, EPOS_VELOCITY_INDEX_CONTROL_PARAMETERS,
+    EPOS_VELOCITY_SUBINDEX_P_GAIN, (unsigned char*)&p_gain, sizeof(short));
+}
+
+int epos_velocity_set_i_gain(epos_device_p dev, short i_gain) {
+  return epos_device_write(dev, EPOS_VELOCITY_INDEX_CONTROL_PARAMETERS,
+    EPOS_VELOCITY_SUBINDEX_I_GAIN, (unsigned char*)&i_gain, sizeof(short));
 }

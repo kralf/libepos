@@ -26,6 +26,15 @@ void epos_current_init(epos_current_p current, float target_value) {
   current->target_value = target_value;
 }
 
+int epos_current_setup(epos_node_p node, epos_current_config_p config) {
+  int result;
+
+  if (!(result = epos_current_set_p_gain(&node->dev, config->p_gain)))
+    return epos_current_set_i_gain(&node->dev, config->i_gain);
+  else
+    return result;
+}
+
 int epos_current_start(epos_node_p node, epos_current_p current) {
   int result;
   short curr = current->target_value*1e3;
@@ -57,7 +66,17 @@ short epos_current_get_average(epos_device_p dev) {
   return current;
 }
 
-int epos_current_set_demand(epos_device_p dev, short curr) {
+int epos_current_set_demand(epos_device_p dev, short current) {
   return epos_device_write(dev, EPOS_CURRENT_INDEX_SETTING_VALUE, 0,
-    (unsigned char*)&curr, sizeof(short));
+    (unsigned char*)&current, sizeof(short));
+}
+
+int epos_current_set_p_gain(epos_device_p dev, short p_gain) {
+  return epos_device_write(dev, EPOS_CURRENT_INDEX_CONTROL_PARAMETERS,
+    EPOS_CURRENT_SUBINDEX_P_GAIN, (unsigned char*)&p_gain, sizeof(short));
+}
+
+int epos_current_set_i_gain(epos_device_p dev, short i_gain) {
+  return epos_device_write(dev, EPOS_CURRENT_INDEX_CONTROL_PARAMETERS,
+    EPOS_CURRENT_SUBINDEX_I_GAIN, (unsigned char*)&i_gain, sizeof(short));
 }

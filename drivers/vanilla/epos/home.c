@@ -60,8 +60,8 @@ int epos_home_stop(epos_node_p node) {
 }
 
 int epos_home_wait(epos_node_p node, double timeout) {
-  return epos_device_wait_status(&node->dev,
-    EPOS_DEVICE_STATUS_HOMING_ATTAINED, timeout);
+  return epos_device_wait_status(&node->dev, EPOS_HOME_STATUS_REACHED,
+    timeout);
 }
 
 int epos_home_set_method(epos_device_p dev, epos_home_method_t method) {

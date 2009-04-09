@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "usage: %s POS [PARAMS]\n", argv[0]);
     return -1;
   }
-  float target_value = atof(argv[1]);
+  float target_value = atof(argv[1])*M_PI/180.0;
 
   if (epos_init_arg(&node, argc, argv))
     return -1;

@@ -19,41 +19,45 @@
  ***************************************************************************/
 
 #include <stdio.h>
-#include <stdlib.h>
+#include <signal.h>
+#include <math.h>
 
 #include <epos.h>
+#include <position_profile.h>
 
-#define STATUS_TARGET_REACHED 0x0408
+int quit = 0;
+
+void epos_signaled(int signal) {
+  quit = 1;
+}
 
 int main(int argc, char **argv) {
-  if ((argc < 4) || (argc > 5)) {
-    fprintf(stderr, "Usage: %s DEV POS VEL [ID]\n", argv[0]);
+  epos_node_t node;
+  epos_position_profile_t profile;
+  signal(SIGINT, epos_signaled);
+
+  if (argc < 4) {
+    fprintf(stderr, "usage: %s POS VEL ACC [PARAMS]\n", argv[0]);
     return -1;
   }
+  float pos = atof(argv[1])*M_PI/180.0;
+  float vel = atof(argv[2])*M_PI/180.0;
+  float acc = atof(argv[3])*M_PI/180.0;
 
-  int id = 1;
-  if (argc == 5)
-    id = atoi(argv[4]);
-  int pos = atoi(argv[2]);
-  int vel = atoi(argv[3]);
-
-  can_init(argv[1]);
-  epos_fault_reset(id);
-
-  epos_shutdown(id);
-  epos_enable_operation(id);
-  epos_set_mode_of_operation(id, EPOS_OPERATION_MODE_PROFILE_POSITION);
-  epos_set_profile_velocity(id, vel);
-  epos_set_target_position(id, pos);
-  epos_activate_position(id);
-
-  do {
-    epos_get_statusword(id);
+  if (epos_init_arg(&node, argc, argv))
+    return -1;
+  epos_position_profile_init(&profile, pos, vel, acc, acc, epos_linear);
+  profile.relative = 1;
+  if (!epos_position_profile_start(&node, &profile)) {
+    while (!quit && epos_profile_wait(&node, 0.1)) {
+      fprintf(stdout, "\rEPOS angular position: %8.2f deg",
+        epos_get_position(&node)*180.0/M_PI);
+      fflush(stdout);
+    }
+    fprintf(stdout, "\n");
+    epos_position_profile_stop(&node);
   }
-  while (!(epos_read.node[id-1].status & STATUS_TARGET_REACHED));
-
-  epos_shutdown(id);
-  can_close();
+  epos_close(&node);
 
   return 0;
 }

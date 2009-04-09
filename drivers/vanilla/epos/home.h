@@ -36,6 +36,8 @@
 #define EPOS_HOME_CONTROL_START                     0x001F
 #define EPOS_HOME_CONTROL_HALT                      0x01FF
 
+#define EPOS_HOME_STATUS_REACHED                    0x1000
+
 /** \brief EPOS homing methods
   */
 typedef enum {

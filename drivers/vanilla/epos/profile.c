@@ -18,12 +18,28 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef EPOS_GLOBAL_H
-#define EPOS_GLOBAL_H
+#include <stdio.h>
 
-#define abs(a) ((a) < (0) ? (-a) : (a))
-#define min(a,b) ((a) < (b) ? (a) : (b))
-#define max(a,b) ((a) > (b) ? (a) : (b))
-#define clip(a, b, c) max(min(a, c), b)
+#include "profile.h"
 
-#endif
+int epos_profile_wait(epos_node_p node, double timeout) {
+  return epos_device_wait_status(&node->dev, EPOS_PROFILE_STATUS_REACHED,
+    timeout);
+}
+
+int epos_profile_set_acceleration(epos_device_p dev, unsigned int
+  acceleration) {
+  return epos_device_write(dev, EPOS_PROFILE_INDEX_ACCELERATION, 0,
+    (unsigned char*)&acceleration, sizeof(unsigned int));
+}
+
+int epos_profile_set_deceleration(epos_device_p dev, unsigned int
+  deceleration) {
+  return epos_device_write(dev, EPOS_PROFILE_INDEX_DECELERATION, 0,
+    (unsigned char*)&deceleration, sizeof(unsigned int));
+}
+
+int epos_profile_set_type(epos_device_p dev, epos_profile_type_t type) {
+  return epos_device_write(dev, EPOS_PROFILE_INDEX_TYPE, 0,
+    (unsigned char*)&type, sizeof(short));
+}

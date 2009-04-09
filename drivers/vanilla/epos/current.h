@@ -28,6 +28,16 @@
 #define EPOS_CURRENT_INDEX_SETTING_VALUE           0x2030
 #define EPOS_CURRENT_INDEX_ACTUAL_VALUE            0x6078
 #define EPOS_CURRENT_INDEX_AVERAGE_VALUE           0x2027
+#define EPOS_CURRENT_INDEX_CONTROL_PARAMETERS      0x60F6
+#define EPOS_CURRENT_SUBINDEX_P_GAIN               0x01
+#define EPOS_CURRENT_SUBINDEX_I_GAIN               0x02
+
+/** \brief Structure defining an EPOS current control configuration
+  */
+typedef struct epos_current_config_t {
+  short p_gain;         //!< The current controller's P-gain.
+  short i_gain;         //!< The current controller's I-gain.
+} epos_current_config_t, *epos_current_config_p;
 
 /** \brief Structure defining an EPOS current control operation
   */
@@ -42,6 +52,16 @@ typedef struct epos_current_t {
 void epos_current_init(
   epos_current_p current,
   float target_value);
+
+/** \brief Setup EPOS current control
+  * \param[in] node The EPOS node to setup current control for.
+  * \param[in] config The configuration to be used for setting up the
+  *   EPOS current controller.
+  * \return The resulting device error code.
+  */
+int epos_current_setup(
+  epos_node_p node,
+  epos_current_config_p config);
 
 /** \brief Start EPOS current control operation
   * \param[in] node The EPOS node to start the current control operation for.
@@ -75,11 +95,32 @@ short epos_current_get_average(
 
 /** \brief Set the demanded current of an EPOS device
   * \param[in] dev The EPOS device to set the demanded current for.
-  * \param[in] curr The demanded current for the specified EPOS device in [mA].
+  * \param[in] current The demanded current for the specified EPOS
+  *   device in [mA].
   * \return The resulting device error code.
   */
 int epos_current_set_demand(
   epos_device_p dev,
-  short curr);
+  short current);
+
+/** \brief Set the current control P-gain of an EPOS device
+  * \param[in] dev The EPOS device to set the current control P-gain for.
+  * \param[in] p_gain The current control P-gain for the specified EPOS
+  *   device.
+  * \return The resulting device error code.
+  */
+int epos_current_set_p_gain(
+  epos_device_p dev,
+  short p_gain);
+
+/** \brief Set the current control I-gain of an EPOS device
+  * \param[in] dev The EPOS device to set the current control I-gain for.
+  * \param[in] i_gain The current control I-gain for the specified EPOS
+  *   device.
+  * \return The resulting device error code.
+  */
+int epos_current_set_i_gain(
+  epos_device_p dev,
+  short i_gain);
 
 #endif

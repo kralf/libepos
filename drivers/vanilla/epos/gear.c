@@ -25,10 +25,6 @@
 
 #include "gear.h"
 
-#define min(a,b) ((a) < (b) ? (a) : (b))
-#define max(a,b) ((a) > (b) ? (a) : (b))
-#define clip(a, b, c) max(min(a, c), b)
-
 const char* epos_gear_errors[] = {
   "success",
   "error initializing EPOS gear",
@@ -52,8 +48,8 @@ int epos_gear_close(epos_gear_p gear) {
     return EPOS_GEAR_ERROR_CLOSE;
 }
 
-float epos_gear_to_angle(epos_gear_p gear, int pos) {
-  return 2.0*M_PI*pos/(4.0*gear->sensor->num_pulses*gear->transmission);
+float epos_gear_to_angle(epos_gear_p gear, int position) {
+  return 2.0*M_PI*position/(4.0*gear->sensor->num_pulses*gear->transmission);
 }
 
 int epos_gear_from_angle(epos_gear_p gear, float angle) {
@@ -61,11 +57,19 @@ int epos_gear_from_angle(epos_gear_p gear, float angle) {
     INT_MIN, INT_MAX);
 }
 
-float epos_gear_to_angular_velocity(epos_gear_p gear, int vel) {
-  return 2.0*M_PI*vel/(60.0*gear->transmission);
+float epos_gear_to_angular_velocity(epos_gear_p gear, int velocity) {
+  return 2.0*M_PI*velocity/(60.0*gear->transmission);
 }
 
 int epos_gear_from_angular_velocity(epos_gear_p gear, float angular_vel) {
   return clip(angular_vel*60.0*gear->transmission/(2.0*M_PI),
     INT_MIN, INT_MAX);
+}
+
+float epos_gear_to_angular_acceleration(epos_gear_p gear, int acceleration) {
+  return 2.0*M_PI*acceleration/(60.0*gear->transmission);
+}
+
+int epos_gear_from_angular_acceleration(epos_gear_p gear, float angular_acc) {
+  return clip(angular_acc*60.0*gear->transmission/(2.0*M_PI), 1, UINT_MAX);
 }

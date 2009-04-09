@@ -28,6 +28,7 @@
 #define EPOS_POSITION_INDEX_SETTING_VALUE           0x2062
 #define EPOS_POSITION_INDEX_DEMAND_VALUE            0x6062
 #define EPOS_POSITION_INDEX_ACTUAL_VALUE            0x6064
+#define EPOS_POSITION_INDEX_MAX_FOLLOWING_ERROR     0x6065
 #define EPOS_POSITION_INDEX_SOFTWARE_LIMIT          0x607D
 #define EPOS_POSITION_SUBINDEX_NEG_LIMIT            0x01
 #define EPOS_POSITION_SUBINDEX_POS_LIMIT            0x02
@@ -41,8 +42,6 @@
 /** \brief Structure defining an EPOS position control configuration
   */
 typedef struct epos_position_config_t {
-  float max_error;      //!< The maximum position following error in [rad].
-
   short p_gain;         //!< The position controller's P-gain.
   short i_gain;         //!< The position controller's I-gain.
   short d_gain;         //!< The position controller's D-gain.
@@ -53,10 +52,11 @@ typedef struct epos_position_config_t {
 /** \brief Structure defining an EPOS position control operation
   */
 typedef struct epos_position_t {
-  float target_value;             //!< The target position in [rad].
+  float target_value;   //!< The target position in [rad].
 
-  float min_value;                //!< The minimum position limit in [rad].
-  float max_value;                //!< The maximum position limit in [rad].
+  float min_value;      //!< The minimum position limit in [rad].
+  float max_value;      //!< The maximum position limit in [rad].
+  float max_error;      //!< The maximum position following error in [rad].
 } epos_position_t, *epos_position_p;
 
 /** \brief Initialize EPOS position control operation
@@ -72,12 +72,14 @@ void epos_position_init(
   * \param[in] target_value The target position in [rad].
   * \param[in] min_value The minimum position angle in [rad].
   * \param[in] max_value The maximum position angle in [rad].
+  * \param[in] max_error The maximum following error in [rad].
   */
 void epos_position_init_limits(
   epos_position_p position,
   float target_value,
   float min_value,
-  float max_value);
+  float max_value,
+  float max_error);
 
 /** \brief Setup EPOS position control
   * \param[in] node The EPOS node to setup position control for.
@@ -85,7 +87,7 @@ void epos_position_init_limits(
   *   EPOS position controller.
   * \return The resulting device error code.
   */
-void epos_position_setup(
+int epos_position_setup(
   epos_node_p node,
   epos_position_config_p config);
 
@@ -125,12 +127,13 @@ int epos_position_get_actual(
 
 /** \brief Set the demanded position of an EPOS device
   * \param[in] dev The EPOS device to set the demanded position for.
-  * \param[in] pos The demanded position for the specified EPOS device in [pu].
+  * \param[in] position The demanded position for the specified EPOS
+  *   device in [pu].
   * \return The resulting device error code.
   */
 int epos_position_set_demand(
   epos_device_p dev,
-  int pos);
+  int position);
 
 /** \brief Retrieve the demanded position of an EPOS device
   * \param[in] dev The EPOS device to retrieve the demanded position for.
@@ -138,5 +141,66 @@ int epos_position_set_demand(
   */
 int epos_position_get_demand(
   epos_device_p dev);
+
+/** \brief Set the maximum position following error of an EPOS device
+  * \param[in] dev The EPOS device to set the maximum following error for.
+  * \param[in] max_error The maximum following error for the specified EPOS
+  *   device in [pu].
+  * \return The resulting device error code.
+  */
+int epos_position_set_max_error(
+  epos_device_p dev,
+  unsigned int max_error);
+
+/** \brief Set the position control P-gain of an EPOS device
+  * \param[in] dev The EPOS device to set the position control P-gain for.
+  * \param[in] p_gain The position control P-gain for the specified EPOS
+  *   device.
+  * \return The resulting device error code.
+  */
+int epos_position_set_p_gain(
+  epos_device_p dev,
+  short p_gain);
+
+/** \brief Set the position control I-gain of an EPOS device
+  * \param[in] dev The EPOS device to set the position control I-gain for.
+  * \param[in] i_gain The position control I-gain for the specified EPOS
+  *   device.
+  * \return The resulting device error code.
+  */
+int epos_position_set_i_gain(
+  epos_device_p dev,
+  short i_gain);
+
+/** \brief Set the position control D-gain of an EPOS device
+  * \param[in] dev The EPOS device to set the position control D-gain for.
+  * \param[in] d_gain The position control D-gain for the specified EPOS
+  *   device.
+  * \return The resulting device error code.
+  */
+int epos_position_set_d_gain(
+  epos_device_p dev,
+  short d_gain);
+
+/** \brief Set the velocity feed-forward factor of an EPOS device
+  * \param[in] dev The EPOS device to set the velocity feed-forward factor for.
+  * \param[in] vel_factor The velocity feed-forward factor for the specified
+  *   EPOS device.
+  * \return The resulting device error code.
+  */
+int epos_position_set_velocity_factor(
+  epos_device_p dev,
+  short vel_factor);
+
+/** \brief Set the acceleration feed-forward factor of an EPOS device
+  * \param[in] dev The EPOS device to set the acceleration feed-forward
+  *   factor for.
+  * \param[in] vel_factor The acceleration feed-forward factor for the
+  *   specified EPOS device.
+  * \return The resulting device error code.
+  */
+int epos_position_set_acceleration_factor(
+  epos_device_p dev,
+  short acc_factor);
 
 #endif
