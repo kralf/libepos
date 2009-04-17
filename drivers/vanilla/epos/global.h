@@ -25,5 +25,6 @@
 #define min(a,b) ((a) < (b) ? (a) : (b))
 #define max(a,b) ((a) > (b) ? (a) : (b))
 #define clip(a, b, c) max(min(a, c), b)
+#define sqr(a) ((a)*(a))
 
 #endif

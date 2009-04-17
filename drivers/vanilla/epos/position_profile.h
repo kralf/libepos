@@ -41,6 +41,9 @@ typedef struct epos_position_profile_t {
 
   int relative;                  //!< The profile position is relative.
   epos_profile_type_t type;      //!< The position profile type.
+
+  float start_value;             //!< The start position of the profile in [s].
+  double start_time;             //!< The start time of the profile in [s].
 } epos_position_profile_t, *epos_position_profile_p;
 
 /** \brief Initialize EPOS position profile control operation
@@ -78,6 +81,17 @@ int epos_position_profile_start(
   */
 int epos_position_profile_stop(
   epos_node_p node);
+
+/** \brief Estimate the relative position of an EPOS position profile
+  * \param[in] profile The EPOS position profile control operation to
+  *   estimate the relative position of.
+  * \param[in] time The absolute time to estimate the relative position
+  *    at in [s].
+  * \return The estimated relative position in [rad].
+  */
+float epos_position_profile_estimate(
+  epos_position_profile_p profile,
+  double time);
 
 /** \brief Set the position profile target position of an EPOS device
   * \param[in] dev The EPOS device to set the target position for.
