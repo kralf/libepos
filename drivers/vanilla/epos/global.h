@@ -21,9 +21,9 @@
 #ifndef EPOS_GLOBAL_H
 #define EPOS_GLOBAL_H
 
-#define abs(a) ((a) < (0) ? (-a) : (a))
-#define min(a,b) ((a) < (b) ? (a) : (b))
-#define max(a,b) ((a) > (b) ? (a) : (b))
+#define abs(a) (((a) < (0)) ? -(a) : (a))
+#define min(a, b) (((a) < (b)) ? (a) : (b))
+#define max(a, b) (((a) > (b)) ? (a) : (b))
 #define clip(a, b, c) max(min(a, c), b)
 #define sqr(a) ((a)*(a))
 

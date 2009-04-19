@@ -78,12 +78,13 @@ int epos_position_profile_stop(epos_node_p node) {
 float epos_position_profile_estimate(epos_position_profile_p profile,
   double time) {
   float s_0 = profile->start_value;
+  float s_1 = (profile->relative) ? s_0+profile->target_value :
+    profile->target_value;
   float d_s = 0.0;
   double t = time-profile->start_time;
 
   if (t > 0.0) {
-    float s = (profile->relative) ? abs(profile->target_value) :
-      abs(profile->target_value-s_0);
+    float s = abs(s_1-s_0);
     float v = profile->velocity;
     float a = profile->acceleration;
     float d = profile->deceleration;
@@ -130,10 +131,10 @@ float epos_position_profile_estimate(epos_position_profile_p profile,
     }
   }
 
-  if (profile->target_value < 0.0)
-    return s_0-d_s;
-  else
+  if (s_1 > s_0)
     return s_0+d_s;
+  else
+    return s_0-d_s;
 }
 
 int epos_position_profile_set_target(epos_device_p dev, int position) {
