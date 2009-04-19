@@ -59,36 +59,32 @@ typedef struct epos_parameter_t {
   char value[64];                 //!< The EPOS parameter value.
 } epos_parameter_t, *epos_parameter_p;
 
-/** \brief Predefined EPOS parameters
+/** \brief Predefined EPOS default parameters
   */
-extern epos_parameter_t epos_parameters[];
+extern epos_parameter_t epos_default_parameters[];
 
 /** \brief Structure defining an EPOS node
   */
 typedef struct epos_node_t {
-  epos_device_t dev;          //!< The EPOS node device.
-  epos_sensor_t sensor;       //!< The EPOS position sensor.
-  epos_motor_t motor;         //!< The EPOS motor.
-  epos_gear_t gear;           //!< The EPOS gear assembly.
-  epos_control_t control;     //!< The EPOS controller.
-} epos_node_t, *epos_node_p;
+  epos_device_t dev;              //!< The EPOS node device.
+  epos_sensor_t sensor;           //!< The EPOS position sensor.
+  epos_motor_t motor;             //!< The EPOS motor.
+  epos_gear_t gear;               //!< The EPOS gear assembly.
+  epos_control_t control;         //!< The EPOS controller.
 
-/** \brief Set EPOS parameters from command line arguments
-  * \param[in] argc The number of supplied command line arguments.
-  * \param[in] argv The list of supplied command line arguments.
-  */
-void epos_set_arg(
-  int argc,
-  char **argv);
+  epos_parameter_t* parameters;   //!< The EPOS configuration parameters.
+} epos_node_t, *epos_node_p;
 
 /** \brief Initialize EPOS node
   * \param[in] node The EPOS node to be initialized.
-  * \param[in] node_id The EPOS node identifier.
+  * \param[in] parameters An array of EPOS parameters.
+  * \param[in] num_parameters The number of EPOS parameters.
   * \return The resulting error code.
   */
 int epos_init(
   epos_node_p node,
-  int node_id);
+  epos_parameter_t parameters[],
+  ssize_t num_parameters);
 
 /** \brief Initialize EPOS node from command line arguments
   * \param[in] node The EPOS node to be initialized.

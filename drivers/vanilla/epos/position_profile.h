@@ -95,7 +95,8 @@ float epos_position_profile_estimate(
 
 /** \brief Set the position profile target position of an EPOS device
   * \param[in] dev The EPOS device to set the target position for.
-  * \param[in] position The target position for the specified EPOS device.
+  * \param[in] position The target position for the specified EPOS
+  *   device in [pu].
   * \return The resulting device error code.
   */
 int epos_position_profile_set_target(
@@ -104,7 +105,8 @@ int epos_position_profile_set_target(
 
 /** \brief Set the position profile velocity of an EPOS device
   * \param[in] dev The EPOS device to set the profile velocity for.
-  * \param[in] velocity The profile velocity for the specified EPOS device.
+  * \param[in] velocity The profile velocity for the specified EPOS
+  *   device in [vu].
   * \return The resulting device error code.
   */
 int epos_position_profile_set_velocity(

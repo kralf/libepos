@@ -43,9 +43,9 @@ int epos_velocity_start(epos_node_p node, epos_velocity_p velocity) {
 
   if (!(result = epos_control_set_type(&node->control, epos_velocity)) &&
     !(result = epos_control_start(&node->control)))
-    return epos_velocity_set_demand(&node->dev, vel);
-  else
-    return result;
+    result = epos_velocity_set_demand(&node->dev, vel);
+
+  return result;
 }
 
 int epos_velocity_stop(epos_node_p node) {

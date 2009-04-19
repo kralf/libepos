@@ -48,9 +48,9 @@ int epos_velocity_profile_start(epos_node_p node, epos_velocity_profile_p
     !(result = epos_profile_set_deceleration(&node->dev, dec)) &&
     !(result = epos_profile_set_type(&node->dev, profile->type)) &&
     !(result = epos_control_start(&node->control)))
-    return epos_velocity_profile_set_target(&node->dev, vel);
-  else
-    return result;
+    result = epos_velocity_profile_set_target(&node->dev, vel);
+
+  return result;
 }
 
 int epos_velocity_profile_stop(epos_node_p node) {

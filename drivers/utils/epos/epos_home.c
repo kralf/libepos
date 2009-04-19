@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <signal.h>
+#include <math.h>
 
 #include <epos.h>
 #include <home.h>
@@ -35,9 +36,19 @@ int main(int argc, char **argv) {
   epos_home_t home;
   signal(SIGINT, epos_signaled);
 
+  if (argc < 6) {
+    fprintf(stderr, "usage: %s METHOD CURR VEL ACC POS [PARAMS]\n", argv[0]);
+    return -1;
+  }
+  epos_home_method_t method = atoi(argv[1]);
+  float curr = atof(argv[2]);
+  float vel = atof(argv[3])*M_PI/180.0;
+  float acc = atof(argv[4])*M_PI/180.0;
+  float pos = atof(argv[5])*M_PI/180.0;
+
   if (epos_init_arg(&node, argc, argv))
     return -1;
-  epos_home_init(&home, epos_neg_current_index, 1000, 50, 0);
+  epos_home_init(&home, method, curr, vel, acc, pos);
   if (!epos_home_start(&node, &home)) {
     while (!quit && epos_home_wait(&node, 0.1));
     epos_home_stop(&node);

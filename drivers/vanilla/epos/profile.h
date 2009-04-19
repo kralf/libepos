@@ -50,7 +50,7 @@ int epos_profile_wait(
 /** \brief Set the profile acceleration of an EPOS device
   * \param[in] dev The EPOS device to set the profile acceleration for.
   * \param[in] acceleration The profile acceleration for the specified
-  *   EPOS device.
+  *   EPOS device in [au].
   * \return The resulting device error code.
   */
 int epos_profile_set_acceleration(
@@ -60,7 +60,7 @@ int epos_profile_set_acceleration(
 /** \brief Set the profile deceleration of an EPOS device
   * \param[in] dev The EPOS device to set the profile deceleration for.
   * \param[in] deceleration The profile deceleration for the specified
-  *   EPOS device.
+  *   EPOS device in [au].
   * \return The resulting device error code.
   */
 int epos_profile_set_deceleration(

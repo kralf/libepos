@@ -46,10 +46,10 @@ int epos_position_setup(epos_node_p node, epos_position_config_p config) {
     !(result = epos_position_set_d_gain(&node->dev, config->d_gain)) &&
     !(result = epos_position_set_velocity_factor(&node->dev,
       config->vel_factor)))
-    return epos_position_set_acceleration_factor(&node->dev,
+    result = epos_position_set_acceleration_factor(&node->dev,
       config->acc_factor);
-  else
-    return result;
+
+  return result;
 }
 
 int epos_position_start(epos_node_p node, epos_position_p position) {

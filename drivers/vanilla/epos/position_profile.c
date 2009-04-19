@@ -67,8 +67,8 @@ int epos_position_profile_start(epos_node_p node, epos_position_profile_p
     result = epos_device_set_control(&node->dev, control);
     timer_correct(&profile->start_time);
   }
-  else
-    return result;
+
+  return result;
 }
 
 int epos_position_profile_stop(epos_node_p node) {

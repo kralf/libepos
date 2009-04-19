@@ -21,7 +21,7 @@
 #ifndef EPOS_HOME_H
 #define EPOS_HOME_H
 
-#include "epos.h"
+#include "profile.h"
 
 /** \brief Predefined EPOS homing control constants
   */
@@ -29,6 +29,7 @@
 #define EPOS_HOME_INDEX_VELOCITIES                  0x6099
 #define EPOS_HOME_SUBINDEX_SWITCH_SEARCH_VELOCITY   0x01
 #define EPOS_HOME_SUBINDEX_ZERO_SEARCH_VELOCITY     0x02
+#define EPOS_HOME_INDEX_ACCELERATION                0x609A
 #define EPOS_HOME_INDEX_OFFSET                      0x607C
 #define EPOS_HOME_INDEX_CURRENT_THRESHOLD           0x2080
 #define EPOS_HOME_INDEX_POSITION                    0x2081
@@ -56,27 +57,32 @@ typedef enum {
 typedef struct epos_home_t {
   epos_home_method_t method;   //!< The EPOS homing method.
 
-  short current;               //!< The homing current threshold in [mA].
-  int switch_vel;              //!< The switch search velocity in [rpm].
-  int zero_vel;                //!< The zero search velocity in [rpm].
+  float current;               //!< The homing current threshold in [A].
+  float switch_vel;            //!< The switch search velocity in [rad/s].
+  float zero_vel;              //!< The zero search velocity in [rad/s].
+  float acceleration;          //!< The homing acceleration in [rad/s^2].
 
-  int offset;                  //!< The home offset from the switch in [steps].
-  int position;                //!< The home position in [steps].
+  float offset;                //!< The home offset from the switch in [rad].
+  float position;              //!< The home position in [rad].
+
+  epos_profile_type_t type;    //!< The homing profile type.
 } epos_home_t, *epos_home_p;
 
 /** \brief Initialize EPOS homing operation
   * \param[in] home The EPOS homing operation to be initialized.
   * \param[in] method The homing method to be used.
-  * \param[in] current The homing current threshold to be used in [rpm].
-  * \param[in] velocity The homing velocity to be used in [rpm].
-  * \param[in] position The home position to be set in [steps].
+  * \param[in] current The homing current threshold to be used in [A].
+  * \param[in] velocity The homing velocity to be used in [rad/s].
+  * \param[in] acceleration The homing acceleration to be used in [rad/s^2].
+  * \param[in] position The home position to be set in [rad].
   */
 void epos_home_init(
   epos_home_p home,
   epos_home_method_t method,
-  short current,
-  int velocity,
-  int position);
+  float current,
+  float velocity,
+  float acceleration,
+  float position);
 
 /** \brief Start EPOS homing operation
   * \param[in] node The EPOS node to start the homing operation for.
@@ -124,25 +130,34 @@ int epos_home_set_current_threshold(
 /** \brief Set EPOS homing switch search velocity
   * \param[in] dev The EPOS device to set the homing switch search
   *   velocity for.
-  * \param[in] velocity The homing switch search velocity to be set in [rpm].
+  * \param[in] velocity The homing switch search velocity to be set in [vu].
   * \return The resulting device error code.
   */
 int epos_home_set_switch_search_velocity(
   epos_device_p dev,
-  int velocity);
+  unsigned int velocity);
 
 /** \brief Set EPOS homing zero search velocity
   * \param[in] dev The EPOS device to set the homing zero search velocity for.
-  * \param[in] velocity The homing zero search velocity to be set in [rpm].
+  * \param[in] velocity The homing zero search velocity to be set in [vu].
   * \return The resulting device error code.
   */
 int epos_home_set_zero_search_velocity(
   epos_device_p dev,
-  int velocity);
+  unsigned int velocity);
+
+/** \brief Set EPOS homing acceleration
+  * \param[in] dev The EPOS device to set the homing acceleration for.
+  * \param[in] acceleration The homing acceleration to be set in [au].
+  * \return The resulting device error code.
+  */
+int epos_home_set_acceleration(
+  epos_device_p dev,
+  unsigned int acceleration);
 
 /** \brief Set EPOS homing offset
   * \param[in] dev The EPOS device to set the homing offset for.
-  * \param[in] offset The homing offset to be set in [steps].
+  * \param[in] offset The homing offset to be set in [pu].
   * \return The resulting device error code.
   */
 int epos_home_set_offset(
@@ -151,7 +166,7 @@ int epos_home_set_offset(
 
 /** \brief Set EPOS home position
   * \param[in] dev The EPOS device to set the home position for.
-  * \param[in] position The absolute home position to be set in [steps].
+  * \param[in] position The absolute home position to be set in [pu].
   * \return The resulting device error code.
   */
 int epos_home_set_position(

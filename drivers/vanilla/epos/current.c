@@ -41,9 +41,9 @@ int epos_current_start(epos_node_p node, epos_current_p current) {
 
   if (!(result = epos_control_set_type(&node->control, epos_current)) &&
     !(result = epos_control_start(&node->control)))
-    return epos_current_set_demand(&node->dev, curr);
-  else
-    return result;
+    result = epos_current_set_demand(&node->dev, curr);
+
+  return result;
 }
 
 int epos_current_stop(epos_node_p node) {

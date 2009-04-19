@@ -21,34 +21,48 @@
 #include <stdio.h>
 
 #include "home.h"
+#include "gear.h"
 
-void epos_home_init(epos_home_p home, epos_home_method_t method, short current,
-  int velocity, int position) {
+void epos_home_init(epos_home_p home, epos_home_method_t method, float current,
+  float velocity, float acceleration, float position) {
   home->method = method;
 
   home->current = current;
   home->switch_vel = velocity;
   home->zero_vel = velocity;
+  home->acceleration = acceleration;
 
-  home->offset = 0;
+  home->offset = 0.0;
   home->position = position;
+
+  home->type = epos_sinusoidal;
 }
 
 int epos_home_start(epos_node_p node, epos_home_p home) {
   int result;
+  unsigned int switch_vel = abs(epos_gear_from_angular_velocity(&node->gear,
+    home->switch_vel));
+  unsigned int zero_vel = abs(epos_gear_from_angular_velocity(&node->gear,
+    home->zero_vel));
+  unsigned int acc = abs(epos_gear_from_angular_acceleration(&node->gear,
+    home->acceleration));
+  int offset = epos_gear_from_angle(&node->gear, home->offset);
+  int pos = epos_gear_from_angle(&node->gear, home->position);
+
   if (!(result = epos_control_set_type(&node->control, epos_homing)) &&
     !(result = epos_home_set_method(&node->dev, home->method)) &&
-    !(result = epos_home_set_current_threshold(&node->dev, home->current)) &&
-    !(result = epos_home_set_switch_search_velocity(&node->dev,
-      home->switch_vel)) &&
-    !(result = epos_home_set_zero_search_velocity(&node->dev,
-      home->zero_vel)) &&
-    !(result = epos_home_set_offset(&node->dev, home->offset)) &&
-    !(result = epos_home_set_position(&node->dev, home->position)) &&
+    !(result = epos_home_set_current_threshold(&node->dev,
+      home->current*1e3)) &&
+    !(result = epos_home_set_switch_search_velocity(&node->dev, switch_vel)) &&
+    !(result = epos_home_set_zero_search_velocity(&node->dev, zero_vel)) &&
+    !(result = epos_home_set_acceleration(&node->dev, acc)) &&
+    !(result = epos_home_set_offset(&node->dev, offset)) &&
+    !(result = epos_home_set_position(&node->dev, pos)) &&
+    !(result = epos_profile_set_type(&node->dev, home->type)) &&
     !(result = epos_control_start(&node->control)))
-    return epos_device_set_control(&node->dev, EPOS_HOME_CONTROL_START);
-  else
-    return result;
+    result = epos_device_set_control(&node->dev, EPOS_HOME_CONTROL_START);
+
+  return result;
 }
 
 int epos_home_stop(epos_node_p node) {
@@ -74,16 +88,23 @@ int epos_home_set_current_threshold(epos_device_p dev, short current) {
     (unsigned char*)&current, sizeof(short));
 }
 
-int epos_home_set_switch_search_velocity(epos_device_p dev, int velocity) {
+int epos_home_set_switch_search_velocity(epos_device_p dev, unsigned int
+  velocity) {
   return epos_device_write(dev, EPOS_HOME_INDEX_VELOCITIES,
     EPOS_HOME_SUBINDEX_SWITCH_SEARCH_VELOCITY, (unsigned char*)&velocity,
-    sizeof(int));
+    sizeof(unsigned int));
 }
 
-int epos_home_set_zero_search_velocity(epos_device_p dev, int velocity) {
+int epos_home_set_zero_search_velocity(epos_device_p dev, unsigned int
+  velocity) {
   return epos_device_write(dev, EPOS_HOME_INDEX_VELOCITIES,
     EPOS_HOME_SUBINDEX_ZERO_SEARCH_VELOCITY, (unsigned char*)&velocity,
-    sizeof(int));
+    sizeof(unsigned int));
+}
+
+int epos_home_set_acceleration(epos_device_p dev, unsigned int acceleration) {
+  return epos_device_write(dev, EPOS_HOME_INDEX_ACCELERATION, 0,
+    (unsigned char*)&acceleration, sizeof(unsigned int));
 }
 
 int epos_home_set_offset(epos_device_p dev, int offset) {

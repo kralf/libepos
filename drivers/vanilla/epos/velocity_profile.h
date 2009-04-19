@@ -75,7 +75,8 @@ int epos_velocity_profile_stop(
 
 /** \brief Set the velocity profile target velocity of an EPOS device
   * \param[in] dev The EPOS device to set the target velocity for.
-  * \param[in] velocity The target velocity for the specified EPOS device.
+  * \param[in] velocity The target velocity for the specified EPOS
+  *   device in [vu].
   * \return The resulting device error code.
   */
 int epos_velocity_profile_set_target(
