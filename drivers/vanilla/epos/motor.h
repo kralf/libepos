@@ -54,8 +54,8 @@ typedef struct epos_motor_t {
   epos_device_p dev;        //!< The EPOS device of the motor.
 
   epos_motor_type_t type;   //!< The motor type.
-  short max_cont_current;   //!< The motor's continuous current limit in [mA].
-  short max_out_current;    //!< The motor's output current limit in [mA].
+  float max_cont_current;   //!< The motor's continuous current limit in [A].
+  float max_out_current;    //!< The motor's output current limit in [A].
 } epos_motor_t, *epos_motor_p;
 
 /** \brief Initialize EPOS motor
@@ -63,7 +63,7 @@ typedef struct epos_motor_t {
   * \param[in] sensor The EPOS motor to be initialized.
   * \param[in] type The type of the EPOS motor to be initialized.
   * \param[in] max_current The maximum output current of the EPOS motor to
-  *   be initialized in [mA]. The continuous current limit will be set
+  *   be initialized in [A]. The continuous current limit will be set
   *   to half of this value.
   * \return The resulting error code.
   */
@@ -71,7 +71,7 @@ int epos_motor_init(
   epos_device_p dev,
   epos_motor_p motor,
   epos_motor_type_t type,
-  short max_current);
+  float max_current);
 
 /** \brief Close EPOS motor
   * \param[in] sensor The EPOS motor to be closed.

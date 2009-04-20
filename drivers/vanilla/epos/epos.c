@@ -40,8 +40,8 @@ epos_parameter_t epos_default_parameters[] = {
   {"enc-polarity", "0"},
   {"enc-pulses", "1024"},
   {"motor-type", "1"},
-  {"motor-current", "2000"},
-  {"gear-trans", "1"},
+  {"motor-current", "2.0"},
+  {"gear-trans", "1.0"},
   {"control-type", "6"},
 };
 
@@ -80,7 +80,7 @@ int epos_init(epos_node_p node, epos_parameter_t parameters[], ssize_t
       atoi(node->parameters[EPOS_PARAMETER_SENSOR_PULSES].value)) &&
     !epos_motor_init(&node->dev, &node->motor,
       atoi(node->parameters[EPOS_PARAMETER_MOTOR_TYPE].value),
-      atoi(node->parameters[EPOS_PARAMETER_MOTOR_CURRENT].value)) &&
+      atof(node->parameters[EPOS_PARAMETER_MOTOR_CURRENT].value)) &&
     !epos_gear_init(&node->sensor, &node->gear,
       atof(node->parameters[EPOS_PARAMETER_GEAR_TRANSMISSION].value)) &&
     !epos_control_init(&node->dev, &node->control,

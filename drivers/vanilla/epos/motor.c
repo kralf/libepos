@@ -29,12 +29,12 @@ const char* epos_motor_errors[] = {
 };
 
 int epos_motor_init(epos_device_p dev, epos_motor_p motor, epos_motor_type_t
-  type, short max_current) {
+  type, float max_current) {
   motor->dev = dev;
 
   if (epos_motor_set_type(motor, type) ||
-    epos_motor_set_max_continuous_current(motor, max_current/2) ||
-    epos_motor_set_max_output_current(motor, max_current)) {
+    epos_motor_set_max_continuous_current(motor, 0.5*max_current*1e3) ||
+    epos_motor_set_max_output_current(motor, max_current*1e3)) {
     motor->dev = 0;
     return EPOS_MOTOR_ERROR_INIT;
   }

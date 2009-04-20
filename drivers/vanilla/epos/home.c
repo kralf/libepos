@@ -59,8 +59,13 @@ int epos_home_start(epos_node_p node, epos_home_p home) {
     !(result = epos_home_set_offset(&node->dev, offset)) &&
     !(result = epos_home_set_position(&node->dev, pos)) &&
     !(result = epos_profile_set_type(&node->dev, home->type)) &&
+    !(result = epos_device_set_control(&node->dev,
+      EPOS_DEVICE_CONTROL_SHUTDOWN)) &&
     !(result = epos_control_start(&node->control)))
     result = epos_device_set_control(&node->dev, EPOS_HOME_CONTROL_START);
+
+  epos_control_start(&node->control);
+  epos_device_set_control(&node->dev, EPOS_HOME_CONTROL_START);
 
   return result;
 }
