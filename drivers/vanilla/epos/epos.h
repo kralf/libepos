@@ -73,6 +73,7 @@ typedef struct epos_node_t {
   epos_control_t control;         //!< The EPOS controller.
 
   epos_parameter_t* parameters;   //!< The EPOS configuration parameters.
+  ssize_t num_parameters;         //!< The number of EPOS parameters.
 } epos_node_t, *epos_node_p;
 
 /** \brief Initialize EPOS node

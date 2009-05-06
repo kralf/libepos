@@ -47,15 +47,15 @@ epos_parameter_t epos_default_parameters[] = {
 
 int epos_init(epos_node_p node, can_device_p can_dev, epos_parameter_t
   parameters[], ssize_t num_parameters) {
-  ssize_t num_default_parameters = sizeof(epos_default_parameters)/
-    sizeof(epos_parameter_t);
   node->parameters = malloc(sizeof(epos_default_parameters));
   memcpy(node->parameters, epos_default_parameters,
     sizeof(epos_default_parameters));
-  int i, j;
+  node->num_parameters = sizeof(epos_default_parameters)/
+    sizeof(epos_parameter_t);
 
+  int i, j;
   for (i = 0; i < num_parameters; ++i) {
-    for (j = 0; j < num_default_parameters; ++j)
+    for (j = 0; j < node->num_parameters; ++j)
       if (!strcmp(parameters[i].name, node->parameters[j].name)) {
       strcpy(node->parameters[j].value, parameters[i].value);
       break;
@@ -81,6 +81,7 @@ int epos_init(epos_node_p node, can_device_p can_dev, epos_parameter_t
   else {
     free(node->parameters);
     node->parameters = 0;
+    node->num_parameters = 0;
 
     return EPOS_ERROR_INIT;
   }
@@ -140,6 +141,7 @@ int epos_close(epos_node_p node) {
 
     free(node->parameters);
     node->parameters = 0;
+    node->num_parameters = 0;
 
     return EPOS_ERROR_NONE;
   }
