@@ -60,10 +60,12 @@ int epos_device_rs232_baudrates[] = {
   115200,
 };
 
-int epos_device_init(epos_device_p dev, int node_id, int reset, can_parameter_t
-  parameters[], ssize_t num_parameters) {
-  dev->node_id = node_id;
-  if (!can_init(&dev->can_dev, parameters, num_parameters)) {
+int epos_device_init(epos_device_p dev, can_device_p can_dev, int node_id,
+  int reset) {
+  if (!can_open(can_dev)) {
+    dev->can_dev = can_dev;
+    dev->node_id = node_id;
+
     dev->num_read = 0;
     dev->num_written = 0;
 
@@ -82,13 +84,19 @@ int epos_device_init(epos_device_p dev, int node_id, int reset, can_parameter_t
   }
   else {
     fprintf(stderr, "Node %d connection error\n", node_id);
+
+    dev->can_dev = 0;
+    dev->node_id = EPOS_DEVICE_INVALID_ID;
+
     return EPOS_DEVICE_ERROR_INIT;
   }
 }
 
 int epos_device_close(epos_device_p dev) {
-  if (!can_close(&dev->can_dev)) {
+  if (!can_close(dev->can_dev)) {
+    dev->can_dev = 0;
     dev->node_id = EPOS_DEVICE_INVALID_ID;
+
     return EPOS_DEVICE_ERROR_NONE;
   }
   else
@@ -96,14 +104,14 @@ int epos_device_close(epos_device_p dev) {
 }
 
 int epos_device_send_message(epos_device_p dev, can_message_p message) {
-  if (!can_send_message(&dev->can_dev, message))
+  if (!can_send_message(dev->can_dev, message))
     return EPOS_DEVICE_ERROR_NONE;
   else
     return EPOS_DEVICE_ERROR_SEND;
 }
 
 int epos_device_receive_message(epos_device_p dev, can_message_p message) {
-  if (!can_receive_message(&dev->can_dev, message)) {
+  if (!can_receive_message(dev->can_dev, message)) {
     if ((message->id >= EPOS_DEVICE_EMERGENCY_ID) &&
       (message->id <= EPOS_DEVICE_EMERGENCY_ID+EPOS_DEVICE_MAX_ID)) {
       short code;

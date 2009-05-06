@@ -45,35 +45,26 @@ epos_parameter_t epos_default_parameters[] = {
   {"control-type", "6"},
 };
 
-int epos_init(epos_node_p node, epos_parameter_t parameters[], ssize_t
-  num_parameters) {
-  ssize_t num_defp = sizeof(epos_default_parameters)/sizeof(epos_parameter_t);
-  ssize_t num_devp = 0;
-  can_parameter_t devp[num_parameters];
+int epos_init(epos_node_p node, can_device_p can_dev, epos_parameter_t
+  parameters[], ssize_t num_parameters) {
+  ssize_t num_default_parameters = sizeof(epos_default_parameters)/
+    sizeof(epos_parameter_t);
   node->parameters = malloc(sizeof(epos_default_parameters));
   memcpy(node->parameters, epos_default_parameters,
     sizeof(epos_default_parameters));
   int i, j;
 
   for (i = 0; i < num_parameters; ++i) {
-    if (!strncmp(parameters[i].name, EPOS_ARG_DEVICE,
-    strlen(EPOS_ARG_DEVICE))) {
-      strcpy(devp[num_devp].name, &parameters[i].name[strlen(EPOS_ARG_DEVICE)]);
-      strcpy(devp[num_devp].value, parameters[i].value);
-      ++num_devp;
-    }
-    else {
-      for (j = 0; j < num_defp; ++j)
-        if (!strcmp(parameters[i].name, node->parameters[j].name)) {
-        strcpy(node->parameters[j].value, parameters[i].value);
-        break;
-      }
+    for (j = 0; j < num_default_parameters; ++j)
+      if (!strcmp(parameters[i].name, node->parameters[j].name)) {
+      strcpy(node->parameters[j].value, parameters[i].value);
+      break;
     }
   }
 
-  if (!epos_device_init(&node->dev,
+  if (!epos_device_init(&node->dev, can_dev,
       atoi(node->parameters[EPOS_PARAMETER_ID].value),
-      atoi(node->parameters[EPOS_PARAMETER_RESET].value), devp, num_devp) &&
+      atoi(node->parameters[EPOS_PARAMETER_RESET].value)) &&
     !epos_sensor_init(&node->dev, &node->sensor,
       atoi(node->parameters[EPOS_PARAMETER_SENSOR_TYPE].value),
       atoi(node->parameters[EPOS_PARAMETER_SENSOR_POLARITY].value),
@@ -96,7 +87,8 @@ int epos_init(epos_node_p node, epos_parameter_t parameters[], ssize_t
 }
 
 int epos_init_arg(epos_node_p node, int argc, char **argv) {
-  ssize_t num_parameters = 0;
+  ssize_t num_can_parameters = 0, num_parameters = 0;
+  can_parameter_t can_parameters[argc-1];
   epos_parameter_t parameters[argc-1];
   int i;
 
@@ -105,26 +97,47 @@ int epos_init_arg(epos_node_p node, int argc, char **argv) {
     char* param = &argv[i][2];
     char* split = strchr(param, '=');
     if (split) {
-      char name[64];
-      char value[64];
-      strncpy(parameters[num_parameters].name, param, split-param);
-      parameters[num_parameters].name[split-param] = 0;
-      strcpy(parameters[num_parameters].value, &split[1]);
-      ++num_parameters;
+      if (!strncmp(param, EPOS_ARG_DEVICE, strlen(EPOS_ARG_DEVICE))) {
+        strncpy(can_parameters[num_can_parameters].name,
+          &param[strlen(EPOS_ARG_DEVICE)], split-param-strlen(EPOS_ARG_DEVICE));
+        can_parameters[num_can_parameters].name[split-param-
+          strlen(EPOS_ARG_DEVICE)] = 0;
+        strcpy(can_parameters[num_can_parameters].value, &split[1]);
+
+        ++num_can_parameters;
+      }
+      else {
+        strncpy(parameters[num_parameters].name, param, split-param);
+        parameters[num_parameters].name[split-param] = 0;
+        strcpy(parameters[num_parameters].value, &split[1]);
+
+        ++num_parameters;
+      }
     }
     else
       return EPOS_ERROR_FORMAT;
   }
 
-  return epos_init(node, parameters, num_parameters);  
+  can_device_p can_dev = can_init(can_parameters, num_can_parameters);
+  if (!epos_init(node, can_dev, parameters, num_parameters))
+    return EPOS_ERROR_NONE;
+  else {
+    can_destroy(can_dev);
+    return EPOS_ERROR_INIT;
+  }
 }
 
 int epos_close(epos_node_p node) {
+  can_device_p can_dev = node->dev.can_dev;
+
   if (!epos_control_close(&node->control) &&
     !epos_gear_close(&node->gear) &&
     !epos_motor_close(&node->motor) &&
     !epos_sensor_close(&node->sensor) &&
     !epos_device_close(&node->dev)) {
+    if (!can_dev->num_references)
+      can_destroy(can_dev);
+
     free(node->parameters);
     node->parameters = 0;
 

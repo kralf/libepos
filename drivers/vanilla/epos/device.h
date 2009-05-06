@@ -93,7 +93,7 @@ extern const char* epos_device_errors[];
 /** \brief Structure defining an EPOS device
   */
 typedef struct epos_device_t {
-  can_device_t can_dev;       //!< The CAN device of the EPOS device.
+  can_device_p can_dev;       //!< The CAN device of the EPOS device.
   int node_id;                //!< The node identifier of the EPOS device.
 
   int can_bitrate;            //!< The CAN bitrate in [kbit/s].
@@ -109,19 +109,16 @@ typedef struct epos_device_t {
 /** \brief Initialize EPOS device communication
   * \note This method also reads basic setup parameters from the EPOS node.
   * \param[in] dev The EPOS device to be initialized.
-  * \param[in] name The name of the EPOS device to be initialized.
+  * \param[in] can_dev The CAN device of the EPOS device.
   * \param[in] node_id The identifier of the EPOS node to be initialized.
   * \param[in] reset Reset the EPOS node upon initialization.
-  * \param[in] parameters An array of CAN parameters.
-  * \param[in] num_parameters The number of CAN parameters.
   * \return The resulting error code.
   */
 int epos_device_init(
   epos_device_p dev,
+  can_device_p can_dev,
   int node_id,
-  int reset,
-  can_parameter_t parameters[],
-  ssize_t num_parameters);
+  int reset);
 
 /** \brief Close EPOS device communication
   * \param[in] dev The initialized EPOS device to be closed.
