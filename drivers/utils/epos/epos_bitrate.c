@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
 
   epos_node_t node;
 
-  if (epos_init_arg(&node, argc, argv))
+  if (epos_init_arg(&node, 0, argc, argv))
     return -1;
   printf("current EPOS bitrate: %d kbit/s\n", node.dev.can_bitrate);
   if (argc > 2) {

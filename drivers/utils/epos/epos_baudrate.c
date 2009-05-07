@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
 
   epos_node_t node;
 
-  if (epos_init_arg(&node, argc, argv))
+  if (epos_init_arg(&node, 0, argc, argv))
     return -1;
   printf("current EPOS baudrate: %d Baud\n", node.dev.rs232_baudrate);
   if (argc > 2) {

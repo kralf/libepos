@@ -62,6 +62,9 @@ int epos_init(epos_node_p node, can_device_p can_dev, epos_parameter_t
     }
   }
 
+  if (!can_dev)
+    can_dev = can_init(0, 0);
+
   if (!epos_device_init(&node->dev, can_dev,
       atoi(node->parameters[EPOS_PARAMETER_ID].value),
       atoi(node->parameters[EPOS_PARAMETER_RESET].value)) &&
@@ -87,7 +90,8 @@ int epos_init(epos_node_p node, can_device_p can_dev, epos_parameter_t
   }
 }
 
-int epos_init_arg(epos_node_p node, int argc, char **argv) {
+int epos_init_arg(epos_node_p node, can_device_p can_dev, int argc,
+  char **argv) {
   ssize_t num_can_parameters = 0, num_parameters = 0;
   can_parameter_t can_parameters[argc-1];
   epos_parameter_t parameters[argc-1];
@@ -119,7 +123,9 @@ int epos_init_arg(epos_node_p node, int argc, char **argv) {
       return EPOS_ERROR_FORMAT;
   }
 
-  can_device_p can_dev = can_init(can_parameters, num_can_parameters);
+  if (!can_dev)
+    can_dev = can_init(can_parameters, num_can_parameters);
+
   if (!epos_init(node, can_dev, parameters, num_parameters))
     return EPOS_ERROR_NONE;
   else {

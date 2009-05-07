@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
   float dec = atof(argv[4])*M_PI/180.0;
   double t;
 
-  if (epos_init_arg(&node, argc, argv))
+  if (epos_init_arg(&node, 0, argc, argv))
     return -1;
   epos_position_profile_init(&profile, pos, vel, acc, dec, epos_sinusoidal);
   profile.relative = 1;

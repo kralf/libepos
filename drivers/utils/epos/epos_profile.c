@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
   float vel = atof(argv[2])*M_PI/180.0;
   float acc = atof(argv[3])*M_PI/180.0;
 
-  if (epos_init_arg(&node, argc, argv))
+  if (epos_init_arg(&node, 0, argc, argv))
     return -1;
   epos_position_profile_init(&profile, pos, vel, acc, acc, epos_linear);
   profile.relative = 1;

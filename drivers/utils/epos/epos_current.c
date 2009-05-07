@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
   }
   float target_value = atof(argv[1]);
 
-  if (epos_init_arg(&node, argc, argv))
+  if (epos_init_arg(&node, 0, argc, argv))
     return -1;
   epos_current_init(&curr, target_value);
   if (!epos_current_start(&node, &curr)) {

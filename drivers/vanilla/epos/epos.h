@@ -78,7 +78,8 @@ typedef struct epos_node_t {
 
 /** \brief Initialize EPOS node
   * \param[in] node The EPOS node to be initialized.
-  * \param[in] can_dev The CAN communication device of the EPOS node.
+  * \param[in] can_dev The CAN communication device of the EPOS node. If
+  *   null, a device will be created from default parameters.
   * \param[in] parameters An array of EPOS parameters.
   * \param[in] num_parameters The number of EPOS parameters.
   * \return The resulting error code.
@@ -90,14 +91,17 @@ int epos_init(
   ssize_t num_parameters);
 
 /** \brief Initialize EPOS node from command line arguments
-  * \note This method also creates a CAN communication device for the node.
   * \param[in] node The EPOS node to be initialized.
+  * \param[in] can_dev The CAN communication device of the EPOS node. If
+  *   null, a device will be created from parameters provided with the
+  *   command line arguments.
   * \param[in] argc The number of supplied command line arguments.
   * \param[in] argv The list of supplied command line arguments.
   * \return The resulting error code.
   */
 int epos_init_arg(
   epos_node_p node,
+  can_device_p can_dev,
   int argc,
   char **argv);
 

@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
   float acc = atof(argv[4])*M_PI/180.0;
   float pos = atof(argv[5])*M_PI/180.0;
 
-  if (epos_init_arg(&node, argc, argv))
+  if (epos_init_arg(&node, 0, argc, argv))
     return -1;
   epos_home_init(&home, method, curr, vel, acc, pos);
   if (!epos_home_start(&node, &home)) {
