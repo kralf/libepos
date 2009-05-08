@@ -1,5 +1,6 @@
-CFLAGS = -I../../vanilla/can -I../../vanilla/epos -I../../../posix/timer
-LDFLAGS = -L ../../vanilla/epos -L ../../../posix/timer -lepos -ltimer
+CFLAGS += -I../../../posix/config -I../../vanilla/can -I../../vanilla/epos \
+	-I../../../posix/timer
+LDFLAGS += -L ../../vanilla/epos -L ../../../posix/timer -lepos -ltimer
 
 PREFIX = /usr/local
 

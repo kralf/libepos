@@ -28,129 +28,91 @@
 
 const char* epos_errors[] = {
   "success",
-  "error initializing EPOS",
+  "error opening EPOS",
   "error closing EPOS",
   "command line format error",
 };
 
-epos_parameter_t epos_default_parameters[] = {
-  {"node-id", "0"},
-  {"node-reset", "1"},
-  {"enc-type", "1"},
-  {"enc-polarity", "0"},
-  {"enc-pulses", "1024"},
-  {"motor-type", "1"},
-  {"motor-current", "2.0"},
-  {"gear-trans", "1.0"},
-  {"control-type", "6"},
+param_t epos_default_params[] = {
+  {EPOS_PARAMETER_ID, "0"},
+  {EPOS_PARAMETER_RESET, "1"},
+  {EPOS_PARAMETER_SENSOR_TYPE, "1"},
+  {EPOS_PARAMETER_SENSOR_POLARITY, "0"},
+  {EPOS_PARAMETER_SENSOR_PULSES, "1024"},
+  {EPOS_PARAMETER_MOTOR_TYPE, "1"},
+  {EPOS_PARAMETER_MOTOR_CURRENT, "2.0"},
+  {EPOS_PARAMETER_GEAR_TRANSMISSION, "1.0"},
+  {EPOS_PARAMETER_CONTROL_TYPE, "6"},
 };
 
-int epos_init(epos_node_p node, can_device_p can_dev, epos_parameter_t
-  parameters[], ssize_t num_parameters) {
-  node->parameters = malloc(sizeof(epos_default_parameters));
-  memcpy(node->parameters, epos_default_parameters,
-    sizeof(epos_default_parameters));
-  node->num_parameters = sizeof(epos_default_parameters)/
-    sizeof(epos_parameter_t);
+config_t epos_default_config = {
+  epos_default_params,
+  sizeof(epos_default_params)/sizeof(param_t),
+};
 
-  int i, j;
-  for (i = 0; i < num_parameters; ++i) {
-    for (j = 0; j < node->num_parameters; ++j)
-      if (!strcmp(parameters[i].name, node->parameters[j].name)) {
-      strcpy(node->parameters[j].value, parameters[i].value);
-      break;
-    }
+void epos_init(epos_node_p node, can_device_p can_dev, config_p config) {
+  config_init_default(&node->config, &epos_default_config);
+  if (config)
+    config_set(&node->config, config);
+
+  if (!can_dev) {
+    can_dev = malloc(sizeof(can_device_t));
+    can_init(can_dev, 0);
   }
 
-  if (!can_dev)
-    can_dev = can_init(0, 0);
-
-  if (!epos_device_init(&node->dev, can_dev,
-      atoi(node->parameters[EPOS_PARAMETER_ID].value),
-      atoi(node->parameters[EPOS_PARAMETER_RESET].value)) &&
-    !epos_sensor_init(&node->dev, &node->sensor,
-      atoi(node->parameters[EPOS_PARAMETER_SENSOR_TYPE].value),
-      atoi(node->parameters[EPOS_PARAMETER_SENSOR_POLARITY].value),
-      atoi(node->parameters[EPOS_PARAMETER_SENSOR_PULSES].value)) &&
-    !epos_motor_init(&node->dev, &node->motor,
-      atoi(node->parameters[EPOS_PARAMETER_MOTOR_TYPE].value),
-      atof(node->parameters[EPOS_PARAMETER_MOTOR_CURRENT].value)) &&
-    !epos_gear_init(&node->sensor, &node->gear,
-      atof(node->parameters[EPOS_PARAMETER_GEAR_TRANSMISSION].value)) &&
-    !epos_control_init(&node->dev, &node->control,
-      atoi(node->parameters[EPOS_PARAMETER_CONTROL_TYPE].value))) {
-    return EPOS_ERROR_NONE;
-  }
-  else {
-    free(node->parameters);
-    node->parameters = 0;
-    node->num_parameters = 0;
-
-    return EPOS_ERROR_INIT;
-  }
+  epos_device_init(&node->dev, can_dev,
+    config_get_int(&node->config, EPOS_PARAMETER_ID),
+    config_get_int(&node->config, EPOS_PARAMETER_RESET));
+  epos_sensor_init(&node->sensor, &node->dev,
+    config_get_int(&node->config, EPOS_PARAMETER_SENSOR_TYPE),
+    config_get_int(&node->config, EPOS_PARAMETER_SENSOR_POLARITY),
+    config_get_int(&node->config, EPOS_PARAMETER_SENSOR_PULSES));
+  epos_motor_init(&node->motor, &node->dev,
+    config_get_int(&node->config, EPOS_PARAMETER_MOTOR_TYPE),
+    config_get_float(&node->config, EPOS_PARAMETER_MOTOR_CURRENT));
+  epos_gear_init(&node->gear, &node->sensor,
+    config_get_float(&node->config, EPOS_PARAMETER_GEAR_TRANSMISSION));
+  epos_control_init(&node->control, &node->dev,
+    config_get_int(&node->config, EPOS_PARAMETER_CONTROL_TYPE));
 }
 
-int epos_init_arg(epos_node_p node, can_device_p can_dev, int argc,
-  char **argv) {
-  ssize_t num_can_parameters = 0, num_parameters = 0;
-  can_parameter_t can_parameters[argc-1];
-  epos_parameter_t parameters[argc-1];
-  int i;
+void epos_init_arg(epos_node_p node, int argc, char **argv) {
+  can_device_p can_dev = malloc(sizeof(can_device_t));
+  can_init_arg(can_dev, argc, argv);
 
-  for (i = 1; i < argc; ++i)
-    if ((argv[i][0] == '-') && (argv[i][1] == '-')) {
-    char* param = &argv[i][2];
-    char* split = strchr(param, '=');
-    if (split) {
-      if (!strncmp(param, EPOS_ARG_DEVICE, strlen(EPOS_ARG_DEVICE))) {
-        strncpy(can_parameters[num_can_parameters].name,
-          &param[strlen(EPOS_ARG_DEVICE)], split-param-strlen(EPOS_ARG_DEVICE));
-        can_parameters[num_can_parameters].name[split-param-
-          strlen(EPOS_ARG_DEVICE)] = 0;
-        strcpy(can_parameters[num_can_parameters].value, &split[1]);
+  config_t config;
+  config_init_arg(&config, argc, argv, EPOS_CONFIG_ARG_PREFIX);
+    
+  epos_init(node, can_dev, &config);
+}
 
-        ++num_can_parameters;
-      }
-      else {
-        strncpy(parameters[num_parameters].name, param, split-param);
-        parameters[num_parameters].name[split-param] = 0;
-        strcpy(parameters[num_parameters].value, &split[1]);
+void epos_destroy(epos_node_p node) {
+  can_device_p can_dev = node->dev.can_dev;
 
-        ++num_parameters;
-      }
-    }
-    else
-      return EPOS_ERROR_FORMAT;
-  }
+  epos_control_destroy(&node->control);
+  epos_gear_destroy(&node->gear);
+  epos_motor_destroy(&node->motor);
+  epos_sensor_destroy(&node->sensor);
+  epos_device_destroy(&node->dev);
 
-  if (!can_dev)
-    can_dev = can_init(can_parameters, num_can_parameters);
-
-  if (!epos_init(node, can_dev, parameters, num_parameters))
-    return EPOS_ERROR_NONE;
-  else {
+  if (!can_dev->num_references)
     can_destroy(can_dev);
-    return EPOS_ERROR_INIT;
-  }
+
+  config_destroy(&node->config);
+}
+
+int epos_open(epos_node_p node) {
+  if (!epos_device_open(&node->dev) &&
+    !epos_sensor_setup(&node->sensor) &&
+    !epos_motor_setup(&node->motor))
+    return EPOS_ERROR_NONE;
+  else
+    return EPOS_ERROR_OPEN;
 }
 
 int epos_close(epos_node_p node) {
-  can_device_p can_dev = node->dev.can_dev;
-
-  if (!epos_control_close(&node->control) &&
-    !epos_gear_close(&node->gear) &&
-    !epos_motor_close(&node->motor) &&
-    !epos_sensor_close(&node->sensor) &&
-    !epos_device_close(&node->dev)) {
-    if (!can_dev->num_references)
-      can_destroy(can_dev);
-
-    free(node->parameters);
-    node->parameters = 0;
-    node->num_parameters = 0;
-
+  if (!epos_device_close(&node->dev))
     return EPOS_ERROR_NONE;
-  }
   else
     return EPOS_ERROR_CLOSE;
 }

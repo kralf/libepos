@@ -33,8 +33,7 @@
 /** \brief Predefined EPOS motor error codes
   */
 #define EPOS_MOTOR_ERROR_NONE                         0
-#define EPOS_MOTOR_ERROR_INIT                         1
-#define EPOS_MOTOR_ERROR_CLOSE                        2
+#define EPOS_MOTOR_ERROR_SETUP                        1
 
 /** \brief Predefined EPOS motor error descriptions
   */
@@ -59,25 +58,30 @@ typedef struct epos_motor_t {
 } epos_motor_t, *epos_motor_p;
 
 /** \brief Initialize EPOS motor
+  * \param[in] motor The EPOS motor to be initialized.
   * \param[in] dev The EPOS device the motor is connected to.
-  * \param[in] sensor The EPOS motor to be initialized.
   * \param[in] type The type of the EPOS motor to be initialized.
   * \param[in] max_current The maximum output current of the EPOS motor to
   *   be initialized in [A]. The continuous current limit will be set
   *   to half of this value.
-  * \return The resulting error code.
   */
-int epos_motor_init(
-  epos_device_p dev,
+void epos_motor_init(
   epos_motor_p motor,
+  epos_device_p dev,
   epos_motor_type_t type,
   float max_current);
 
-/** \brief Close EPOS motor
-  * \param[in] sensor The EPOS motor to be closed.
+/** \brief Destroy EPOS motor
+  * \param[in] motor The EPOS motor to be destroyed.
+  */
+void epos_motor_destroy(
+  epos_motor_p motor);
+
+/** \brief Set EPOS motor parameters
+  * \param[in] motor The EPOS motor to set the parameters for.
   * \return The resulting error code.
   */
-int epos_motor_close(
+int epos_motor_setup(
   epos_motor_p motor);
 
 /** \brief Retrieve EPOS motor type

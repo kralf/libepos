@@ -31,9 +31,12 @@ void epos_signaled(int signal) {
 
 int main(int argc, char **argv) {
   epos_node_t node;
+  epos_init_arg(&node, argc, argv);
+
   signal(SIGINT, epos_signaled);
 
-  epos_init_arg(&node, 0, argc, argv);
+  if (epos_open(&node))
+    return -1;
   while (!quit) {
     fprintf(stdout, "\rEPOS sensor position: %10d steps",
       epos_sensor_get_position(&node.sensor));
@@ -42,5 +45,6 @@ int main(int argc, char **argv) {
   fprintf(stdout, "\n");
   epos_close(&node);
 
+  epos_destroy(&node);
   return 0;
 }

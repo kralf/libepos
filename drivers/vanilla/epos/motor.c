@@ -24,31 +24,31 @@
 
 const char* epos_motor_errors[] = {
   "success",
-  "error initializing EPOS motor",
-  "error closing EPOS motor",
+  "error setting EPOS motor parameters",
 };
 
-int epos_motor_init(epos_device_p dev, epos_motor_p motor, epos_motor_type_t
+void epos_motor_init(epos_motor_p motor, epos_device_p dev, epos_motor_type_t
   type, float max_current) {
   motor->dev = dev;
 
-  if (epos_motor_set_type(motor, type) ||
-    epos_motor_set_max_continuous_current(motor, 0.5*max_current*1e3) ||
-    epos_motor_set_max_output_current(motor, max_current*1e3)) {
-    motor->dev = 0;
-    return EPOS_MOTOR_ERROR_INIT;
-  }
-  else
-    return EPOS_MOTOR_ERROR_NONE;
+  motor->type = type;
+  motor->max_cont_current = 0.5*max_current;
+  motor->max_out_current = max_current;
 }
 
-int epos_motor_close(epos_motor_p motor) {
-  if (motor->dev) {
-    motor->dev = 0;
+void epos_motor_destroy(epos_motor_p motor) {
+  motor->dev = 0;
+}
+
+int epos_motor_setup(epos_motor_p motor) {
+  if (!epos_motor_set_type(motor, motor->type) &&
+    !epos_motor_set_max_continuous_current(motor,
+      motor->max_cont_current*1e3) &&
+    !epos_motor_set_max_output_current(motor, motor->max_out_current*1e3)) {
     return EPOS_MOTOR_ERROR_NONE;
   }
   else
-    return EPOS_MOTOR_ERROR_CLOSE;
+    return EPOS_MOTOR_ERROR_SETUP;
 }
 
 epos_motor_type_t epos_motor_get_type(epos_motor_p motor) {
@@ -85,7 +85,7 @@ int epos_motor_set_max_continuous_current(epos_motor_p motor, short current) {
     sizeof(short));
 
   if (!result)
-    motor->max_cont_current = current;
+    motor->max_cont_current = current*1e-3;
 
   return result;
 }
@@ -105,7 +105,7 @@ int epos_motor_set_max_output_current(epos_motor_p motor, short current) {
     sizeof(short));
 
   if (!result)
-    motor->max_out_current = current;
+    motor->max_out_current = current*1e-3;
 
   return result;
 }

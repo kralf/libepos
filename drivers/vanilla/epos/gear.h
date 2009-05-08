@@ -23,16 +23,6 @@
 
 #include "sensor.h"
 
-/** \brief Predefined EPOS gear error codes
-  */
-#define EPOS_GEAR_ERROR_NONE                    0
-#define EPOS_GEAR_ERROR_INIT                    1
-#define EPOS_GEAR_ERROR_CLOSE                   2
-
-/** \brief Predefined EPOS gear error descriptions
-  */
-extern const char* epos_gear_errors[];
-
 /** \brief Structure defining an EPOS gear assembly
   */
 typedef struct epos_gear_t {
@@ -42,23 +32,21 @@ typedef struct epos_gear_t {
 } epos_gear_t, *epos_gear_p;
 
 /** \brief Initialize an EPOS gear assembly
+  * \param[in] gear The EPOS gear assembly to be initialized.
   * \param[in] sensor The EPOS position sensor the gear assembly is
   *   connected to.
-  * \param[in] gear The EPOS gear assembly to be initialized.
   * \param[in] transmission The transmission factor of the EPOS gear to be
   *   initialized.
-  * \return The resulting error code.
   */
-int epos_gear_init(
-  epos_sensor_p sensor,
+void epos_gear_init(
   epos_gear_p gear,
+  epos_sensor_p sensor,
   float transmission);
 
-/** \brief Close an EPOS gear assembly
-  * \param[in] gear The EPOS gear assembly to be closed.
-  * \return The resulting error code.
+/** \brief Destroy an EPOS gear assembly
+  * \param[in] gear The EPOS gear assembly to be destroyed.
   */
-int epos_gear_close(
+void epos_gear_destroy(
   epos_gear_p gear);
 
 /** \brief Convert EPOS position units to radian space angle

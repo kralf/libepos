@@ -24,12 +24,14 @@
 
 int main(int argc, char **argv) {
   epos_node_t node;
+  epos_init_arg(&node, argc, argv);
 
-  if (epos_init_arg(&node, 0, argc, argv))
+  if (epos_open(&node))
     return -1;
   printf("EPOS hardware version: 0x%04X\n", node.dev.hardware_version);
   printf("EPOS software version: 0x%04X\n", node.dev.software_version);
   epos_close(&node);
 
+  epos_destroy(&node);
   return 0;
 }

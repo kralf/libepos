@@ -25,27 +25,14 @@
 
 #include "gear.h"
 
-const char* epos_gear_errors[] = {
-  "success",
-  "error initializing EPOS gear",
-  "error closing EPOS gear",
-};
-
-int epos_gear_init(epos_sensor_p sensor, epos_gear_p gear, float
+void epos_gear_init(epos_gear_p gear, epos_sensor_p sensor, float
   transmission) {
   gear->sensor = sensor;
   gear->transmission = transmission;
-
-  return EPOS_GEAR_ERROR_NONE;
 }
 
-int epos_gear_close(epos_gear_p gear) {
-  if (gear->sensor) {
-    gear->sensor = 0;
-    return EPOS_GEAR_ERROR_NONE;
-  }
-  else
-    return EPOS_GEAR_ERROR_CLOSE;
+void epos_gear_destroy(epos_gear_p gear) {
+  gear->sensor = 0;
 }
 
 float epos_gear_to_angle(epos_gear_p gear, int position) {

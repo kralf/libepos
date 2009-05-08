@@ -22,31 +22,14 @@
 
 #include "control.h"
 
-const char* epos_control_errors[] = {
-  "success",
-  "error initializing EPOS controller",
-  "error closing EPOS controller",
-};
-
-int epos_control_init(epos_device_p dev, epos_control_p control,
+void epos_control_init(epos_control_p control, epos_device_p dev,
   epos_control_type_t type) {
   control->dev = dev;
-
-  if (epos_control_set_type(control, type)) {
-    control->dev = 0;
-    return EPOS_CONTROL_ERROR_INIT;
-  }
-  else
-    return EPOS_CONTROL_ERROR_NONE;
 }
 
-int epos_control_close(epos_control_p control) {
-  if (control->dev) {
+void epos_control_destroy(epos_control_p control) {
+  if (control->dev)
     control->dev = 0;
-    return EPOS_CONTROL_ERROR_NONE;
-  }
-  else
-    return EPOS_CONTROL_ERROR_CLOSE;
 }
 
 epos_control_type_t epos_control_get_type(epos_control_p control) {
@@ -69,7 +52,7 @@ int epos_control_set_type(epos_control_p control, epos_control_type_t type) {
 
 int epos_control_start(epos_control_p control) {
   return epos_device_set_control(control->dev,
-    EPOS_DEVICE_CONTROL_ENABLE_OPERATION);
+      EPOS_DEVICE_CONTROL_ENABLE_OPERATION);
 }
 
 int epos_control_stop(epos_control_p control) {

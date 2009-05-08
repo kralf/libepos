@@ -73,7 +73,7 @@
 /** \brief Predefined EPOS device error codes
   */
 #define EPOS_DEVICE_ERROR_NONE                  0
-#define EPOS_DEVICE_ERROR_INIT                  1
+#define EPOS_DEVICE_ERROR_OPEN                  1
 #define EPOS_DEVICE_ERROR_CLOSE                 2
 #define EPOS_DEVICE_ERROR_INVALID_SIZE          3
 #define EPOS_DEVICE_ERROR_SEND                  4
@@ -96,6 +96,8 @@ typedef struct epos_device_t {
   can_device_p can_dev;       //!< The CAN device of the EPOS device.
   int node_id;                //!< The node identifier of the EPOS device.
 
+  int reset;                  //!< Reset the EPOS device after opening.
+
   int can_bitrate;            //!< The CAN bitrate in [kbit/s].
   int rs232_baudrate;         //!< The RS-232 baudrate in [Baud].
 
@@ -106,22 +108,34 @@ typedef struct epos_device_t {
   ssize_t num_written;        //!< The number of message written to the EPOS.
 } epos_device_t, *epos_device_p;
 
-/** \brief Initialize EPOS device communication
-  * \note This method also reads basic setup parameters from the EPOS node.
+/** \brief Initialize EPOS device
   * \param[in] dev The EPOS device to be initialized.
   * \param[in] can_dev The CAN device of the EPOS device.
   * \param[in] node_id The identifier of the EPOS node to be initialized.
-  * \param[in] reset Reset the EPOS node upon initialization.
-  * \return The resulting error code.
+  * \param[in] reset Reset the EPOS device after opening.
   */
-int epos_device_init(
+void epos_device_init(
   epos_device_p dev,
   can_device_p can_dev,
   int node_id,
   int reset);
 
+/** \brief Destroy EPOS device
+  * \param[in] dev The EPOS device to be destroyed.
+  */
+void epos_device_destroy(
+  epos_device_p dev);
+
+/** \brief Open EPOS device communication
+  * \note This method also reads basic setup parameters from the EPOS node.
+  * \param[in] dev The initialized EPOS device to be opened.
+  * \return The resulting error code.
+  */
+int epos_device_open(
+  epos_device_p dev);
+
 /** \brief Close EPOS device communication
-  * \param[in] dev The initialized EPOS device to be closed.
+  * \param[in] dev The opened EPOS device to be closed.
   * \return The resulting error code.
   */
 int epos_device_close(

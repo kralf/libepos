@@ -31,14 +31,17 @@ void epos_signaled(int signal) {
 
 int main(int argc, char **argv) {
   epos_node_t node;
+  epos_init_arg(&node, argc, argv);
+
   signal(SIGINT, epos_signaled);
 
-  if (epos_init_arg(&node, 0, argc, argv))
+  if (epos_open(&node))
     return -1;
   epos_control_start(&node.control);
   while (!quit);
   epos_control_stop(&node.control);
   epos_close(&node);
 
+  epos_destroy(&node);
   return 0;
 }

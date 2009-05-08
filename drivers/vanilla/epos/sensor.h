@@ -34,8 +34,7 @@
 /** \brief Predefined EPOS sensor error codes
   */
 #define EPOS_SENSOR_ERROR_NONE                  0
-#define EPOS_SENSOR_ERROR_INIT                  1
-#define EPOS_SENSOR_ERROR_CLOSE                 2
+#define EPOS_SENSOR_ERROR_SETUP                 1
 
 /** \brief Predefined EPOS sensor error descriptions
   */
@@ -67,25 +66,30 @@ typedef struct epos_sensor_t {
 } epos_sensor_t, *epos_sensor_p;
 
 /** \brief Initialize EPOS position sensor
-  * \param[in] dev The EPOS device the position sensor is connected to.
   * \param[in] sensor The EPOS position sensor to be initialized.
+  * \param[in] dev The EPOS device the position sensor is connected to.
   * \param[in] type The type of the EPOS position sensor to be initialized.
   * \param[in] polarity The polarity of the position sensor.
   * \param[in] num_pulses The sensor's number of pulses per revolution.
-  * \return The resulting error code.
   */
-int epos_sensor_init(
-  epos_device_p dev,
+void epos_sensor_init(
   epos_sensor_p sensor,
+  epos_device_p dev,
   epos_sensor_type_t type,
   epos_sensor_polarity_t polarity,
   short num_pulses);
 
-/** \brief Close EPOS position sensor
-  * \param[in] sensor The EPOS position sensor to be closed.
+/** \brief Destroy EPOS position sensor
+  * \param[in] sensor The EPOS position sensor to be destroyed.
+  */
+void epos_sensor_destroy(
+  epos_sensor_p sensor);
+
+/** \brief Set EPOS sensor parameters
+  * \param[in] sensor The EPOS sensor to set the parameters for.
   * \return The resulting error code.
   */
-int epos_sensor_close(
+int epos_sensor_setup(
   epos_sensor_p sensor);
 
 /** \brief Retrieve EPOS position sensor type

@@ -29,8 +29,9 @@ int main(int argc, char **argv) {
   }
 
   epos_node_t node;
+  epos_init_arg(&node, argc, argv);
 
-  if (epos_init_arg(&node, 0, argc, argv))
+  if (epos_open(&node))
     return -1;
   printf("current EPOS baudrate: %d Baud\n", node.dev.rs232_baudrate);
   if (argc > 2) {
@@ -49,5 +50,6 @@ int main(int argc, char **argv) {
   }
   epos_close(&node);
 
+  epos_destroy(&node);
   return 0;
 }

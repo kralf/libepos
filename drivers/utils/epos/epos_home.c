@@ -32,10 +32,6 @@ void epos_signaled(int signal) {
 }
 
 int main(int argc, char **argv) {
-  epos_node_t node;
-  epos_home_t home;
-  signal(SIGINT, epos_signaled);
-
   if (argc < 6) {
     fprintf(stderr, "usage: %s METHOD CURR VEL ACC POS [PARAMS]\n", argv[0]);
     return -1;
@@ -46,7 +42,13 @@ int main(int argc, char **argv) {
   float acc = atof(argv[4])*M_PI/180.0;
   float pos = atof(argv[5])*M_PI/180.0;
 
-  if (epos_init_arg(&node, 0, argc, argv))
+  epos_node_t node;
+  epos_home_t home;
+  epos_init_arg(&node, argc, argv);
+
+  signal(SIGINT, epos_signaled);
+
+  if (epos_open(&node))
     return -1;
   epos_home_init(&home, method, curr, vel, acc, pos);
   if (!epos_home_start(&node, &home)) {
@@ -55,5 +57,6 @@ int main(int argc, char **argv) {
   }
   epos_close(&node);
 
+  epos_destroy(&node);
   return 0;
 }

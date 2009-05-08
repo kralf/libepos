@@ -33,10 +33,6 @@ void epos_signaled(int signal) {
 }
 
 int main(int argc, char **argv) {
-  epos_node_t node;
-  epos_position_profile_t profile;
-  signal(SIGINT, epos_signaled);
-
   if (argc < 5) {
     fprintf(stderr, "usage: %s POS VEL ACC DEC\n", argv[0]);
     return -1;
@@ -47,7 +43,13 @@ int main(int argc, char **argv) {
   float dec = atof(argv[4])*M_PI/180.0;
   double t;
 
-  if (epos_init_arg(&node, 0, argc, argv))
+  epos_node_t node;
+  epos_position_profile_t profile;
+  epos_init_arg(&node, argc, argv);
+
+  signal(SIGINT, epos_signaled);
+
+  if (epos_open(&node))
     return -1;
   epos_position_profile_init(&profile, pos, vel, acc, dec, epos_sinusoidal);
   profile.relative = 1;
@@ -64,5 +66,6 @@ int main(int argc, char **argv) {
   }
   epos_close(&node);
 
+  epos_destroy(&node);
   return 0;
 }

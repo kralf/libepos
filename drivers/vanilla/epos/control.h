@@ -28,16 +28,6 @@
 #define EPOS_CONTROL_INDEX_MODE              0x6060
 #define EPOS_CONTROL_INDEX_MODE_DISPLAY      0x6061
 
-/** \brief Predefined EPOS control error codes
-  */
-#define EPOS_CONTROL_ERROR_NONE              0
-#define EPOS_CONTROL_ERROR_INIT              1
-#define EPOS_CONTROL_ERROR_CLOSE             2
-
-/** \brief Predefined EPOS control error descriptions
-  */
-extern const char* epos_control_errors[];
-
 /** \brief EPOS controller types
   */
 typedef enum {
@@ -61,21 +51,19 @@ typedef struct epos_control_t {
 } epos_control_t, *epos_control_p;
 
 /** \brief Initialize EPOS controller
-  * \param[in] dev The controller's EPOS device.
   * \param[in] control The EPOS controller to be initialized.
+  * \param[in] dev The controller's EPOS device.
   * \param[in] type The type of the EPOS controller to be initialized.
-  * \return The resulting error code.
   */
-int epos_control_init(
-  epos_device_p dev,
+void epos_control_init(
   epos_control_p control,
+  epos_device_p dev,
   epos_control_type_t type);
 
-/** \brief Close EPOS controller
-  * \param[in] sensor The EPOS controller to be closed.
-  * \return The resulting error code.
+/** \brief Destroy EPOS controller
+  * \param[in] sensor The EPOS controller to be destroyed.
   */
-int epos_control_close(
+void epos_control_destroy(
   epos_control_p control);
 
 /** \brief Retrieve EPOS controller type

@@ -32,17 +32,19 @@ void epos_signaled(int signal) {
 }
 
 int main(int argc, char **argv) {
-  epos_node_t node;
-  epos_current_t curr;
-  signal(SIGINT, epos_signaled);
-
   if (argc < 2) {
     fprintf(stderr, "usage: %s CURR [PARAMS]\n", argv[0]);
     return -1;
   }
   float target_value = atof(argv[1]);
 
-  if (epos_init_arg(&node, 0, argc, argv))
+  epos_node_t node;
+  epos_current_t curr;
+  epos_init_arg(&node, argc, argv);
+
+  signal(SIGINT, epos_signaled);
+
+  if (epos_open(&node))
     return -1;
   epos_current_init(&curr, target_value);
   if (!epos_current_start(&node, &curr)) {
@@ -56,5 +58,6 @@ int main(int argc, char **argv) {
   }
   epos_close(&node);
 
+  epos_destroy(&node);
   return 0;
 }

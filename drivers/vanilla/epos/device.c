@@ -27,7 +27,7 @@
 
 const char* epos_device_errors[] = {
   "success",
-  "error initializing EPOS device",
+  "error opening EPOS device",
   "error closing EPOS device",
   "invalid EPOS object size",
   "error sending to EPOS device",
@@ -60,15 +60,24 @@ int epos_device_rs232_baudrates[] = {
   115200,
 };
 
-int epos_device_init(epos_device_p dev, can_device_p can_dev, int node_id,
+void epos_device_init(epos_device_p dev, can_device_p can_dev, int node_id,
   int reset) {
-  if (!can_open(can_dev)) {
-    dev->can_dev = can_dev;
-    dev->node_id = node_id;
+  dev->can_dev = can_dev;
+  dev->node_id = node_id;
 
-    dev->num_read = 0;
-    dev->num_written = 0;
+  dev->reset = reset;
 
+  dev->num_read = 0;
+  dev->num_written = 0;
+}
+
+void epos_device_destroy(epos_device_p dev) {
+  dev->can_dev = 0;
+  dev->node_id = EPOS_DEVICE_INVALID_ID;
+}
+
+int epos_device_open(epos_device_p dev) {
+  if (!can_open(dev->can_dev)) {
     dev->node_id = epos_device_get_id(dev);
 
     dev->can_bitrate = epos_device_get_can_bitrate(dev);
@@ -77,28 +86,20 @@ int epos_device_init(epos_device_p dev, can_device_p can_dev, int node_id,
     dev->hardware_version = epos_device_get_hardware_version(dev);
     dev->software_version = epos_device_get_software_version(dev);
 
-    if (reset)
+    if (dev->reset)
       return epos_device_reset(dev);
     else
       return EPOS_DEVICE_ERROR_NONE;
   }
   else {
-    fprintf(stderr, "Node %d connection error\n", node_id);
-
-    dev->can_dev = 0;
-    dev->node_id = EPOS_DEVICE_INVALID_ID;
-
-    return EPOS_DEVICE_ERROR_INIT;
+    fprintf(stderr, "Node %d connection error\n", dev->node_id);
+    return EPOS_DEVICE_ERROR_OPEN;
   }
 }
 
 int epos_device_close(epos_device_p dev) {
-  if (!can_close(dev->can_dev)) {
-    dev->can_dev = 0;
-    dev->node_id = EPOS_DEVICE_INVALID_ID;
-
+  if (!can_close(dev->can_dev))
     return EPOS_DEVICE_ERROR_NONE;
-  }
   else
     return EPOS_DEVICE_ERROR_CLOSE;
 }

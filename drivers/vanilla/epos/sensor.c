@@ -24,31 +24,29 @@
 
 const char* epos_sensor_errors[] = {
   "success",
-  "error initializing EPOS sensor",
-  "error closing EPOS sensor",
+  "error setting EPOS sensor parameters",
 };
 
-int epos_sensor_init(epos_device_p dev, epos_sensor_p sensor,
+void epos_sensor_init(epos_sensor_p sensor, epos_device_p dev,
   epos_sensor_type_t type, epos_sensor_polarity_t polarity, short num_pulses) {
   sensor->dev = dev;
 
-  if (epos_sensor_set_type(sensor, type) ||
-    epos_sensor_set_polarity(sensor, polarity) ||
-    epos_sensor_set_pulses(sensor, num_pulses)) {
-    sensor->dev = 0;
-    return EPOS_SENSOR_ERROR_INIT;
-  }
-  else
-    return EPOS_SENSOR_ERROR_NONE;
+  sensor->type = type;
+  sensor->polarity = polarity;
+  sensor->num_pulses = num_pulses;
 }
 
-int epos_sensor_close(epos_sensor_p sensor) {
-  if (sensor->dev) {
-    sensor->dev = 0;
+void epos_sensor_destroy(epos_sensor_p sensor) {
+  sensor->dev = 0;
+}
+
+int epos_sensor_setup(epos_sensor_p sensor) {
+  if (!epos_sensor_set_type(sensor, sensor->type) &&
+    !epos_sensor_set_polarity(sensor, sensor->polarity) &&
+    !epos_sensor_set_pulses(sensor, sensor->num_pulses))
     return EPOS_SENSOR_ERROR_NONE;
-  }
   else
-    return EPOS_SENSOR_ERROR_CLOSE;
+    return EPOS_SENSOR_ERROR_SETUP;
 }
 
 epos_sensor_type_t epos_sensor_get_type(epos_sensor_p sensor) {

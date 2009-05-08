@@ -32,17 +32,19 @@ void epos_signaled(int signal) {
 }
 
 int main(int argc, char **argv) {
-  epos_node_t node;
-  epos_velocity_t vel;
-  signal(SIGINT, epos_signaled);
-
   if (argc < 2) {
     fprintf(stderr, "usage: %s VEL [PARAMS]\n", argv[0]);
     return -1;
   }
   float target_value = atof(argv[1])*M_PI/180.0;
 
-  if (epos_init_arg(&node, 0, argc, argv))
+  epos_node_t node;
+  epos_velocity_t vel;
+  epos_init_arg(&node, argc, argv);
+
+  signal(SIGINT, epos_signaled);
+
+  if (epos_open(&node))
     return -1;
   epos_velocity_init(&vel, target_value*M_PI/180.0);
   if (!epos_velocity_start(&node, &vel)) {
@@ -56,5 +58,6 @@ int main(int argc, char **argv) {
   }
   epos_close(&node);
 
+  epos_destroy(&node);
   return 0;
 }

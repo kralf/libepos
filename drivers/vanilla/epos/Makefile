@@ -1,5 +1,5 @@
-CFLAGS += -I../can -I../../../posix/timer -fPIC
-LDFLAGS += -L../can -L../../../posix/timer -lm -lcan -ltimer
+CFLAGS += -I../can -I../../../posix/config -I../../../posix/timer -fPIC
+LDFLAGS += -L../can -lcan -L../../../posix/timer -ltimer -lm
 
 PREFIX = /usr/local
 OBJECTS = error.o device.o sensor.o motor.o gear.o control.o home.o \

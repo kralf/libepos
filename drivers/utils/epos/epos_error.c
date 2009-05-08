@@ -27,8 +27,9 @@
 int main(int argc, char **argv) {
   int i;
   epos_node_t node;
+  epos_init_arg(&node, argc, argv);
 
-  if (epos_init_arg(&node, 0, argc, argv))
+  if (epos_open(&node))
     return -1;
   int num_errors = epos_error_get_history_length(&node.dev);
   fprintf(stdout, "EPOS error history has length %d\n", num_errors);
@@ -42,5 +43,6 @@ int main(int argc, char **argv) {
   }
   epos_close(&node);
 
+  epos_destroy(&node);
   return 0;
 }
