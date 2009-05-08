@@ -84,6 +84,8 @@ void epos_init_arg(epos_node_p node, int argc, char **argv) {
   config_init_arg(&config, argc, argv, EPOS_CONFIG_ARG_PREFIX);
     
   epos_init(node, can_dev, &config);
+
+  config_destroy(&config);
 }
 
 void epos_destroy(epos_node_p node) {
