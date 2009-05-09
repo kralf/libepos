@@ -46,7 +46,6 @@
 #define EPOS_ERROR_NONE                     0
 #define EPOS_ERROR_OPEN                     1
 #define EPOS_ERROR_CLOSE                    2
-#define EPOS_ERROR_FORMAT                   3
 
 /** \brief Predefined EPOS error descriptions
   */

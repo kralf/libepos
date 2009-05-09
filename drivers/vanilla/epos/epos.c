@@ -30,7 +30,6 @@ const char* epos_errors[] = {
   "success",
   "error opening EPOS",
   "error closing EPOS",
-  "command line format error",
 };
 
 param_t epos_default_params[] = {
