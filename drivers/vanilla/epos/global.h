@@ -21,10 +21,15 @@
 #ifndef EPOS_GLOBAL_H
 #define EPOS_GLOBAL_H
 
+#include <math.h>
+
 #define abs(a) (((a) < (0)) ? -(a) : (a))
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #define clip(a, b, c) max(min(a, c), b)
 #define sqr(a) ((a)*(a))
+
+#define rad_to_deg(a) ((a)*180.0/M_PI)
+#define deg_to_rad(a) ((a)*M_PI/180.0)
 
 #endif

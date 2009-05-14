@@ -43,7 +43,8 @@ int epos_velocity_profile_start(epos_node_p node, epos_velocity_profile_p
   unsigned int dec = abs(epos_gear_from_angular_acceleration(&node->gear,
     profile->deceleration));
 
-  if (!(result = epos_control_set_type(&node->control, epos_profile_vel)) &&
+  if (!(result = epos_control_set_type(&node->control, 
+      epos_control_profile_vel)) &&
     !(result = epos_profile_set_acceleration(&node->dev, acc)) &&
     !(result = epos_profile_set_deceleration(&node->dev, dec)) &&
     !(result = epos_profile_set_type(&node->dev, profile->type)) &&

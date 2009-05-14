@@ -55,7 +55,8 @@ int epos_position_profile_start(epos_node_p node, epos_position_profile_p
     EPOS_POSITION_PROFILE_CONTROL_SET_ABSOLUTE;
   double t_min, t_max;
 
-  if (!(result = epos_control_set_type(&node->control, epos_profile_pos)) &&
+  if (!(result = epos_control_set_type(&node->control, 
+      epos_control_profile_pos)) &&
     !(result = epos_position_profile_set_velocity(&node->dev, vel)) &&
     !(result = epos_profile_set_acceleration(&node->dev, acc)) &&
     !(result = epos_profile_set_deceleration(&node->dev, dec)) &&

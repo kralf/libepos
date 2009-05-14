@@ -26,6 +26,7 @@
 void epos_home_init(epos_home_p home, epos_home_method_t method, float current,
   float velocity, float acceleration, float position) {
   home->method = method;
+  home->type = epos_sinusoidal;
 
   home->current = current;
   home->switch_vel = velocity;
@@ -34,8 +35,6 @@ void epos_home_init(epos_home_p home, epos_home_method_t method, float current,
 
   home->offset = 0.0;
   home->position = position;
-
-  home->type = epos_sinusoidal;
 }
 
 int epos_home_start(epos_node_p node, epos_home_p home) {
@@ -49,7 +48,7 @@ int epos_home_start(epos_node_p node, epos_home_p home) {
   int offset = epos_gear_from_angle(&node->gear, home->offset);
   int pos = epos_gear_from_angle(&node->gear, home->position);
 
-  if (!(result = epos_control_set_type(&node->control, epos_homing)) &&
+  if (!(result = epos_control_set_type(&node->control, epos_control_homing)) &&
     !(result = epos_home_set_method(&node->dev, home->method)) &&
     !(result = epos_home_set_current_threshold(&node->dev,
       home->current*1e3)) &&

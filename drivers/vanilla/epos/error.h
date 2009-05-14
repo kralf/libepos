@@ -39,7 +39,7 @@ typedef struct epos_error_comm_t {
 /** \brief Structure defining an EPOS device error
   */
 typedef struct epos_error_device_t {
-  int code;             //!< The code of the EPOS device error.
+  short code;           //!< The code of the EPOS device error.
   unsigned char reg;    //!< The register value of the EPOS device error.
   const char* message;  //!< A descriptive message of the EPOS device error.
 } epos_error_device_t, *epos_error_device_p;
@@ -68,7 +68,7 @@ const char* epos_error_comm(
   *   specified error code.
   */
 const char* epos_error_device(
-  int code);
+  short code);
 
 /** \brief Retrieve length of the EPOS device error history
   * \param[in] dev The EPOS device to retrieve the error history length for.

@@ -300,6 +300,13 @@ int epos_device_set_control(
 unsigned char epos_device_get_error(
   epos_device_p dev);
 
+/** \brief Shutdown EPOS device
+  * \param[in] dev The EPOS device to be shut down.
+  * \return The resulting error code.
+  */
+int epos_device_shutdown(
+  epos_device_p dev);
+
 /** \brief Reset EPOS device in fault state
   * \param[in] dev The EPOS device to be reset.
   * \return The resulting error code.

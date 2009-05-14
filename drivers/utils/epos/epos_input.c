@@ -28,8 +28,12 @@ int main(int argc, char **argv) {
 
   if (epos_open(&node))
     return -1;
-  printf("EPOS hardware version: 0x%04X\n", node.dev.hardware_version);
-  printf("EPOS software version: 0x%04X\n", node.dev.software_version);
+  int i;
+  printf("%4s  %4s  %4s  %4s  %4s\n", "type", "chan", "pol", "exec", "mask");
+  for (i = 0; i < sizeof(node.input.funcs)/sizeof(epos_input_func_t); ++i)
+    printf("%4d  %4d  %4d  %4d  %4d\n", i, node.input.funcs[i].channel,
+    node.input.funcs[i].polarity, node.input.funcs[i].execute,
+    node.input.funcs[i].enabled);
   epos_close(&node);
 
   epos_destroy(&node);

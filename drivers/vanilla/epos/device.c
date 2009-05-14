@@ -78,6 +78,9 @@ void epos_device_destroy(epos_device_p dev) {
 
 int epos_device_open(epos_device_p dev) {
   if (!can_open(dev->can_dev)) {
+    if (dev->reset && epos_device_reset(dev))
+      return EPOS_DEVICE_ERROR_OPEN;
+
     dev->node_id = epos_device_get_id(dev);
 
     dev->can_bitrate = epos_device_get_can_bitrate(dev);
@@ -86,10 +89,7 @@ int epos_device_open(epos_device_p dev) {
     dev->hardware_version = epos_device_get_hardware_version(dev);
     dev->software_version = epos_device_get_software_version(dev);
 
-    if (dev->reset)
-      return epos_device_reset(dev);
-    else
-      return EPOS_DEVICE_ERROR_NONE;
+    return EPOS_DEVICE_ERROR_NONE;
   }
   else {
     fprintf(stderr, "Node %d connection error\n", dev->node_id);
@@ -98,7 +98,7 @@ int epos_device_open(epos_device_p dev) {
 }
 
 int epos_device_close(epos_device_p dev) {
-  if (!can_close(dev->can_dev))
+  if (!epos_device_shutdown(dev) && !can_close(dev->can_dev))
     return EPOS_DEVICE_ERROR_NONE;
   else
     return EPOS_DEVICE_ERROR_CLOSE;
@@ -118,18 +118,22 @@ int epos_device_receive_message(epos_device_p dev, can_message_p message) {
       short code;
 
       memcpy(&code, &message->content[0], sizeof(code));
-      fprintf(stderr, "Node %d device error: %s\n",
-        message->id-EPOS_DEVICE_EMERGENCY_ID,
-        epos_error_device(code));
+      if (code != EPOS_DEVICE_ERROR_NONE) {
+        fprintf(stderr, "Node %d device error: [0x%hX] %s\n",
+          message->id-EPOS_DEVICE_EMERGENCY_ID, code,
+          epos_error_device(code));
 
-      return EPOS_DEVICE_ERROR_INTERNAL;
+        return EPOS_DEVICE_ERROR_INTERNAL;
+      }
+      else
+        return EPOS_DEVICE_ERROR_NONE;
     }
     else if (message->content[0] == EPOS_DEVICE_ABORT) {
       int code;
 
       memcpy(&code, &message->content[4], sizeof(code));
-      fprintf(stderr, "Node %d communication error: %s\n",
-        message->id-EPOS_DEVICE_RECEIVE_ID,
+      fprintf(stderr, "Node %d communication error: [0x%X] %s\n",
+        message->id-EPOS_DEVICE_RECEIVE_ID, code,
         epos_error_comm(code));
 
       return EPOS_DEVICE_ERROR_ABORT;
@@ -308,11 +312,10 @@ unsigned char epos_device_get_error(epos_device_p dev) {
   return error;
 }
 
+int epos_device_shutdown(epos_device_p dev) {
+  return epos_device_set_control(dev, EPOS_DEVICE_CONTROL_SHUTDOWN);
+}
+
 int epos_device_reset(epos_device_p dev) {
-  int result = epos_device_set_control(dev, EPOS_DEVICE_CONTROL_FAULT_RESET);
-
-  if (!result)
-    result = epos_device_set_control(dev, EPOS_DEVICE_CONTROL_SHUTDOWN);
-
-  return result;
+  return epos_device_set_control(dev, EPOS_DEVICE_CONTROL_FAULT_RESET);
 }

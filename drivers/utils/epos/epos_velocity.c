@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
 
   epos_node_t node;
   epos_velocity_t vel;
-  epos_init_arg(&node, argc, argv);
+  epos_init_arg(&node, argc, argv, 0);
 
   signal(SIGINT, epos_signaled);
 

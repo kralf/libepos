@@ -31,15 +31,15 @@
 /** \brief EPOS controller types
   */
 typedef enum {
-  epos_homing = 6,
-  epos_profile_vel = 3,
-  epos_profile_pos = 1,
-  epos_position = -1,
-  epos_velocity = -2,
-  epos_current = -3,
-  epos_diagnostic = -4,
-  epos_master_enc = -5,
-  epos_step_dir = -6
+  epos_control_homing = 6,
+  epos_control_profile_vel = 3,
+  epos_control_profile_pos = 1,
+  epos_control_position = -1,
+  epos_control_velocity = -2,
+  epos_control_current = -3,
+  epos_control_diagnostic = -4,
+  epos_control_master_enc = -5,
+  epos_control_step_dir = -6
 } epos_control_type_t;
 
 /** \brief Structure defining an EPOS controller

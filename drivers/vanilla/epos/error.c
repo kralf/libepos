@@ -102,7 +102,7 @@ const char* epos_error_comm(int code) {
   return epos_error_comm_undefined_message;
 }
 
-const char* epos_error_device(int code) {
+const char* epos_error_device(short code) {
   int i;
 
   for (i = 0; i < sizeof(epos_errors_device)/ sizeof(epos_error_device_t); ++i)

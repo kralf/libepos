@@ -42,20 +42,21 @@
 /** \brief EPOS homing methods
   */
 typedef enum {
-  epos_neg_switch_index = 1,
-  epos_pos_switch_index = 2,
-  epos_neg_switch = 17,
-  epos_pos_switch = 18,
-  epos_pos_current_index = -1,
-  epos_neg_current_index = -2,
-  epos_pos_current = -3,
-  epos_neg_current = -4
+  epos_home_neg_switch_index = 1,
+  epos_home_pos_switch_index = 2,
+  epos_home_neg_switch = 17,
+  epos_home_pos_switch = 18,
+  epos_home_pos_current_index = -1,
+  epos_home_neg_current_index = -2,
+  epos_home_pos_current = -3,
+  epos_home_neg_current = -4
 } epos_home_method_t;
 
 /** \brief Structure defining an EPOS homing operation
   */
 typedef struct epos_home_t {
   epos_home_method_t method;   //!< The EPOS homing method.
+  epos_profile_type_t type;    //!< The homing profile type.
 
   float current;               //!< The homing current threshold in [A].
   float switch_vel;            //!< The switch search velocity in [rad/s].
@@ -64,8 +65,6 @@ typedef struct epos_home_t {
 
   float offset;                //!< The home offset from the switch in [rad].
   float position;              //!< The home position in [rad].
-
-  epos_profile_type_t type;    //!< The homing profile type.
 } epos_home_t, *epos_home_p;
 
 /** \brief Initialize EPOS homing operation

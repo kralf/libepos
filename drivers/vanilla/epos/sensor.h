@@ -43,16 +43,16 @@ extern const char* epos_sensor_errors[];
 /** \brief EPOS position sensor types
   */
 typedef enum {
-  epos_enc_3chan = 1,
-  epos_enc_2chan = 2,
-  epos_hall = 3
+  epos_sensor_3chan = 1,
+  epos_sensor_2chan = 2,
+  epos_sensor_hall = 3
 } epos_sensor_type_t;
 
 /** \brief EPOS position sensor polarity
   */
 typedef enum {
-  epos_normal = 0x00,
-  epos_inverted = 0x03
+  epos_sensor_normal = 0x00,
+  epos_sensor_inverted = 0x03
 } epos_sensor_polarity_t;
 
 /** \brief Structure defining an EPOS position sensor

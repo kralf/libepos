@@ -25,27 +25,37 @@
 #include "sensor.h"
 #include "motor.h"
 #include "gear.h"
+#include "input.h"
 #include "control.h"
 
 /** \brief Predefined EPOS constants
   */
-#define EPOS_CONFIG_ARG_PREFIX              "--epos-"
+#define EPOS_CONFIG_ARG_PREFIX                "--epos-"
 
-#define EPOS_PARAMETER_ID                   "node-id"
-#define EPOS_PARAMETER_RESET                "node-reset"
-#define EPOS_PARAMETER_SENSOR_TYPE          "enc-type"
-#define EPOS_PARAMETER_SENSOR_POLARITY      "enc-polarity"
-#define EPOS_PARAMETER_SENSOR_PULSES        "enc-pulses"
-#define EPOS_PARAMETER_MOTOR_TYPE           "motor-type"
-#define EPOS_PARAMETER_MOTOR_CURRENT        "motor-current"
-#define EPOS_PARAMETER_GEAR_TRANSMISSION    "gear-trans"
-#define EPOS_PARAMETER_CONTROL_TYPE         "control-type"
+#define EPOS_PARAMETER_ID                     "node-id"
+#define EPOS_PARAMETER_RESET                  "node-reset"
+#define EPOS_PARAMETER_SENSOR_TYPE            "enc-type"
+#define EPOS_PARAMETER_SENSOR_POLARITY        "enc-polarity"
+#define EPOS_PARAMETER_SENSOR_PULSES          "enc-pulses"
+#define EPOS_PARAMETER_MOTOR_TYPE             "motor-type"
+#define EPOS_PARAMETER_MOTOR_CURRENT          "motor-current"
+#define EPOS_PARAMETER_GEAR_TRANSMISSION      "gear-trans"
+#define EPOS_PARAMETER_CONTROL_TYPE           "control-type"
+
+#define EPOS_PARAMETER_HOME_METHOD            "home-method"
+#define EPOS_PARAMETER_HOME_TYPE              "home-type"
+#define EPOS_PARAMETER_HOME_CURRENT           "home-current"
+#define EPOS_PARAMETER_HOME_VELOCITY          "home-vel"
+#define EPOS_PARAMETER_HOME_ACCELERATION      "home-accel"
+#define EPOS_PARAMETER_HOME_OFFSET            "home-offset"
+#define EPOS_PARAMETER_HOME_POSITION          "home-pos"
 
 /** \brief Predefined EPOS error codes
   */
-#define EPOS_ERROR_NONE                     0
-#define EPOS_ERROR_OPEN                     1
-#define EPOS_ERROR_CLOSE                    2
+#define EPOS_ERROR_NONE                       0
+#define EPOS_ERROR_OPEN                       1
+#define EPOS_ERROR_CLOSE                      2
+#define EPOS_ERROR_HOME                       3
 
 /** \brief Predefined EPOS error descriptions
   */
@@ -62,6 +72,7 @@ typedef struct epos_node_t {
   epos_sensor_t sensor;           //!< The EPOS position sensor.
   epos_motor_t motor;             //!< The EPOS motor.
   epos_gear_t gear;               //!< The EPOS gear assembly.
+  epos_input_t input;             //!< The EPOS input module.
   epos_control_t control;         //!< The EPOS controller.
 
   config_t config;                //!< The EPOS configuration parameters.
@@ -82,11 +93,13 @@ void epos_init(
   * \param[in] node The EPOS node to be initialized.
   * \param[in] argc The number of supplied command line arguments.
   * \param[in] argv The list of supplied command line arguments.
+  * \param[in] prefix An optional argument prefix.
   */
 void epos_init_arg(
   epos_node_p node,
   int argc,
-  char **argv);
+  char **argv,
+  const char* prefix);
 
 /** \brief Destroy EPOS node
   * \note This method automatically destroys unused CAN communication devices.
@@ -110,24 +123,33 @@ int epos_close(
   epos_node_p node);
 
 /** \brief Retrieve the angular position of an EPOS node
-  * \param[in] node The EPOS node to retrieve the angular position for.
+  * \param[in] node The opened EPOS node to retrieve the angular position for.
   * \return The angular position of the specified EPOS node in [rad].
   */
 float epos_get_position(
   epos_node_p node);
 
 /** \brief Retrieve the angular velocity of an EPOS node
-  * \param[in] node The EPOS node to retrieve the angular velocity for.
+  * \param[in] node The opened EPOS node to retrieve the angular velocity for.
   * \return The angular velocity of the specified EPOS node in [rad/s].
   */
 float epos_get_velocity(
   epos_node_p node);
 
 /** \brief Retrieve the current of an EPOS node
-  * \param[in] node The EPOS node to retrieve the current for.
+  * \param[in] node The opened EPOS node to retrieve the current for.
   * \return The current of the specified EPOS node in [A].
   */
 float epos_get_current(
   epos_node_p node);
+
+/** \brief Home an EPOS node from configuration settings
+  * \param[in] node The opened EPOS node to be homed.
+  * \param[in] timeout The timeout of the wait operation in [s].
+  * \return The resulting error code.
+  */
+int epos_home(
+  epos_node_p node,
+  double timeout);
 
 #endif
