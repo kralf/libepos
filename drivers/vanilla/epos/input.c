@@ -191,6 +191,17 @@ int epos_input_set_func(epos_input_p input, epos_input_func_type_t type,
     return result;
 }
 
+int epos_input_get_func_state(epos_input_p input, epos_input_func_type_t 
+  type) {
+  short mask = 0x0001 << type;
+  short state = 0;
+
+  epos_device_read(input->dev, EPOS_INPUT_INDEX_FUNCS, 
+    EPOS_INPUT_SUBINDEX_STATE, (unsigned char*)&state, sizeof(short));
+
+  return ((state & mask) != 0);
+}
+
 int epos_input_get_func_channel(epos_input_p input, epos_input_func_type_t 
   type) {
   int i;

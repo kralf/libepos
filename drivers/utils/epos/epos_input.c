@@ -29,11 +29,12 @@ int main(int argc, char **argv) {
   if (epos_open(&node))
     return -1;
   int i;
-  printf("%4s  %4s  %4s  %4s  %4s\n", "type", "chan", "pol", "exec", "mask");
+  printf("%5s  %5s  %5s  %5s  %5s  %5s\n", "type", "chan", "pol", "exec", 
+    "mask", "state");
   for (i = 0; i < sizeof(node.input.funcs)/sizeof(epos_input_func_t); ++i)
-    printf("%4d  %4d  %4d  %4d  %4d\n", i, node.input.funcs[i].channel,
+    printf("%5d  %5d  %5d  %5d  %5d  %5d\n", i, node.input.funcs[i].channel,
     node.input.funcs[i].polarity, node.input.funcs[i].execute,
-    node.input.funcs[i].enabled);
+    node.input.funcs[i].enabled, epos_input_get_func_state(&node.input, i));
   epos_close(&node);
 
   epos_destroy(&node);

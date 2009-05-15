@@ -30,6 +30,7 @@
 
 #define EPOS_INPUT_INDEX_CONFIG             0x2070
 #define EPOS_INPUT_INDEX_FUNCS              0x2071
+#define EPOS_INPUT_SUBINDEX_STATE           0x01
 #define EPOS_INPUT_SUBINDEX_MASK            0x02
 #define EPOS_INPUT_SUBINDEX_POLARITY        0x03
 #define EPOS_INPUT_SUBINDEX_EXECUTE         0x04
@@ -140,6 +141,16 @@ int epos_input_set_func(
   epos_input_p input,
   epos_input_func_type_t type,
   epos_input_func_p func);
+
+/** \brief Retrieve EPOS input functionality state
+  * \param[in] input The EPOS input module to retrieve the functionality 
+  *   state for.
+  * \param[in] type The input functionality type to retrieve the state for.
+  * \return func The retrieved input functionality state.
+  */
+int epos_input_get_func_state(
+  epos_input_p input,
+  epos_input_func_type_t type);
 
 /** \brief Retrieve EPOS input functionality channel
   * \param[in] input The EPOS input module to retrieve the functionality 
