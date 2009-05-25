@@ -90,7 +90,7 @@ float epos_position_profile_estimate(epos_position_profile_p profile,
     float a = profile->acceleration;
     float d = profile->deceleration;
 
-    if (profile->type == epos_sinusoidal) {
+    if (profile->type == epos_profile_sinusoidal) {
       float v_max = sqrt(4.0*s/(M_PI/a+M_PI/d));
       v = min(v, v_max);
 

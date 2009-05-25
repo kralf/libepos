@@ -26,7 +26,7 @@
 void epos_home_init(epos_home_p home, epos_home_method_t method, float current,
   float velocity, float acceleration, float position) {
   home->method = method;
-  home->type = epos_sinusoidal;
+  home->type = epos_profile_sinusoidal;
 
   home->current = current;
   home->switch_vel = velocity;
