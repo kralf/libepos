@@ -85,7 +85,7 @@ float epos_position_profile_estimate(epos_position_profile_p profile,
   double t = time-profile->start_time;
 
   if (t > 0.0) {
-    float s = abs(s_1-s_0);
+    float s = fabs(s_1-s_0);
     float v = profile->velocity;
     float a = profile->acceleration;
     float d = profile->deceleration;

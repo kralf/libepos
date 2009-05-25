@@ -59,5 +59,5 @@ float epos_gear_to_angular_acceleration(epos_gear_p gear, int acceleration) {
 
 int epos_gear_from_angular_acceleration(epos_gear_p gear, float angular_acc) {
   return clip(angular_acc*60.0*abs(gear->transmission)/(2.0*M_PI), 
-    1, UINT_MAX);
+    INT_MIN, INT_MAX);
 }

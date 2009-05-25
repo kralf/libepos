@@ -23,7 +23,6 @@
 
 #include <math.h>
 
-#define abs(a) (((a) < (0)) ? -(a) : (a))
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #define clip(a, b, c) max(min(a, c), b)
