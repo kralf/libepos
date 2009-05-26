@@ -53,6 +53,13 @@ int epos_velocity_stop(epos_node_p node) {
   return epos_control_stop(&node->control);
 }
 
+int epos_velocity_update(epos_node_p node, epos_velocity_p velocity) {
+  int vel = epos_gear_from_angular_velocity(&node->gear,
+    velocity->target_value);
+
+  return epos_velocity_set_demand(&node->dev, vel);
+}
+
 int epos_velocity_get_actual(epos_device_p dev) {
   int vel;
   epos_device_read(dev, EPOS_VELOCITY_INDEX_ACTUAL_VALUE, 0,

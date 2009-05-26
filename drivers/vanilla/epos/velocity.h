@@ -80,6 +80,16 @@ int epos_velocity_start(
 int epos_velocity_stop(
   epos_node_p node);
 
+/** \brief Update the velocity control operation of an EPOS device
+  * \param[in] node The EPOS node to update the velocity control 
+  *   operation for.
+  * \param[in] velocity The updated velocity control operation.
+  * \return The resulting device error code.
+  */
+int epos_velocity_update(
+  epos_node_p node,
+  epos_velocity_p velocity);
+
 /** \brief Retrieve the actual velocity of an EPOS device
   * \param[in] dev The EPOS device to retrieve the actual velocity for.
   * \return The actual velocity of the specified EPOS device in [vu].
