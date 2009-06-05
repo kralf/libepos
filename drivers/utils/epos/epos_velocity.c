@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "usage: %s VEL [PARAMS]\n", argv[0]);
     return -1;
   }
-  float target_value = atof(argv[1])*M_PI/180.0;
+  float target_value = deg_to_rad(atof(argv[1]));
 
   epos_node_t node;
   epos_velocity_t vel;
@@ -46,11 +46,11 @@ int main(int argc, char **argv) {
 
   if (epos_open(&node))
     return -1;
-  epos_velocity_init(&vel, target_value*M_PI/180.0);
+  epos_velocity_init(&vel, target_value);
   if (!epos_velocity_start(&node, &vel)) {
     while (!quit) {
       fprintf(stdout, "\rEPOS angular velocity: %8.2f deg/s",
-        epos_get_velocity(&node)*180.0/M_PI);
+        rad_to_deg(epos_get_velocity(&node)));
       fflush(stdout);
     }
     fprintf(stdout, "\n");

@@ -25,6 +25,8 @@
 
 /** \brief Predefined EPOS control constants
   */
+#define EPOS_CONTROL_START_SLEEP             0.01
+
 #define EPOS_CONTROL_INDEX_MODE              0x6060
 #define EPOS_CONTROL_INDEX_MODE_DISPLAY      0x6061
 

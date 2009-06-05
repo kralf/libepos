@@ -33,14 +33,14 @@ void epos_control_destroy(epos_control_p control) {
 }
 
 epos_control_type_t epos_control_get_type(epos_control_p control) {
-  unsigned char type;
+  char type;
   epos_device_read(control->dev, EPOS_CONTROL_INDEX_MODE_DISPLAY, 0, &type, 1);
 
   return type;
 }
 
 int epos_control_set_type(epos_control_p control, epos_control_type_t type) {
-  unsigned char t = type;
+  char t = type;
   int result = epos_device_write(control->dev, EPOS_CONTROL_INDEX_MODE, 0,
     &t, 1);
 
@@ -51,8 +51,13 @@ int epos_control_set_type(epos_control_p control, epos_control_type_t type) {
 }
 
 int epos_control_start(epos_control_p control) {
-  return epos_device_set_control(control->dev,
-      EPOS_DEVICE_CONTROL_ENABLE_OPERATION);
+  int result = epos_device_set_control(control->dev,
+    EPOS_DEVICE_CONTROL_ENABLE_OPERATION);
+
+  if (!result)
+    timer_sleep(EPOS_CONTROL_START_SLEEP);
+
+  return result;
 }
 
 int epos_control_stop(epos_control_p control) {

@@ -89,7 +89,10 @@ int epos_device_open(epos_device_p dev) {
     dev->hardware_version = epos_device_get_hardware_version(dev);
     dev->software_version = epos_device_get_software_version(dev);
 
-    return EPOS_DEVICE_ERROR_NONE;
+    if (epos_device_shutdown(dev))
+      return EPOS_DEVICE_ERROR_OPEN;
+    else
+      return EPOS_DEVICE_ERROR_NONE;
   }
   else {
     fprintf(stderr, "Node %d connection error\n", dev->node_id);

@@ -103,6 +103,13 @@ int epos_current_set_demand(
   epos_device_p dev,
   short current);
 
+/** \brief Retrieve the demanded current of an EPOS device
+  * \param[in] dev The EPOS device to retrieve the demanded current for.
+  * \return The demanded current of the specified EPOS device in [mA].
+  */
+short epos_current_get_demand(
+  epos_device_p dev);
+
 /** \brief Set the current control P-gain of an EPOS device
   * \param[in] dev The EPOS device to set the current control P-gain for.
   * \param[in] p_gain The current control P-gain for the specified EPOS

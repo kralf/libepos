@@ -20,7 +20,6 @@
 
 #include <stdio.h>
 #include <signal.h>
-#include <math.h>
 
 #include <epos.h>
 #include <position.h>
@@ -36,7 +35,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "usage: %s POS [PARAMS]\n", argv[0]);
     return -1;
   }
-  float target_value = atof(argv[1])*M_PI/180.0;
+  float target_value = deg_to_rad(atof(argv[1]));
 
   epos_node_t node;
   epos_position_t pos;
@@ -50,7 +49,7 @@ int main(int argc, char **argv) {
   if (!epos_position_start(&node, &pos)) {
     while (!quit) {
       fprintf(stdout, "\rEPOS angular position: %8.2f deg",
-        epos_get_position(&node)*180.0/M_PI);
+        rad_to_deg(epos_get_position(&node)));
       fflush(stdout);
     }
     fprintf(stdout, "\n");

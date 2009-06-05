@@ -20,7 +20,6 @@
 
 #include <stdio.h>
 #include <signal.h>
-#include <math.h>
 #include <timer.h>
 
 #include <epos.h>
@@ -37,10 +36,10 @@ int main(int argc, char **argv) {
     fprintf(stderr, "usage: %s POS VEL ACC DEC\n", argv[0]);
     return -1;
   }
-  float pos = atof(argv[1])*M_PI/180.0;
-  float vel = atof(argv[2])*M_PI/180.0;
-  float acc = atof(argv[3])*M_PI/180.0;
-  float dec = atof(argv[4])*M_PI/180.0;
+  float pos = deg_to_rad(atof(argv[1]));
+  float vel = deg_to_rad(atof(argv[2]));
+  float acc = deg_to_rad(atof(argv[3]));
+  float dec = deg_to_rad(atof(argv[4]));
   double t;
 
   epos_node_t node;
@@ -57,11 +56,11 @@ int main(int argc, char **argv) {
   if (!epos_position_profile_start(&node, &profile)) {
     while (!quit && epos_profile_wait(&node, 0.1)) {
       timer_start(&t);
-      float pos_a = epos_get_position(&node)*180.0/M_PI;
+      float pos_a = epos_get_position(&node);
       timer_correct(&t);
-      float pos_e = epos_position_profile_estimate(&profile, t)*180.0/M_PI;
+      float pos_e = epos_position_profile_estimate(&profile, t);
       fprintf(stdout, "%7.2f  %8.2f  %8.2f\n", t-profile.start_time,
-        pos_a, pos_e);
+        rad_to_deg(pos_a), rad_to_deg(pos_e));
     }
     epos_position_profile_stop(&node);
   }

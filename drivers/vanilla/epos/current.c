@@ -72,6 +72,14 @@ int epos_current_set_demand(epos_device_p dev, short current) {
     (unsigned char*)&current, sizeof(short));
 }
 
+short epos_current_get_demand(epos_device_p dev) {
+  short current;
+  epos_device_read(dev, EPOS_CURRENT_INDEX_SETTING_VALUE, 0,
+    (unsigned char*)&current, sizeof(short));
+
+  return current;
+}
+
 int epos_current_set_p_gain(epos_device_p dev, short p_gain) {
   return epos_device_write(dev, EPOS_CURRENT_INDEX_CONTROL_PARAMETERS,
     EPOS_CURRENT_SUBINDEX_P_GAIN, (unsigned char*)&p_gain, sizeof(short));

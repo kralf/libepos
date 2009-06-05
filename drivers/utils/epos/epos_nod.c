@@ -20,7 +20,6 @@
 
 #include <stdio.h>
 #include <signal.h>
-#include <math.h>
 
 #include <epos.h>
 #include <position_profile.h>
@@ -36,9 +35,9 @@ int main(int argc, char **argv) {
     fprintf(stderr, "usage: %s POS VEL ACC [PARAMS]\n", argv[0]);
     return -1;
   }
-  float pos = atof(argv[1])*M_PI/180.0;
-  float vel = atof(argv[2])*M_PI/180.0;
-  float acc = atof(argv[3])*M_PI/180.0;
+  float pos = deg_to_rad(atof(argv[1]));
+  float vel = deg_to_rad(atof(argv[2]));
+  float acc = deg_to_rad(atof(argv[3]));
 
   epos_node_t node;
   epos_position_profile_t profile;
@@ -54,7 +53,7 @@ int main(int argc, char **argv) {
   while (!quit && !epos_position_profile_start(&node, &profile)) {
     while (!quit && epos_profile_wait(&node, 0.1)) {
       fprintf(stdout, "\rEPOS angular position: %8.2f deg",
-        epos_get_position(&node)*180.0/M_PI);
+        rad_to_deg(epos_get_position(&node)));
       fflush(stdout);
     }
     profile.target_value = -profile.target_value;
