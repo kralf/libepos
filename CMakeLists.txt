@@ -22,4 +22,4 @@ remake_doc(
 
 remake_pack_deb(tulibs libcan)
 remake_pack_deb(COMPONENT dev tulibs-dev libcan-dev)
-remake_pack_deb(COMPONENT doc)
+remake_pack_deb(ARCH all COMPONENT doc)
