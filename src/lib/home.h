@@ -27,7 +27,7 @@
   * \brief EPOS homing mode functions
   */
 
-/** \brief Predefined EPOS homing control constants
+/** Predefined EPOS homing control constants
   */
 #define EPOS_HOME_INDEX_METHOD                      0x6098
 #define EPOS_HOME_INDEX_VELOCITIES                  0x6099

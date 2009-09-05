@@ -27,7 +27,7 @@
   * \brief EPOS position profile mode functions
   */
 
-/** \brief Predefined EPOS position profile control constants
+/** Predefined EPOS position profile control constants
   */
 #define EPOS_POSITION_PROFILE_INDEX_TARGET            0x607A
 #define EPOS_POSITION_PROFILE_INDEX_VELOCITY          0x6081

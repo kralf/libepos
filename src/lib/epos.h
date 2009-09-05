@@ -34,7 +34,7 @@
   * \brief EPOS convenience functions
   */
 
-/** \brief Predefined EPOS constants
+/** Predefined EPOS constants
   */
 #define EPOS_CONFIG_ARG_PREFIX                "--epos-"
 
@@ -56,7 +56,7 @@
 #define EPOS_PARAMETER_HOME_OFFSET            "home-offset"
 #define EPOS_PARAMETER_HOME_POSITION          "home-pos"
 
-/** \brief Predefined EPOS error codes
+/** Predefined EPOS error codes
   */
 #define EPOS_ERROR_NONE                       0
 #define EPOS_ERROR_OPEN                       1

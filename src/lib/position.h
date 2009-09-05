@@ -27,7 +27,7 @@
   * \brief EPOS position mode functions
   */
 
-/** \brief Predefined EPOS position control constants
+/** Predefined EPOS position control constants
   */
 #define EPOS_POSITION_INDEX_SETTING_VALUE           0x2062
 #define EPOS_POSITION_INDEX_DEMAND_VALUE            0x6062
@@ -199,7 +199,7 @@ int epos_position_set_velocity_factor(
 /** \brief Set the acceleration feed-forward factor of an EPOS device
   * \param[in] dev The EPOS device to set the acceleration feed-forward
   *   factor for.
-  * \param[in] vel_factor The acceleration feed-forward factor for the
+  * \param[in] acc_factor The acceleration feed-forward factor for the
   *   specified EPOS device.
   * \return The resulting device error code.
   */

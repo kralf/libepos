@@ -27,14 +27,14 @@
   * \brief EPOS motor functions
   */
 
-/** \brief Predefined EPOS motor constants
+/** Predefined EPOS motor constants
   */
 #define EPOS_MOTOR_INDEX_TYPE                         0x6402
 #define EPOS_MOTOR_INDEX_DATA                         0x6410
 #define EPOS_MOTOR_SUBINDEX_MAX_CONTINUOUS_CURRENT    0x01
 #define EPOS_MOTOR_SUBINDEX_MAX_OUTPUT_CURRENT        0x02
 
-/** \brief Predefined EPOS motor error codes
+/** Predefined EPOS motor error codes
   */
 #define EPOS_MOTOR_ERROR_NONE                         0
 #define EPOS_MOTOR_ERROR_SETUP                        1

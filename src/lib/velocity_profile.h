@@ -27,7 +27,7 @@
   * \brief EPOS velocity profile mode functions
   */
 
-/** \brief Predefined EPOS velocity profile control constants
+/** Predefined EPOS velocity profile control constants
   */
 #define EPOS_VELOCITY_PROFILE_INDEX_TARGET            0x60FF
 

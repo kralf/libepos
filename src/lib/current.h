@@ -27,7 +27,7 @@
   * \brief EPOS current mode functions
   */
 
-/** \brief Predefined EPOS current control constants
+/** Predefined EPOS current control constants
   */
 #define EPOS_CURRENT_INDEX_SETTING_VALUE           0x2030
 #define EPOS_CURRENT_INDEX_ACTUAL_VALUE            0x6078
@@ -50,7 +50,7 @@ typedef struct epos_current_t {
 } epos_current_t, *epos_current_p;
 
 /** \brief Initialize EPOS current control operation
-  * \param[in] velocity The EPOS current control operation to be initialized.
+  * \param[in] current The EPOS current control operation to be initialized.
   * \param[in] target_value The target current in [A].
   */
 void epos_current_init(

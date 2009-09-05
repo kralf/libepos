@@ -27,7 +27,7 @@
   * \brief EPOS velocity mode functions
   */
 
-/** \brief Predefined EPOS velocity control constants
+/** Predefined EPOS velocity control constants
   */
 #define EPOS_VELOCITY_INDEX_SETTING_VALUE           0x206B
 #define EPOS_VELOCITY_INDEX_DEMAND_VALUE            0x606B

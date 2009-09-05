@@ -27,7 +27,7 @@
   * \brief EPOS sensor functions
   */
 
-/** \brief Predefined EPOS sensor constants
+/** Predefined EPOS sensor constants
   */
 #define EPOS_SENSOR_INDEX_CONFIGURATION         0x2210
 #define EPOS_SENSOR_SUBINDEX_PULSES             0x01
@@ -35,7 +35,7 @@
 #define EPOS_SENSOR_SUBINDEX_POLARITY           0x04
 #define EPOS_SENSOR_INDEX_POSITION              0x2020
 
-/** \brief Predefined EPOS sensor error codes
+/** Predefined EPOS sensor error codes
   */
 #define EPOS_SENSOR_ERROR_NONE                  0
 #define EPOS_SENSOR_ERROR_SETUP                 1

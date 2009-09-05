@@ -55,7 +55,7 @@ void epos_gear_destroy(
 
 /** \brief Convert EPOS position units to radian space angle
   * \param[in] gear The EPOS gear assembly to be used for conversion.
-  * \param[in] pos The number of EPOS position units to be converted
+  * \param[in] position The number of EPOS position units to be converted
   *   into an angle.
   * \return The angle corresponding to the specified number of EPOS
   *   position units in [rad].
@@ -77,7 +77,7 @@ int epos_gear_from_angle(
 
 /** \brief Convert EPOS velocity units to radian space angular velocity
   * \param[in] gear The EPOS gear assembly to be used for conversion.
-  * \param[in] vel The number of EPOS velocity units to be converted
+  * \param[in] velocity The number of EPOS velocity units to be converted
   *   into an angular velocity.
   * \return The angular velocity corresponding to the specified number of
   *   EPOS velocity units in [rad/s].
@@ -99,8 +99,8 @@ int epos_gear_from_angular_velocity(
 
 /** \brief Convert EPOS acceleration units to radian space angular acceleration
   * \param[in] gear The EPOS gear assembly to be used for conversion.
-  * \param[in] acc The number of EPOS acceleration units to be converted
-  *   into an angular acceleration.
+  * \param[in] acceleration The number of EPOS acceleration units to be
+  *   converted into an angular acceleration.
   * \return The angular acceleration corresponding to the specified number of
   *   EPOS velocity units in [rad/s^2].
   */

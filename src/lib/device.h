@@ -29,7 +29,7 @@
   * \brief EPOS device functions
   */
 
-/** \brief Predefined EPOS device constants
+/** Predefined EPOS device constants
   */
 #define EPOS_DEVICE_WAIT_FOREVER                -1.0
 
@@ -74,7 +74,7 @@
 #define EPOS_DEVICE_CONTROL_ENABLE_OPERATION    0x000F
 #define EPOS_DEVICE_CONTROL_FAULT_RESET         0x00FF
 
-/** \brief Predefined EPOS device error codes
+/** Predefined EPOS device error codes
   */
 #define EPOS_DEVICE_ERROR_NONE                  0
 #define EPOS_DEVICE_ERROR_OPEN                  1

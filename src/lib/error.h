@@ -27,7 +27,7 @@
   * \brief EPOS error functions
   */
 
-/** \brief Predefined EPOS error constants
+/** Predefined EPOS error constants
   */
 #define EPOS_ERROR_INDEX_HISTORY                0x1003
 #define EPOS_ERROR_SUBINDEX_HISTORY_LENGTH      0x00

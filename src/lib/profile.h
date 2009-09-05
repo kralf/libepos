@@ -27,7 +27,7 @@
   * \brief EPOS profile generic functions
   */
 
-/** \brief Predefined EPOS profile control constants
+/** Predefined EPOS profile control constants
   */
 #define EPOS_PROFILE_INDEX_ACCELERATION       0x6083
 #define EPOS_PROFILE_INDEX_DECELERATION       0x6084

@@ -27,7 +27,7 @@
   * \brief EPOS input functions
   */
 
-/** \brief Predefined EPOS input constants
+/** Predefined EPOS input constants
   */
 #define EPOS_INPUT_RESERVED_FUNC            7            
 #define EPOS_INPUT_DUMMY_FUNC               65535
@@ -39,7 +39,7 @@
 #define EPOS_INPUT_SUBINDEX_POLARITY        0x03
 #define EPOS_INPUT_SUBINDEX_EXECUTE         0x04
 
-/** \brief Predefined EPOS input error codes
+/** Predefined EPOS input error codes
   */
 #define EPOS_INPUT_ERROR_NONE               0
 #define EPOS_INPUT_ERROR_SETUP              1
@@ -101,6 +101,7 @@ void epos_input_init(
   * \param[in] channel The input functionality's channel.
   * \param[in] polarity The input functionality's polarity.
   * \param[in] execute The input functionality's execution flag.
+  * \param[in] enabled The input functionality's enabled flag.
   */
 void epos_input_init_func(
   epos_input_func_p func,
@@ -238,7 +239,7 @@ int epos_input_get_func_enabled(
   * \param[in] input The EPOS input module to set the functionality enabled 
   *   flag for.
   * \param[in] type The input functionality type to set the enabled flag for.
-  * \param[in] execute The functionality enabled flag to be set.
+  * \param[in] enabled The functionality enabled flag to be set.
   * \return The resulting device error code.
   */
 int epos_input_set_func_enabled(

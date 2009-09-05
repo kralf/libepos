@@ -27,7 +27,7 @@
   * \brief EPOS generic control functions
   */
 
-/** \brief Predefined EPOS control constants
+/** Predefined EPOS control constants
   */
 #define EPOS_CONTROL_START_SLEEP             0.01
 
@@ -67,7 +67,7 @@ void epos_control_init(
   epos_control_type_t type);
 
 /** \brief Destroy EPOS controller
-  * \param[in] sensor The EPOS controller to be destroyed.
+  * \param[in] control The EPOS controller to be destroyed.
   */
 void epos_control_destroy(
   epos_control_p control);
