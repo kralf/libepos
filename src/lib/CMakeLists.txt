@@ -3,7 +3,7 @@ remake_project_set(CAN_INTERFACE cpc CACHE STRING
 
 remake_find_library(
   m math.h
-  PACKAGES libm
+  PACKAGE libm
 )
 remake_find_library(
   tulibs-config config.h
