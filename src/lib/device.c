@@ -158,6 +158,7 @@ int epos_device_read(epos_device_p dev, short index, unsigned char subindex,
   message.content[1] = index;
   message.content[2] = index >> 8;
   message.content[3] = subindex;
+  message.length = 8;
 
   if (!epos_device_send_message(dev, &message) &&
     !epos_device_receive_message(dev, &message)) {
@@ -176,11 +177,11 @@ int epos_device_write(epos_device_p dev, short index, unsigned char subindex,
   message.id = EPOS_DEVICE_SEND_ID+dev->node_id;
   switch (num) {
     case 1 : message.content[0] = EPOS_DEVICE_WRITE_SEND_1_BYTE;
-             break; 
+             break;
     case 2 : message.content[0] = EPOS_DEVICE_WRITE_SEND_2_BYTE;
-             break; 
+             break;
     case 4 : message.content[0] = EPOS_DEVICE_WRITE_SEND_4_BYTE;
-             break; 
+             break;
     default: return EPOS_DEVICE_ERROR_INVALID_SIZE;
   }
   message.content[1] = index;
@@ -190,6 +191,7 @@ int epos_device_write(epos_device_p dev, short index, unsigned char subindex,
   message.content[5] = (num > 1) ? data[1] : 0x00;
   message.content[6] = (num > 2) ? data[2] : 0x00;
   message.content[7] = (num > 2) ? data[3] : 0x00;
+  message.length = 8;
 
   if (!epos_device_send_message(dev, &message) &&
     !epos_device_receive_message(dev, &message)) {
