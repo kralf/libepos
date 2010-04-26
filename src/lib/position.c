@@ -74,6 +74,11 @@ int epos_position_stop(epos_node_p node) {
   return epos_control_stop(&node->control);
 }
 
+int epos_position_update(epos_node_p node, epos_position_p position) {
+  int pos = epos_gear_from_angle(&node->gear, position->target_value);
+  return epos_position_set_demand(&node->dev, pos);
+}
+
 int epos_position_set_limits(epos_device_p dev, int min_pos, int max_pos) {
   int result;
 

@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
 
   if (epos_open(&node))
     return -1;
-  epos_position_profile_init(&profile, pos, vel, acc, acc, 
+  epos_position_profile_init(&profile, pos, vel, acc, acc,
     epos_profile_sinusoidal);
   profile.relative = 1;
   while (!quit && !epos_position_profile_start(&node, &profile)) {

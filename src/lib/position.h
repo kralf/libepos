@@ -111,6 +111,15 @@ int epos_position_start(
 int epos_position_stop(
   epos_node_p node);
 
+/** \brief Update the position control operation of an EPOS device
+  * \param[in] node The EPOS node to update the position control operation for.
+  * \param[in] position The update position control operation.
+  * \return The resulting device error code.
+  */
+int epos_position_update(
+  epos_node_p node,
+  epos_position_p position);
+
 /** \brief Set EPOS software position limits
   * \param[in] dev The EPOS device to set the software position limits for.
   * \param[in] min_pos The minimal position limit of the EPOS device in [pu].
