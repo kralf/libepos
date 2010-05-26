@@ -94,8 +94,12 @@ void epos_init_arg(epos_node_p node, int argc, char **argv, const char*
   can_init_arg(can_dev, argc, argv, 0);
 
   config_t config;
-  config_init_arg(&config, argc, argv, (prefix) ? prefix : 
-    EPOS_CONFIG_ARG_PREFIX);
+  if (config_init_arg(&config, argc, argv, (prefix) ? prefix : 
+      EPOS_CONFIG_ARG_PREFIX)) {
+    config_print_help(stdout, &epos_default_config, EPOS_CONFIG_ARG_PREFIX);
+    config_print_help(stdout, &can_default_config, CAN_CONFIG_ARG_PREFIX);
+    exit(0);
+  }
     
   epos_init(node, can_dev, &config);
 
@@ -120,8 +124,8 @@ void epos_destroy(epos_node_p node) {
 
 int epos_open(epos_node_p node) {
   if (!epos_device_open(&node->dev) &&
-    !epos_sensor_setup(&node->sensor) &&
     !epos_motor_setup(&node->motor) &&
+    !epos_sensor_setup(&node->sensor) &&
     !epos_input_setup(&node->input))
     return EPOS_ERROR_NONE;
   else

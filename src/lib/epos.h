@@ -36,7 +36,7 @@
 
 /** Predefined EPOS constants
   */
-#define EPOS_CONFIG_ARG_PREFIX                "--epos-"
+#define EPOS_CONFIG_ARG_PREFIX                "epos"
 
 #define EPOS_PARAMETER_ID                     "node-id"
 #define EPOS_PARAMETER_RESET                  "node-reset"

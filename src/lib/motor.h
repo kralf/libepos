@@ -33,6 +33,7 @@
 #define EPOS_MOTOR_INDEX_DATA                         0x6410
 #define EPOS_MOTOR_SUBINDEX_MAX_CONTINUOUS_CURRENT    0x01
 #define EPOS_MOTOR_SUBINDEX_MAX_OUTPUT_CURRENT        0x02
+#define EPOS_MOTOR_SUBINDEX_NUM_POLES                 0x03
 
 /** Predefined EPOS motor error codes
   */
@@ -59,6 +60,8 @@ typedef struct epos_motor_t {
   epos_motor_type_t type;   //!< The motor type.
   float max_cont_current;   //!< The motor's continuous current limit in [A].
   float max_out_current;    //!< The motor's output current limit in [A].
+
+  short num_poles;          //!< The brushless motor's number of poles.
 } epos_motor_t, *epos_motor_p;
 
 /** \brief Initialize EPOS motor
@@ -139,5 +142,23 @@ short epos_motor_get_max_output_current(
 int epos_motor_set_max_output_current(
   epos_motor_p motor,
   short current);
+
+/** \brief Retrieve a brushless EPOS motor's number of poles
+  * \param[in] motor The brushless EPOS motor to retrieve the number of
+  *   poles for.
+  * \return The number of poles of the specified brushless EPOS motor.
+  */
+short epos_motor_get_num_poles(
+  epos_motor_p motor);
+
+/** \brief Set a brushless EPOS motor's number of poles
+  * \param[in] motor The EPOS motor to set the number of poles for.
+  * \param[in] current The number of poles of the specified brushless
+  *   EPOS motor.
+  * \return The resulting device error code.
+  */
+int epos_motor_set_num_poles(
+  epos_motor_p motor,
+  short num_poles);
 
 #endif

@@ -34,6 +34,7 @@ void epos_motor_init(epos_motor_p motor, epos_device_p dev, epos_motor_type_t
   motor->type = type;
   motor->max_cont_current = 0.5*max_current;
   motor->max_out_current = max_current;
+  motor->num_poles = 1;
 }
 
 void epos_motor_destroy(epos_motor_p motor) {
@@ -106,6 +107,26 @@ int epos_motor_set_max_output_current(epos_motor_p motor, short current) {
 
   if (!result)
     motor->max_out_current = current*1e-3;
+
+  return result;
+}
+
+short epos_motor_get_num_poles(epos_motor_p motor) {
+  short num_poles;
+  epos_device_read(motor->dev, EPOS_MOTOR_INDEX_DATA,
+    EPOS_MOTOR_SUBINDEX_NUM_POLES, (unsigned char*)&num_poles,
+    sizeof(short));
+
+  return num_poles;
+}
+
+int epos_motor_set_num_poles(epos_motor_p motor, short num_poles) {
+  int result = epos_device_write(motor->dev, EPOS_MOTOR_INDEX_DATA,
+    EPOS_MOTOR_SUBINDEX_NUM_POLES, (unsigned char*)&num_poles,
+    sizeof(short));
+
+  if (!result)
+    motor->num_poles = num_poles;
 
   return result;
 }
