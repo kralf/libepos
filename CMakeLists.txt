@@ -20,7 +20,21 @@ remake_doc(
   html
 )
 
-remake_pack_deb(tulibs libcan)
-remake_pack_deb(COMPONENT utils libepos)
-remake_pack_deb(COMPONENT dev tulibs-dev libcan-dev)
-remake_pack_deb(ARCH all COMPONENT doc)
+remake_pack_deb(
+  tulibs libcan
+)
+remake_pack_deb(
+  COMPONENT utils
+  DESCRIPTION "utilities"
+  libepos
+)
+remake_pack_deb(
+  COMPONENT dev
+  DESCRIPTION "development headers"
+  tulibs-dev libcan-dev
+)
+remake_pack_deb(
+  ARCH all
+  COMPONENT doc
+  DESCRIPTION "documentation"
+)
