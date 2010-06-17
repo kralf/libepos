@@ -28,11 +28,25 @@ const char* epos_input_errors[] = {
   "error setting EPOS input parameters",
 };
 
+short epos_input_channel_masks[] = {
+  0x003F,
+  0x003F,
+  0x00FF,
+  0x00CF,
+  0x003F,
+  0x03FF,
+  0x00FF,
+  0x00CF,
+  0x0000,
+};
+
 void epos_input_init(epos_input_p input, epos_device_p dev) {
   int i;
 
   input->dev = dev;
 
+  input->channel_mask = 0x0000;
+  
   for (i = 0; i < sizeof(input->channels)/sizeof(epos_input_func_type_t); ++i)
     input->channels[i] = EPOS_INPUT_DUMMY_FUNC;
 
@@ -153,8 +167,13 @@ int epos_input_set_enabled(epos_input_p input, short enabled) {
 int epos_input_setup(epos_input_p input) {
   int i, result = EPOS_INPUT_ERROR_NONE;
 
-  for (i = 0; i < sizeof(input->channels)/sizeof(epos_input_func_type_t); ++i)
-    input->channels[i] = epos_input_get_channel_func(input, i+1);
+  input->channel_mask = epos_input_channel_masks[input->dev->type];
+
+  for (i = 0; i < sizeof(input->channels)/sizeof(epos_input_func_type_t); ++i) {
+    short c = (0x01 << i);
+    if (c & input->channel_mask)
+      input->channels[i] = epos_input_get_channel_func(input, i+1);
+  }
   input->polarity = epos_input_get_polarity(input);
   input->execute = epos_input_get_execute(input);
   input->enabled = epos_input_get_enabled(input);

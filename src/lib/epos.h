@@ -43,6 +43,7 @@
 #define EPOS_PARAMETER_SENSOR_TYPE            "enc-type"
 #define EPOS_PARAMETER_SENSOR_POLARITY        "enc-polarity"
 #define EPOS_PARAMETER_SENSOR_PULSES          "enc-pulses"
+#define EPOS_PARAMETER_SENSOR_SUPERVISION     "enc-supervision"
 #define EPOS_PARAMETER_MOTOR_TYPE             "motor-type"
 #define EPOS_PARAMETER_MOTOR_CURRENT          "motor-current"
 #define EPOS_PARAMETER_GEAR_TRANSMISSION      "gear-trans"

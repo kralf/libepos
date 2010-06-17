@@ -42,6 +42,7 @@ param_t epos_default_params[] = {
   {EPOS_PARAMETER_SENSOR_TYPE, "1"},
   {EPOS_PARAMETER_SENSOR_POLARITY, "0"},
   {EPOS_PARAMETER_SENSOR_PULSES, "1024"},
+  {EPOS_PARAMETER_SENSOR_SUPERVISION, "0"},
   {EPOS_PARAMETER_MOTOR_TYPE, "1"},
   {EPOS_PARAMETER_MOTOR_CURRENT, "2.0"},
   {EPOS_PARAMETER_GEAR_TRANSMISSION, "1.0"},
@@ -77,7 +78,8 @@ void epos_init(epos_node_p node, can_device_p can_dev, config_p config) {
   epos_sensor_init(&node->sensor, &node->dev,
     config_get_int(&node->config, EPOS_PARAMETER_SENSOR_TYPE),
     config_get_int(&node->config, EPOS_PARAMETER_SENSOR_POLARITY),
-    config_get_int(&node->config, EPOS_PARAMETER_SENSOR_PULSES));
+    config_get_int(&node->config, EPOS_PARAMETER_SENSOR_PULSES),
+    config_get_int(&node->config, EPOS_PARAMETER_SENSOR_SUPERVISION));
   epos_motor_init(&node->motor, &node->dev,
     config_get_int(&node->config, EPOS_PARAMETER_MOTOR_TYPE),
     config_get_float(&node->config, EPOS_PARAMETER_MOTOR_CURRENT));

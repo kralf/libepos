@@ -59,14 +59,24 @@ typedef enum {
   epos_sensor_inverted = 0x03
 } epos_sensor_polarity_t;
 
+typedef enum {
+  epos_sensor_fully_supervised = 0x00,
+  epos_sensor_hardware_supervised = 0x01,
+  epos_sensor_software_supervised = 0x02,
+  epos_sensor_unsupervised = 0x03
+} epos_sensor_supervision_t;
+
 /** \brief Structure defining an EPOS position sensor
   */
 typedef struct epos_sensor_t {
-  epos_device_p dev;                //!< The EPOS device of the sensor.
+  epos_device_p dev;               //!< The EPOS device of the sensor.
 
-  epos_sensor_type_t type;          //!< The position sensor type.
-  epos_sensor_polarity_t polarity;  //!< The position sensor polarity.
-  short num_pulses;                 //!< The number of pulses per revolution.
+  epos_sensor_type_t type;         //!< The position sensor type.
+  epos_sensor_polarity_t polarity; //!< The position sensor polarity.
+  int num_pulses;                  //!< The number of pulses per revolution.
+
+  epos_sensor_supervision_t
+    supervision;                   //!< The position sensor's supervision.
 } epos_sensor_t, *epos_sensor_p;
 
 /** \brief Initialize EPOS position sensor
@@ -75,13 +85,15 @@ typedef struct epos_sensor_t {
   * \param[in] type The type of the EPOS position sensor to be initialized.
   * \param[in] polarity The polarity of the position sensor.
   * \param[in] num_pulses The sensor's number of pulses per revolution.
+  * \param[in] supervision The sensor's supervision.
   */
 void epos_sensor_init(
   epos_sensor_p sensor,
   epos_device_p dev,
   epos_sensor_type_t type,
   epos_sensor_polarity_t polarity,
-  short num_pulses);
+  int num_pulses,
+  epos_sensor_supervision_t supervision);
 
 /** \brief Destroy EPOS position sensor
   * \param[in] sensor The EPOS position sensor to be destroyed.
@@ -133,7 +145,7 @@ int epos_sensor_set_polarity(
   *   revolutions for.
   * \return The number of pulses of the specified EPOS position sensor.
   */
-short epos_sensor_get_pulses(
+int epos_sensor_get_pulses(
   epos_sensor_p sensor);
 
 /** \brief Set an EPOS position sensor's number of pulses per revolution
@@ -145,7 +157,24 @@ short epos_sensor_get_pulses(
   */
 int epos_sensor_set_pulses(
   epos_sensor_p sensor,
-  short num_pulses);
+  int num_pulses);
+
+/** \brief Retrieve an EPOS position sensor's supervision
+  * \param[in] sensor The EPOS position sensor to retrieve the supervision for.
+  * \return The number of pulses of the specified EPOS position sensor.
+  */
+epos_sensor_supervision_t epos_sensor_get_supervision(
+  epos_sensor_p sensor);
+
+/** \brief Set an EPOS position sensor's supervision
+  * \param[in] sensor The EPOS position sensor to set the supervision for.
+  * \param[in] supervision The supervision of the specified EPOS position
+*     sensor.
+  * \return The resulting device error code.
+  */
+int epos_sensor_set_supervision(
+  epos_sensor_p sensor,
+  epos_sensor_supervision_t supervision);
 
 /** \brief Retrieve an EPOS position sensor's position
   * \param[in] sensor The EPOS position sensor to retrieve the position for.

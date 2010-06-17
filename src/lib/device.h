@@ -62,6 +62,7 @@
 #define EPOS_DEVICE_INDEX_CAN_BITRATE           0x2001
 #define EPOS_DEVICE_INDEX_RS232_BAUDRATE        0x2002
 #define EPOS_DEVICE_INDEX_VERSION               0x2003
+#define EPOS_DEVICE_INDEX_MISC_CONFIGURATION    0x2008
 #define EPOS_DEVICE_SUBINDEX_SOFTWARE_VERSION   0x01
 #define EPOS_DEVICE_SUBINDEX_HARDWARE_VERSION   0x02
 #define EPOS_DEVICE_INDEX_CONTROL               0x6040
@@ -73,6 +74,8 @@
 #define EPOS_DEVICE_CONTROL_QUICK_STOP          0x0007
 #define EPOS_DEVICE_CONTROL_ENABLE_OPERATION    0x000F
 #define EPOS_DEVICE_CONTROL_FAULT_RESET         0x00FF
+
+#define EPOS_DEVICE_TYPE_MASK                   0xFFF0
 
 /** Predefined EPOS device error codes
   */
@@ -94,6 +97,32 @@
   */
 extern const char* epos_device_errors[];
 
+/** \brief Predefined EPOS device hardware versions
+  */
+extern short epos_device_hardware_versions[];
+
+/** \brief Predefined EPOS device hardware generations
+  */
+extern short epos_device_hardware_generations[];
+
+/** \brief Predefined EPOS device names
+  */
+extern const char* epos_device_names[];
+
+/** \brief EPOS device types
+  */
+typedef enum {
+  epos_device_epos_24_1,
+  epos_device_epos_24_5,
+  epos_device_epos_70_10,
+  epos_device_mcd_epos_60_w,
+  epos_device_epos2_24_5,
+  epos_device_epos2_50_5,
+  epos_device_epos2_70_10,
+  epos_device_epos2_module_36_2,
+  epos_device_unknown
+} epos_device_type_t;
+
 /** \brief Structure defining an EPOS device
   */
 typedef struct epos_device_t {
@@ -107,6 +136,9 @@ typedef struct epos_device_t {
 
   short hardware_version;     //!< The hardware version of the EPOS device.
   short software_version;     //!< The software version of the EPOS device.
+  
+  epos_device_type_t type;    //!< The type of the EPOS device.
+  short hardware_generation;  //!< The hardware generation of the EPOS device.
 
   ssize_t num_read;           //!< The number of message read from the EPOS.
   ssize_t num_written;        //!< The number of message written to the EPOS.
@@ -296,6 +328,24 @@ short epos_device_get_control(
 int epos_device_set_control(
   epos_device_p dev,
   short control);
+
+/** \brief Retrieve miscellaneous configuration of an EPOS device
+  * \param[in] dev The EPOS device to retrieve the miscellaneous
+  *   configuration for.
+  * \return The miscellaneous configuration word of the specified EPOS device.
+  */
+short epos_device_get_configuration(
+  epos_device_p dev);
+
+/** \brief Set miscellaneous configuration of an EPOS device
+  * \param[in] dev The EPOS device to set the miscellaneous configuration for.
+  * \param[in] control The new miscellaneous configuration word of the specified
+  *   EPOS device.
+  * \return The resulting error code.
+  */
+int epos_device_set_configuration(
+  epos_device_p dev,
+  short configuration);
 
 /** \brief Retrieve EPOS device error register
   * \param[in] dev The EPOS device to retrieve the error register for.

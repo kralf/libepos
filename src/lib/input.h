@@ -48,6 +48,10 @@
   */
 extern const char* epos_input_errors[];
 
+/** \brief Predefined EPOS input channel masks
+  */
+extern short epos_input_channel_masks[];
+
 /** \brief EPOS input functionalities
   */
 typedef enum {
@@ -78,14 +82,16 @@ typedef struct epos_input_func_t {
 /** \brief Structure defining the EPOS input module
   */
 typedef struct epos_input_t {
-  epos_device_p dev;                  //!< The EPOS device of the input module.
+  epos_device_p dev;                   //!< The EPOS device of the input module.
 
-  epos_input_func_type_t channels[8]; //!< The EPOS input functionalities.
-  short polarity;                     //!< The EPOS input polarity.
-  short execute;                      //!< The EPOS input execution.
-  short enabled;                      //!< The EPOS input enabled mask.
+  short channel_mask;                  //!< The EPOS input channel mask.
 
-  epos_input_func_t funcs[5]  ;       //!< The EPOS input functionalities.
+  epos_input_func_type_t channels[10]; //!< The EPOS input channels.
+  short polarity;                      //!< The EPOS input polarity.
+  short execute;                       //!< The EPOS input execution.
+  short enabled;                       //!< The EPOS input enabled mask.
+
+  epos_input_func_t funcs[5]  ;        //!< The EPOS input functionalities.
 } epos_input_t, *epos_input_p;
 
 /** \brief Initialize EPOS input module

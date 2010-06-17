@@ -41,6 +41,40 @@ const char* epos_device_errors[] = {
   "wait operation timed out",
 };
 
+short epos_device_hardware_versions[] = {
+  0x6010,
+  0x6210,
+  0x6410,
+  0x6610,
+  0x6220,
+  0x6320,
+  0x6420,
+  0x6120,
+};
+
+short epos_device_hardware_generations[] = {
+  1,
+  1,
+  1,
+  1,
+  2,
+  2,
+  2,
+  2,
+};
+
+const char* epos_device_names[] = {
+  "EPOS 24/1",
+  "EPOS 24/5",
+  "EPOS 70/10",
+  "MCD EPOS 60 W",
+  "EPOS2 24/5",
+  "EPOS2 50/5",
+  "EPOS2 70/10",
+  "EPOS2 Module 36/2",
+  "unknown",
+};
+
 int epos_device_can_bitrates[] = {
   1000,
   800,
@@ -67,6 +101,9 @@ void epos_device_init(epos_device_p dev, can_device_p can_dev, int node_id,
 
   dev->reset = reset;
 
+  dev->hardware_generation = 0;
+  dev->type = epos_device_unknown;
+  
   dev->num_read = 0;
   dev->num_written = 0;
 }
@@ -257,10 +294,20 @@ int epos_device_set_rs232_baudrate(epos_device_p dev, int baudrate) {
 
 short epos_device_get_hardware_version(epos_device_p dev) {
   short hardware_version;
+  epos_device_type_t t;
+
   epos_device_read(dev, EPOS_DEVICE_INDEX_VERSION,
     EPOS_DEVICE_SUBINDEX_HARDWARE_VERSION,
     (unsigned char*)&hardware_version, sizeof(short));
 
+  for (t = 0; t < sizeof(epos_device_hardware_versions)/sizeof(short); ++t) {
+    if ((hardware_version & EPOS_DEVICE_TYPE_MASK) ==
+      epos_device_hardware_versions[t]) {
+      dev->type = t;
+      dev->hardware_generation = epos_device_hardware_generations[t];
+    }
+  }
+    
   return hardware_version;
 }
 
@@ -308,6 +355,19 @@ short epos_device_get_control(epos_device_p dev) {
 int epos_device_set_control(epos_device_p dev, short control) {
   return epos_device_write(dev, EPOS_DEVICE_INDEX_CONTROL, 0,
     (unsigned char*)&control, sizeof(short));
+}
+
+short epos_device_get_configuration(epos_device_p dev) {
+  short configuration;
+  epos_device_read(dev, EPOS_DEVICE_INDEX_MISC_CONFIGURATION, 0,
+    (unsigned char*)&configuration, sizeof(short));
+
+  return configuration;
+}
+
+int epos_device_set_configuration(epos_device_p dev, short configuration) {
+  return epos_device_write(dev, EPOS_DEVICE_INDEX_MISC_CONFIGURATION, 0,
+    (unsigned char*)&configuration, sizeof(short));
 }
 
 unsigned char epos_device_get_error(epos_device_p dev) {
