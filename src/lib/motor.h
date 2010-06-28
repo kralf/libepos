@@ -153,7 +153,7 @@ short epos_motor_get_num_poles(
 
 /** \brief Set a brushless EPOS motor's number of poles
   * \param[in] motor The EPOS motor to set the number of poles for.
-  * \param[in] current The number of poles of the specified brushless
+  * \param[in] num_poles The number of poles of the specified brushless
   *   EPOS motor.
   * \return The resulting device error code.
   */

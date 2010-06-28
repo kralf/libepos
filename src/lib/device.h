@@ -339,8 +339,8 @@ short epos_device_get_configuration(
 
 /** \brief Set miscellaneous configuration of an EPOS device
   * \param[in] dev The EPOS device to set the miscellaneous configuration for.
-  * \param[in] control The new miscellaneous configuration word of the specified
-  *   EPOS device.
+  * \param[in] configuration The new miscellaneous configuration word of the
+  *   specified EPOS device.
   * \return The resulting error code.
   */
 int epos_device_set_configuration(
