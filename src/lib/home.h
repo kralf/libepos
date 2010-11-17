@@ -46,10 +46,14 @@
 /** \brief EPOS homing methods
   */
 typedef enum {
-  epos_home_neg_switch_index = 1,
-  epos_home_pos_switch_index = 2,
-  epos_home_neg_switch = 17,
-  epos_home_pos_switch = 18,
+  epos_home_neg_switch_index = 11,
+  epos_home_pos_switch_index = 7,
+  epos_home_neg_switch = 27,
+  epos_home_pos_switch = 23,
+  epos_home_neg_limit_index = 1,
+  epos_home_pos_limit_index = 2,
+  epos_home_neg_limit = 17,
+  epos_home_pos_limit = 18,
   epos_home_pos_current_index = -1,
   epos_home_neg_current_index = -2,
   epos_home_pos_current = -3,
