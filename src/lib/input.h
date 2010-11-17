@@ -55,8 +55,8 @@ extern short epos_input_channel_masks[];
 /** \brief EPOS input functionalities
   */
 typedef enum {
-  epos_input_neg_switch = 0,
-  epos_input_pos_switch = 1,
+  epos_input_neg_limit = 0,
+  epos_input_pos_limit = 1,
   epos_input_home_switch = 2,
   epos_input_pos_marker = 3,
   epos_input_dev_enable = 4,
