@@ -30,7 +30,7 @@ remake_pack_deb(
 remake_pack_deb(
   COMPONENT dev
   DESCRIPTION "development headers"
-  tulibs-dev libcan-dev
+  libepos tulibs-dev libcan-dev
 )
 remake_pack_deb(
   ARCH all
