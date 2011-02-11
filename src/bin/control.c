@@ -31,8 +31,10 @@ void epos_signaled(int signal) {
 
 int main(int argc, char **argv) {
   epos_node_t node;
-  epos_init_arg(&node, argc, argv, 0);
 
+  if (epos_init_arg(&node, argc, argv, 0, 0))
+    return -1;
+  
   signal(SIGINT, epos_signaled);
 
   if (epos_open(&node))

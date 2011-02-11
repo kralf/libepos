@@ -90,22 +90,28 @@ void epos_init(epos_node_p node, can_device_p can_dev, config_p config) {
     config_get_int(&node->config, EPOS_PARAMETER_CONTROL_TYPE));
 }
 
-void epos_init_arg(epos_node_p node, int argc, char **argv, const char* 
-  prefix) {
+int epos_init_arg(epos_node_p node, int argc, char **argv, const char*
+  prefix, const char* args) {
+  int result;
   can_device_p can_dev = malloc(sizeof(can_device_t));
-  can_init_arg(can_dev, argc, argv, 0);
+  
+  if (!(result = can_init_arg(can_dev, argc, argv, 0, args))) {
+    config_t config;
+    if (result = config_init_arg(&config, argc, argv, (prefix) ? prefix :
+        EPOS_CONFIG_ARG_PREFIX, args)) {
+      config_print_usage(stdout, argv[0], args, result);
+      config_print_help(stdout, &epos_default_config, EPOS_CONFIG_ARG_PREFIX);
+      config_print_help(stdout, &can_default_config, CAN_CONFIG_ARG_PREFIX);
+    }
+    else
+      epos_init(node, can_dev, &config);
 
-  config_t config;
-  if (config_init_arg(&config, argc, argv, (prefix) ? prefix : 
-      EPOS_CONFIG_ARG_PREFIX)) {
-    config_print_help(stdout, &epos_default_config, EPOS_CONFIG_ARG_PREFIX);
-    config_print_help(stdout, &can_default_config, CAN_CONFIG_ARG_PREFIX);
-    exit(0);
+    config_destroy(&config);
   }
-    
-  epos_init(node, can_dev, &config);
+  else
+    config_print_help(stdout, &epos_default_config, EPOS_CONFIG_ARG_PREFIX);
 
-  config_destroy(&config);
+  return result;
 }
 
 void epos_destroy(epos_node_p node) {

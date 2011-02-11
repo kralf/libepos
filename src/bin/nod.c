@@ -31,17 +31,14 @@ void epos_signaled(int signal) {
 }
 
 int main(int argc, char **argv) {
-  if (argc < 4) {
-    fprintf(stderr, "usage: %s POS VEL ACC [PARAMS]\n", argv[0]);
+  epos_node_t node;
+  epos_position_profile_t profile;
+
+  if (epos_init_arg(&node, argc, argv, 0, "POSITION VELOCITY ACCELERATION"))
     return -1;
-  }
   float pos = deg_to_rad(atof(argv[1]));
   float vel = deg_to_rad(atof(argv[2]));
   float acc = deg_to_rad(atof(argv[3]));
-
-  epos_node_t node;
-  epos_position_profile_t profile;
-  epos_init_arg(&node, argc, argv, 0);
 
   signal(SIGINT, epos_signaled);
 

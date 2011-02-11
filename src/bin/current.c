@@ -32,15 +32,12 @@ void epos_signaled(int signal) {
 }
 
 int main(int argc, char **argv) {
-  if (argc < 2) {
-    fprintf(stderr, "usage: %s CURR [PARAMS]\n", argv[0]);
-    return -1;
-  }
-  float target_value = atof(argv[1]);
-
   epos_node_t node;
   epos_current_t curr;
-  epos_init_arg(&node, argc, argv, 0);
+  
+  if (epos_init_arg(&node, argc, argv, 0, "CURRENT"))
+    return -1;
+  float target_value = atof(argv[1]);
 
   signal(SIGINT, epos_signaled);
 

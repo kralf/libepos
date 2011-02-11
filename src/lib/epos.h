@@ -101,12 +101,15 @@ void epos_init(
   * \param[in] argc The number of supplied command line arguments.
   * \param[in] argv The list of supplied command line arguments.
   * \param[in] prefix An optional argument prefix.
+  * \param[in] args An optional string naming the expected arguments.
+  * \return The resulting configuration error code.
   */
-void epos_init_arg(
+int epos_init_arg(
   epos_node_p node,
   int argc,
   char **argv,
-  const char* prefix);
+  const char* prefix,
+  const char* args);
 
 /** \brief Destroy EPOS node
   * \note This method automatically destroys unused CAN communication devices.

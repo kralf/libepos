@@ -32,15 +32,12 @@ void epos_signaled(int signal) {
 }
 
 int main(int argc, char **argv) {
-  if (argc < 2) {
-    fprintf(stderr, "usage: %s VEL [PARAMS]\n", argv[0]);
-    return -1;
-  }
-  float target_value = deg_to_rad(atof(argv[1]));
-
   epos_node_t node;
   epos_velocity_t vel;
-  epos_init_arg(&node, argc, argv, 0);
+
+  if (epos_init_arg(&node, argc, argv, 0, "VELOCITY"))
+    return -1;
+  float target_value = deg_to_rad(atof(argv[1]));
 
   signal(SIGINT, epos_signaled);
 

@@ -24,7 +24,9 @@
 
 int main(int argc, char **argv) {
   epos_node_t node;
-  epos_init_arg(&node, argc, argv, 0);
+
+  if (epos_init_arg(&node, argc, argv, 0, 0))
+    return -1;
 
   if (epos_open(&node))
     return -1;
