@@ -57,7 +57,9 @@ typedef enum {
   epos_home_pos_current_index = -1,
   epos_home_neg_current_index = -2,
   epos_home_pos_current = -3,
-  epos_home_neg_current = -4
+  epos_home_neg_current = -4,
+  epos_home_pos_index = 34,
+  epos_home_neg_index = 33
 } epos_home_method_t;
 
 /** \brief Structure defining an EPOS homing operation
