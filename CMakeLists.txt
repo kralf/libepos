@@ -6,10 +6,10 @@ remake_project(
   libepos
   VERSION 0.1
   RELEASE alpha
-  SUMMARY "Driver library for the maxon EPOS motor control."
+  SUMMARY "Driver library for the maxon EPOS motor controller."
   AUTHOR "Ralf Kaestner"
   CONTACT "ralf.kaestner@gmail.com"
-  HOME "http://aslforge.ethz.ch/projects/libepos"
+  HOME "http://github.com/kralf/libepos"
   LICENSE "GNU Lesser General Public License (LGPL)"
   PREFIX epos-
   INSTALL /usr
@@ -20,20 +20,35 @@ remake_doc(
 )
 
 remake_pack_deb(
-  tulibs libcan
+  DEPENDS tulibs libcan
 )
 remake_pack_deb(
   COMPONENT utils
   DESCRIPTION "utilities"
-  libepos
+  DEPENDS libepos
 )
 remake_pack_deb(
   COMPONENT dev
   DESCRIPTION "development headers"
-  libepos tulibs-dev libcan-dev
+  DEPENDS libepos tulibs-dev libcan-dev
 )
 remake_pack_deb(
   ARCH all
   COMPONENT doc
   DESCRIPTION "documentation"
+)
+
+remake_distribute_deb(
+  DISTRIBUTION lucid
+  SECTION libs
+  UPLOAD ppa:kralf/asl
+  DEPENDS tulibs-dev libcan-dev remake doxygen
+  PASS CMAKE_BUILD_TYPE LIBEPOS_GIT_REVISION
+)
+remake_distribute_deb(
+  DISTRIBUTION precise
+  SECTION libs
+  UPLOAD ppa:kralf/asl
+  DEPENDS tulibs-dev libcan-dev remake doxygen
+  PASS CMAKE_BUILD_TYPE LIBEPOS_GIT_REVISION
 )
