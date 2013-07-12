@@ -1,3 +1,9 @@
+libepos (0.1-63) unstable; urgency=low
+
+  * Excluded vendor directory from source distribution
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Fri, 12 Jul 2013 16:26:00 +0100
+
 libepos (0.1-62) unstable; urgency=low
 
   * Library now links against libcan, alternatives may switch between
