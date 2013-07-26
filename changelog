@@ -1,3 +1,9 @@
+libepos (0.1-64) unstable; urgency=low
+
+  * Added pkg-config file
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Fri, 26 Jul 2013 09:58:00 +0100
+
 libepos (0.1-63) unstable; urgency=low
 
   * Excluded vendor directory from source distribution

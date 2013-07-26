@@ -43,7 +43,7 @@ remake_distribute_deb(
   SECTION libs
   EXCLUDE /vendor/
   UPLOAD ppa:kralf/asl
-  DEPENDS tulibs-dev libcan-dev remake doxygen
+  DEPENDS tulibs-dev libcan-dev remake pkg-config doxygen
   PASS CMAKE_BUILD_TYPE LIBEPOS_GIT_REVISION
 )
 remake_distribute_deb(
@@ -51,6 +51,6 @@ remake_distribute_deb(
   SECTION libs
   EXCLUDE /vendor/
   UPLOAD ppa:kralf/asl
-  DEPENDS tulibs-dev libcan-dev remake doxygen
+  DEPENDS tulibs-dev libcan-dev remake pkg-config doxygen
   PASS CMAKE_BUILD_TYPE LIBEPOS_GIT_REVISION
 )
