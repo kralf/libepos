@@ -1,3 +1,9 @@
+libepos (0.1-66) unstable; urgency=low
+
+  * Updated project summary
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Fri, 18 Oct 2013 10:29:00 +0100
+
 libepos (0.1-65) unstable; urgency=low
 
   * Adapted to revised libcan naming conventions
