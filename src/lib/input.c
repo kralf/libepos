@@ -48,7 +48,7 @@ void epos_input_init(epos_input_p input, epos_device_p dev) {
   input->channel_mask = 0x0000;
   
   for (i = 0; i < sizeof(input->channels)/sizeof(epos_input_func_type_t); ++i)
-    input->channels[i] = EPOS_INPUT_DUMMY_FUNC;
+    input->channels[i] = EPOS_INPUT_FUNC_DUMMY;
 
   for (i = 0; i < sizeof(input->funcs)/sizeof(epos_input_func_t); ++i) {
     input->funcs[i].channel = 0;
@@ -84,13 +84,12 @@ epos_input_func_type_t epos_input_get_channel_func(epos_input_p input, int
 int epos_input_set_channel_func(epos_input_p input, int channel, 
   epos_input_func_type_t type) {
   int result = EPOS_DEVICE_ERROR_NONE;
-  short t = EPOS_INPUT_RESERVED_FUNC;
-  int enabled = input->funcs[type].enabled;
+  short t = EPOS_INPUT_FUNC_RESERVED;
 
   if (input->funcs[type].channel) {
     if (!(result = epos_device_write(input->dev, EPOS_INPUT_INDEX_CONFIG, 
       input->funcs[type].channel, (unsigned char*)&t, sizeof(short)))) {
-      input->channels[input->funcs[type].channel-1] = EPOS_INPUT_DUMMY_FUNC;
+      input->channels[input->funcs[type].channel-1] = EPOS_INPUT_FUNC_DUMMY;
       input->funcs[type].channel = 0;
     }
     else

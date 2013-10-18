@@ -1,3 +1,11 @@
+libepos (0.1-65) unstable; urgency=low
+
+  * Adapted to revised libcan naming conventions
+  * Revised preprocessor defines naming conventions
+  * Revised documentation
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Fri, 18 Oct 2013 10:13:00 +0100
+
 libepos (0.1-64) unstable; urgency=low
 
   * Added pkg-config file

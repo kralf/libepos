@@ -27,11 +27,19 @@
   * \brief EPOS velocity profile mode functions
   */
 
-/** Predefined EPOS velocity profile control constants
+/** \name Object Indexes
+  * \brief Predefined EPOS velocity profile control object indexes
   */
+//@{
 #define EPOS_VELOCITY_PROFILE_INDEX_TARGET            0x60FF
+//@}
 
+/** \name Control Words
+  * \brief Predefined EPOS velocity profile control words
+  */
+//@{
 #define EPOS_VELOCITY_PROFILE_CONTROL_SET             0x007F
+//@}
 
 /** \brief Structure defining an EPOS velocity profile control operation
   */

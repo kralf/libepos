@@ -27,22 +27,33 @@
   * \brief EPOS input functions
   */
 
-/** Predefined EPOS input constants
+/** \name Object Indexes
+  * \brief Predefined EPOS input object indexes
   */
-#define EPOS_INPUT_RESERVED_FUNC            7            
-#define EPOS_INPUT_DUMMY_FUNC               65535
-
+//@{
 #define EPOS_INPUT_INDEX_CONFIG             0x2070
 #define EPOS_INPUT_INDEX_FUNCS              0x2071
 #define EPOS_INPUT_SUBINDEX_STATE           0x01
 #define EPOS_INPUT_SUBINDEX_MASK            0x02
 #define EPOS_INPUT_SUBINDEX_POLARITY        0x03
 #define EPOS_INPUT_SUBINDEX_EXECUTE         0x04
+//@}
 
-/** Predefined EPOS input error codes
+/** \name Input Functionalities
+  * \brief Predefined EPOS input functionalities
   */
+//@{
+#define EPOS_INPUT_FUNC_RESERVED            7            
+#define EPOS_INPUT_FUNC_DUMMY               65535
+//@}
+
+/** \name Error Codes
+  * \brief Predefined EPOS input error codes
+  */
+//@{
 #define EPOS_INPUT_ERROR_NONE               0
 #define EPOS_INPUT_ERROR_SETUP              1
+//@}
 
 /** \brief Predefined EPOS input error descriptions
   */

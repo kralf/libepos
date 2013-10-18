@@ -27,13 +27,21 @@
   * \brief EPOS position profile mode functions
   */
 
-/** Predefined EPOS position profile control constants
+/** \name Object Indexes
+  * \brief Predefined EPOS position profile control object indexes
   */
+//@{
 #define EPOS_POSITION_PROFILE_INDEX_TARGET            0x607A
 #define EPOS_POSITION_PROFILE_INDEX_VELOCITY          0x6081
+//@}
 
+/** \name Control Words
+  * \brief Predefined EPOS position profile control words
+  */
+//@{
 #define EPOS_POSITION_PROFILE_CONTROL_SET_ABSOLUTE    0x003F
 #define EPOS_POSITION_PROFILE_CONTROL_SET_RELATIVE    0x007F
+//@}
 
 /** \brief Structure defining an EPOS position profile control operation
   */

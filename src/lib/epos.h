@@ -34,10 +34,14 @@
   * \brief EPOS convenience functions
   */
 
-/** Predefined EPOS constants
+/** \brief Predefined EPOS argument prefix
   */
-#define EPOS_CONFIG_ARG_PREFIX                "epos"
+#define EPOS_ARG_PREFIX                       "epos"
 
+/** \name Parameters
+  * \brief Predefined EPOS parameters
+  */
+//@{
 #define EPOS_PARAMETER_ID                     "node-id"
 #define EPOS_PARAMETER_RESET                  "node-reset"
 #define EPOS_PARAMETER_SENSOR_TYPE            "enc-type"
@@ -56,13 +60,17 @@
 #define EPOS_PARAMETER_HOME_ACCELERATION      "home-accel"
 #define EPOS_PARAMETER_HOME_OFFSET            "home-offset"
 #define EPOS_PARAMETER_HOME_POSITION          "home-pos"
+//@}
 
-/** Predefined EPOS error codes
+/** \name Error Codes
+  * \brief Predefined EPOS error codes
   */
+//@{
 #define EPOS_ERROR_NONE                       0
 #define EPOS_ERROR_OPEN                       1
 #define EPOS_ERROR_CLOSE                      2
 #define EPOS_ERROR_HOME                       3
+//@}
 
 /** \brief Predefined EPOS error descriptions
   */

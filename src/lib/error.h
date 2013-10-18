@@ -27,11 +27,14 @@
   * \brief EPOS error functions
   */
 
-/** Predefined EPOS error constants
+/** \name Object Indexes
+  * \brief Predefined EPOS error object indexes
   */
+//@{
 #define EPOS_ERROR_INDEX_HISTORY                0x1003
 #define EPOS_ERROR_SUBINDEX_HISTORY_LENGTH      0x00
 #define EPOS_ERROR_SUBINDEX_HISTORY_ENTRIES     0x01
+//@}
 
 /** \brief Structure defining an EPOS communication error
   */

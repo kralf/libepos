@@ -27,8 +27,10 @@
   * \brief EPOS position mode functions
   */
 
-/** Predefined EPOS position control constants
+/** \name Object Indexes
+  * \brief Predefined EPOS position control object indexes
   */
+//@{
 #define EPOS_POSITION_INDEX_SETTING_VALUE           0x2062
 #define EPOS_POSITION_INDEX_DEMAND_VALUE            0x6062
 #define EPOS_POSITION_INDEX_ACTUAL_VALUE            0x6064
@@ -42,6 +44,7 @@
 #define EPOS_POSITION_SUBINDEX_D_GAIN               0x03
 #define EPOS_POSITION_SUBINDEX_VELOCITY_FACTOR      0x04
 #define EPOS_POSITION_SUBINDEX_ACCELERATION_FACTOR  0x05
+//@}
 
 /** \brief Structure defining an EPOS position control configuration
   */

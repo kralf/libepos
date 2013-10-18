@@ -96,7 +96,7 @@ const char* epos_error_comm(int code) {
   int i;
 
   for (i = 0; i < sizeof(epos_errors_comm)/ sizeof(epos_error_comm_t); ++i)
-    if (epos_errors_comm[i].code == code)
+      if (epos_errors_comm[i].code == code)
     return epos_errors_comm[i].message;
 
   return epos_error_comm_undefined_message;

@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <sys/time.h>
 
 #include "device.h"
 #include "error.h"
@@ -110,7 +111,7 @@ void epos_device_init(epos_device_p dev, can_device_p can_dev, int node_id,
 
 void epos_device_destroy(epos_device_p dev) {
   dev->can_dev = 0;
-  dev->node_id = EPOS_DEVICE_INVALID_ID;
+  dev->node_id = CAN_NODE_ID_BROADCAST;
 }
 
 int epos_device_open(epos_device_p dev) {
@@ -153,28 +154,26 @@ int epos_device_send_message(epos_device_p dev, can_message_p message) {
 
 int epos_device_receive_message(epos_device_p dev, can_message_p message) {
   if (!can_receive_message(dev->can_dev, message)) {
-    if ((message->id >= EPOS_DEVICE_EMERGENCY_ID) &&
-      (message->id <= EPOS_DEVICE_EMERGENCY_ID+EPOS_DEVICE_MAX_ID)) {
+    if ((message->id >= CAN_COB_ID_SDO_EMERGENCY) &&
+      (message->id <= CAN_COB_ID_SDO_EMERGENCY+CAN_NODE_ID_MAX)) {
       short code;
 
       memcpy(&code, &message->content[0], sizeof(code));
       if (code != EPOS_DEVICE_ERROR_NONE) {
         fprintf(stderr, "Node %d device error: [0x%hX] %s\n",
-          message->id-EPOS_DEVICE_EMERGENCY_ID, code,
-          epos_error_device(code));
+          message->id-CAN_COB_ID_SDO_EMERGENCY, code, epos_error_device(code));
 
         return EPOS_DEVICE_ERROR_INTERNAL;
       }
       else
         return EPOS_DEVICE_ERROR_NONE;
     }
-    else if (message->content[0] == EPOS_DEVICE_ABORT) {
+    else if (message->content[0] == CAN_CMD_SDO_ABORT) {
       int code;
 
       memcpy(&code, &message->content[4], sizeof(code));
       fprintf(stderr, "Node %d communication error: [0x%X] %s\n",
-        message->id-EPOS_DEVICE_RECEIVE_ID, code,
-        epos_error_comm(code));
+        message->id-CAN_COB_ID_SDO_RECEIVE, code, epos_error_comm(code));
 
       return EPOS_DEVICE_ERROR_ABORT;
     }
@@ -190,8 +189,8 @@ int epos_device_read(epos_device_p dev, short index, unsigned char subindex,
   can_message_t message;
   memset(&message, 0, sizeof(can_message_t));
 
-  message.id = EPOS_DEVICE_SEND_ID+dev->node_id;
-  message.content[0] = EPOS_DEVICE_READ_SEND;
+  message.id = CAN_COB_ID_SDO_SEND+dev->node_id;
+  message.content[0] = CAN_CMD_SDO_READ_SEND;
   message.content[1] = index;
   message.content[2] = index >> 8;
   message.content[3] = subindex;
@@ -211,13 +210,13 @@ int epos_device_write(epos_device_p dev, short index, unsigned char subindex,
   unsigned char* data, ssize_t num) {
   can_message_t message;
 
-  message.id = EPOS_DEVICE_SEND_ID+dev->node_id;
+  message.id = CAN_COB_ID_SDO_SEND+dev->node_id;
   switch (num) {
-    case 1 : message.content[0] = EPOS_DEVICE_WRITE_SEND_1_BYTE;
+    case 1 : message.content[0] = CAN_CMD_SDO_WRITE_SEND_1_BYTE;
              break;
-    case 2 : message.content[0] = EPOS_DEVICE_WRITE_SEND_2_BYTE;
+    case 2 : message.content[0] = CAN_CMD_SDO_WRITE_SEND_2_BYTE;
              break;
-    case 4 : message.content[0] = EPOS_DEVICE_WRITE_SEND_4_BYTE;
+    case 4 : message.content[0] = CAN_CMD_SDO_WRITE_SEND_4_BYTE;
              break;
     default: return EPOS_DEVICE_ERROR_INVALID_SIZE;
   }
@@ -241,12 +240,12 @@ int epos_device_write(epos_device_p dev, short index, unsigned char subindex,
 
 int epos_device_store_parameters(epos_device_p dev) {
   return epos_device_write(dev, EPOS_DEVICE_INDEX_STORE,
-    EPOS_DEVICE_SUBINDEX_STORE, "save", 4);
+    EPOS_DEVICE_SUBINDEX_STORE, (unsigned char*)"save", 4);
 }
 
 int epos_device_restore_parameters(epos_device_p dev) {
   return epos_device_write(dev, EPOS_DEVICE_INDEX_STORE,
-    EPOS_DEVICE_SUBINDEX_STORE, "load", 4);
+    EPOS_DEVICE_SUBINDEX_STORE, (unsigned char*)"load", 4);
 }
 
 int epos_device_get_id(epos_device_p dev) {

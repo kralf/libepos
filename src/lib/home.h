@@ -27,8 +27,10 @@
   * \brief EPOS homing mode functions
   */
 
-/** Predefined EPOS homing control constants
+/** \name Object Indexes
+  * \brief Predefined EPOS homing object indexes
   */
+//@{
 #define EPOS_HOME_INDEX_METHOD                      0x6098
 #define EPOS_HOME_INDEX_VELOCITIES                  0x6099
 #define EPOS_HOME_SUBINDEX_SWITCH_SEARCH_VELOCITY   0x01
@@ -37,11 +39,22 @@
 #define EPOS_HOME_INDEX_OFFSET                      0x607C
 #define EPOS_HOME_INDEX_CURRENT_THRESHOLD           0x2080
 #define EPOS_HOME_INDEX_POSITION                    0x2081
+//@}
 
+/** \name Control Words
+  * \brief Predefined EPOS homing control words
+  */
+//@{
 #define EPOS_HOME_CONTROL_START                     0x001F
 #define EPOS_HOME_CONTROL_HALT                      0x01FF
+//@}
 
+/** \name Status Words
+  * \brief Predefined EPOS homing status words
+  */
+//@{
 #define EPOS_HOME_STATUS_REACHED                    0x1000
+//@}
 
 /** \brief EPOS homing methods
   */

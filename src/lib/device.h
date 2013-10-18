@@ -29,30 +29,17 @@
   * \brief EPOS device functions
   */
 
-/** Predefined EPOS device constants
+/** \name Constants
+  * \brief Predefined EPOS device constants
   */
+//@{
 #define EPOS_DEVICE_WAIT_FOREVER                -1.0
+//@}
 
-#define EPOS_DEVICE_INVALID_ID                  0x0000
-#define EPOS_DEVICE_MAX_ID                      0x007F
-#define EPOS_DEVICE_SEND_ID                     0x0600
-#define EPOS_DEVICE_RECEIVE_ID                  0x0580
-#define EPOS_DEVICE_EMERGENCY_ID                0x0080
-
-#define EPOS_DEVICE_WRITE_SEND_1_BYTE           0x2F
-#define EPOS_DEVICE_WRITE_SEND_2_BYTE           0x2B
-#define EPOS_DEVICE_WRITE_SEND_4_BYTE           0x23
-#define EPOS_DEVICE_WRITE_SEND_UNDEFINED        0x22
-#define EPOS_DEVICE_WRITE_RECEIVE               0x60
-
-#define EPOS_DEVICE_READ_RECEIVE_1_BYTE         0x4F
-#define EPOS_DEVICE_READ_RECEIVE_2_BYTE         0x4B
-#define EPOS_DEVICE_READ_RECEIVE_4_BYTE         0x43
-#define EPOS_DEVICE_READ_RECEIVE_UNDEFINED      0x42
-#define EPOS_DEVICE_READ_SEND                   0x40
-
-#define EPOS_DEVICE_ABORT                       0xC0
-
+/** \name Object Indexes
+  * \brief Predefined EPOS device object indexes
+  */
+//@{
 #define EPOS_DEVICE_INDEX_ERROR_REGISTER        0x1001
 #define EPOS_DEVICE_INDEX_STORE                 0x1010
 #define EPOS_DEVICE_SUBINDEX_STORE              0x01
@@ -67,18 +54,28 @@
 #define EPOS_DEVICE_SUBINDEX_HARDWARE_VERSION   0x02
 #define EPOS_DEVICE_INDEX_CONTROL               0x6040
 #define EPOS_DEVICE_INDEX_STATUS                0x6041
+//@}
 
+/** \name Control Words
+  * \brief Predefined EPOS device control words
+  */
+//@{
 #define EPOS_DEVICE_CONTROL_SWITCH_ON           0x0001
 #define EPOS_DEVICE_CONTROL_ENABLE_VOLTAGE      0x0003
 #define EPOS_DEVICE_CONTROL_SHUTDOWN            0x0006
 #define EPOS_DEVICE_CONTROL_QUICK_STOP          0x0007
 #define EPOS_DEVICE_CONTROL_ENABLE_OPERATION    0x000F
 #define EPOS_DEVICE_CONTROL_FAULT_RESET         0x00FF
+//@}
 
+/** \brief Predefined EPOS device type mask
+  */
 #define EPOS_DEVICE_TYPE_MASK                   0xFFF0
 
-/** Predefined EPOS device error codes
+/** \name Error Codes
+  * \brief Predefined EPOS device error codes
   */
+//@{
 #define EPOS_DEVICE_ERROR_NONE                  0
 #define EPOS_DEVICE_ERROR_OPEN                  1
 #define EPOS_DEVICE_ERROR_CLOSE                 2
@@ -92,6 +89,7 @@
 #define EPOS_DEVICE_ERROR_INVALID_BITRATE       10
 #define EPOS_DEVICE_ERROR_INVALID_BAURATE       11
 #define EPOS_DEVICE_ERROR_WAIT_TIMEOUT          12
+//@}
 
 /** \brief Predefined EPOS device error descriptions
   */

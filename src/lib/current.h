@@ -27,14 +27,17 @@
   * \brief EPOS current mode functions
   */
 
-/** Predefined EPOS current control constants
+/** \name Object Indexes
+  * \brief Predefined EPOS current control object indexes
   */
+//@{
 #define EPOS_CURRENT_INDEX_SETTING_VALUE           0x2030
 #define EPOS_CURRENT_INDEX_ACTUAL_VALUE            0x6078
 #define EPOS_CURRENT_INDEX_AVERAGE_VALUE           0x2027
 #define EPOS_CURRENT_INDEX_CONTROL_PARAMETERS      0x60F6
 #define EPOS_CURRENT_SUBINDEX_P_GAIN               0x01
 #define EPOS_CURRENT_SUBINDEX_I_GAIN               0x02
+//@}
 
 /** \brief Structure defining an EPOS current control configuration
   */

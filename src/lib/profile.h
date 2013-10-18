@@ -27,13 +27,21 @@
   * \brief EPOS profile generic functions
   */
 
-/** Predefined EPOS profile control constants
+/** \name Object Indexes
+  * \brief Predefined EPOS profile control object indexes
   */
+//@{
 #define EPOS_PROFILE_INDEX_ACCELERATION       0x6083
 #define EPOS_PROFILE_INDEX_DECELERATION       0x6084
 #define EPOS_PROFILE_INDEX_TYPE               0x6086
+//@}
 
+/** \name Status Words
+  * \brief Predefined EPOS profile control status words
+  */
+//@{
 #define EPOS_PROFILE_STATUS_REACHED           0x0400
+//@}
 
 /** \brief EPOS motion profile types
   */

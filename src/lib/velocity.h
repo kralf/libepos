@@ -27,8 +27,10 @@
   * \brief EPOS velocity mode functions
   */
 
-/** Predefined EPOS velocity control constants
+/** \name Object Indexes
+  * \brief Predefined EPOS velocity control object indexes
   */
+//@{
 #define EPOS_VELOCITY_INDEX_SETTING_VALUE           0x206B
 #define EPOS_VELOCITY_INDEX_DEMAND_VALUE            0x606B
 #define EPOS_VELOCITY_INDEX_ACTUAL_VALUE            0x606C
@@ -36,6 +38,7 @@
 #define EPOS_VELOCITY_INDEX_CONTROL_PARAMETERS      0x60F9
 #define EPOS_VELOCITY_SUBINDEX_P_GAIN               0x01
 #define EPOS_VELOCITY_SUBINDEX_I_GAIN               0x02
+//@}
 
 /** \brief Structure defining an EPOS velocity control configuration
   */
