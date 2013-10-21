@@ -1,3 +1,9 @@
+libepos (0.1-67) unstable; urgency=low
+
+  * Added udev support package
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Mon, 21 Oct 2013 11:02:00 +0100
+
 libepos (0.1-66) unstable; urgency=low
 
   * Updated project summary

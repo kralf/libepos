@@ -15,6 +15,14 @@ remake_project(
   INSTALL /usr
 )
 
+remake_component(
+  udev
+  CONFIGURATION_DESTINATION /etc/udev
+)
+remake_add_directories(
+  rules
+  COMPONENT udev
+)
 remake_doc(
   html
 )
@@ -31,6 +39,12 @@ remake_pack_deb(
   COMPONENT dev
   DESCRIPTION "development headers"
   DEPENDS libepos tulibs-dev libcan-dev
+)
+remake_pack_deb(
+  COMPONENT udev
+  DESCRIPTION "udev rules"
+  DEPENDS udev
+  EXTRA debian/rules/*
 )
 remake_pack_deb(
   ARCH all

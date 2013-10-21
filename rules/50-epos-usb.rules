@@ -1,0 +1,5 @@
+# EPOS2 USB auto-configuration rules for udev.
+# See udev(7) for syntax.
+
+# EPOS2 controller device permissions and symlinks
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="a8b0", ATTRS{product}=="maxon motor EPOS2", MODE="0664", GROUP="plugdev", SYMLINK+="epos/%s{serial}"
