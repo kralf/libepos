@@ -46,8 +46,8 @@
 /** \brief EPOS motion profile types
   */
 typedef enum {
-  epos_profile_linear = 0,
-  epos_profile_sinusoidal = 1
+  epos_profile_linear,
+  epos_profile_sinusoidal
 } epos_profile_type_t;
 
 /** \brief Wait for completion of an EPOS motion profile

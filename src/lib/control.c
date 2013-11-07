@@ -20,13 +20,26 @@
 
 #include <stdio.h>
 
-#include <tulibs/timer.h>
+#include <timer/timer.h>
 
 #include "control.h"
 
+char epos_control_modes[] = {
+   6,
+   3,
+   1,
+  -1,
+  -2,
+  -3,
+  -4,
+  -5,
+  -6,
+};
+
 void epos_control_init(epos_control_p control, epos_device_p dev,
-  epos_control_type_t type) {
+    epos_control_mode_t mode) {
   control->dev = dev;
+  control->mode = mode;
 }
 
 void epos_control_destroy(epos_control_p control) {
@@ -34,20 +47,24 @@ void epos_control_destroy(epos_control_p control) {
     control->dev = 0;
 }
 
-epos_control_type_t epos_control_get_type(epos_control_p control) {
-  unsigned char type;
-  epos_device_read(control->dev, EPOS_CONTROL_INDEX_MODE_DISPLAY, 0, &type, 1);
+epos_control_mode_t epos_control_get_mode(epos_control_p control) {
+  unsigned char mode;
+  epos_device_read(control->dev, EPOS_CONTROL_INDEX_MODE_DISPLAY, 0, &mode, 1);
 
-  return type;
+  int i;
+  for (i = 0; i < sizeof(epos_control_modes); ++i)
+    if (epos_control_modes[i] == mode)
+      return i;
+    
+  return mode;
 }
 
-int epos_control_set_type(epos_control_p control, epos_control_type_t type) {
-  unsigned char t = type;
+int epos_control_set_mode(epos_control_p control, epos_control_mode_t mode) {
   int result = epos_device_write(control->dev, EPOS_CONTROL_INDEX_MODE, 0,
-    &t, 1);
+    (unsigned char*)&epos_control_modes[mode], 1);
 
   if (!result)
-    control->type = type;
+    control->mode = mode;
 
   return result;
 }

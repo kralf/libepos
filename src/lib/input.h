@@ -66,24 +66,24 @@ extern short epos_input_channel_masks[];
 /** \brief EPOS input functionalities
   */
 typedef enum {
-  epos_input_neg_limit = 0,
-  epos_input_pos_limit = 1,
-  epos_input_home_switch = 2,
-  epos_input_pos_marker = 3,
-  epos_input_dev_enable = 4,
+  epos_input_neg_limit,
+  epos_input_pos_limit,
+  epos_input_home_switch,
+  epos_input_pos_marker,
+  epos_input_dev_enable
 } epos_input_func_type_t;
 
 /** \brief EPOS input polarities
   */
 typedef enum {
-  epos_input_high = 0,
-  epos_input_low = 1,
+  epos_input_high,
+  epos_input_low
 } epos_input_polarity_t;
 
 /** \brief Structure defining an EPOS input functionalities
   */
 typedef struct epos_input_func_t {
-  int channel;                     //!< The input functionality's type.
+  int channel;                     //!< The input functionality's channel.
   epos_input_polarity_t polarity;  //!< The input functionality's polarity.
   int execute;                     //!< The input functionality's execution.
 

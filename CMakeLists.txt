@@ -4,9 +4,9 @@ include(ReMake)
 
 remake_project(
   libepos
-  VERSION 0.1
+  VERSION 0.2
   RELEASE alpha
-  SUMMARY "Driver library for the maxon EPOS/EPOS2 motor controllers."
+  SUMMARY "Driver library for maxon EPOS/EPOS2 motor controllers."
   AUTHOR "Ralf Kaestner"
   CONTACT "ralf.kaestner@gmail.com"
   HOME "http://github.com/kralf/libepos"

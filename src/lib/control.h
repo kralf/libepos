@@ -42,37 +42,37 @@
 #define EPOS_CONTROL_INDEX_MODE_DISPLAY      0x6061
 //@}
 
-/** \brief EPOS controller types
+/** \brief EPOS controller modes
   */
 typedef enum {
-  epos_control_homing = 6,
-  epos_control_profile_vel = 3,
-  epos_control_profile_pos = 1,
-  epos_control_position = -1,
-  epos_control_velocity = -2,
-  epos_control_current = -3,
-  epos_control_diagnostic = -4,
-  epos_control_master_enc = -5,
-  epos_control_step_dir = -6
-} epos_control_type_t;
+  epos_control_homing,
+  epos_control_profile_vel,
+  epos_control_profile_pos,
+  epos_control_position,
+  epos_control_velocity,
+  epos_control_current,
+  epos_control_diagnostic,
+  epos_control_master_enc,
+  epos_control_step_dir
+} epos_control_mode_t;
 
 /** \brief Structure defining an EPOS controller
   */
 typedef struct epos_control_t {
   epos_device_p dev;          //!< The EPOS device of the controller.
 
-  epos_control_type_t type;   //!< The controller type.
+  epos_control_mode_t mode;   //!< The controller mode.
 } epos_control_t, *epos_control_p;
 
 /** \brief Initialize EPOS controller
   * \param[in] control The EPOS controller to be initialized.
   * \param[in] dev The controller's EPOS device.
-  * \param[in] type The type of the EPOS controller to be initialized.
+  * \param[in] mode The mode of the EPOS controller to be initialized.
   */
 void epos_control_init(
   epos_control_p control,
   epos_device_p dev,
-  epos_control_type_t type);
+  epos_control_mode_t mode);
 
 /** \brief Destroy EPOS controller
   * \param[in] control The EPOS controller to be destroyed.
@@ -80,21 +80,21 @@ void epos_control_init(
 void epos_control_destroy(
   epos_control_p control);
 
-/** \brief Retrieve EPOS controller type
-  * \param[in] control The EPOS controller to retrieve the type for.
-  * \return The type of the specified EPOS controller.
+/** \brief Retrieve EPOS controller mode
+  * \param[in] control The EPOS controller to retrieve the mode for.
+  * \return The mode of the specified EPOS controller.
   */
-epos_control_type_t epos_control_get_type(
+epos_control_mode_t epos_control_get_mode(
   epos_control_p control);
 
-/** \brief Set EPOS controller type
-  * \param[in] control The EPOS controller to set the type for.
-  * \param[in] type The type of the specified EPOS controller.
+/** \brief Set EPOS controller mode
+  * \param[in] control The EPOS controller to set the mode for.
+  * \param[in] mode The mode of the specified EPOS controller.
   * \return The resulting device error code.
   */
-int epos_control_set_type(
+int epos_control_set_mode(
   epos_control_p control,
-  epos_control_type_t type);
+  epos_control_mode_t mode);
 
 /** \brief Start EPOS controller
   * \param[in] control The EPOS controller to be started.

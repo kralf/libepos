@@ -94,12 +94,12 @@ int epos_position_profile_start(
 int epos_position_profile_stop(
   epos_node_p node);
 
-/** \brief Estimate the relative position of an EPOS position profile
+/** \brief Estimate the absolute position of an EPOS position profile
   * \param[in] profile The EPOS position profile control operation to
-  *   estimate the relative position of.
-  * \param[in] time The absolute time to estimate the relative position
+  *   estimate the absolute position of.
+  * \param[in] time The absolute time to estimate the absolute position
   *    at in [s].
-  * \return The estimated relative position in [rad].
+  * \return The estimated absolute position in [rad].
   */
 float epos_position_profile_estimate(
   epos_position_profile_p profile,

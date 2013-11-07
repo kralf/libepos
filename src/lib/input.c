@@ -24,8 +24,8 @@
 #include "input.h"
 
 const char* epos_input_errors[] = {
-  "success",
-  "error setting EPOS input parameters",
+  "Success",
+  "Error setting EPOS input parameters",
 };
 
 short epos_input_channel_masks[] = {

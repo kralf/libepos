@@ -21,7 +21,7 @@
 #ifndef EPOS_H
 #define EPOS_H
 
-#include <tulibs/config.h>
+#include <tulibs/config/config.h>
 
 #include "device.h"
 #include "sensor.h"
@@ -36,14 +36,14 @@
 
 /** \brief Predefined EPOS argument prefix
   */
-#define EPOS_ARG_PREFIX                       "epos"
+#define EPOS_ARG_PREFIX                       "epos-"
 
 /** \name Parameters
   * \brief Predefined EPOS parameters
   */
 //@{
-#define EPOS_PARAMETER_ID                     "node-id"
-#define EPOS_PARAMETER_RESET                  "node-reset"
+#define EPOS_PARAMETER_DEVICE_NODE_ID         "dev-node-id"
+#define EPOS_PARAMETER_DEVICE_RESET           "dev-reset"
 #define EPOS_PARAMETER_SENSOR_TYPE            "enc-type"
 #define EPOS_PARAMETER_SENSOR_POLARITY        "enc-polarity"
 #define EPOS_PARAMETER_SENSOR_PULSES          "enc-pulses"
@@ -51,7 +51,7 @@
 #define EPOS_PARAMETER_MOTOR_TYPE             "motor-type"
 #define EPOS_PARAMETER_MOTOR_CURRENT          "motor-current"
 #define EPOS_PARAMETER_GEAR_TRANSMISSION      "gear-trans"
-#define EPOS_PARAMETER_CONTROL_TYPE           "control-type"
+#define EPOS_PARAMETER_CONTROL_MODE           "control-mode"
 
 #define EPOS_PARAMETER_HOME_METHOD            "home-method"
 #define EPOS_PARAMETER_HOME_TYPE              "home-type"
@@ -67,9 +67,10 @@
   */
 //@{
 #define EPOS_ERROR_NONE                       0
-#define EPOS_ERROR_OPEN                       1
-#define EPOS_ERROR_CLOSE                      2
-#define EPOS_ERROR_HOME                       3
+#define EPOS_ERROR_CONFIG                     1
+#define EPOS_ERROR_OPEN                       2
+#define EPOS_ERROR_CLOSE                      3
+#define EPOS_ERROR_HOME                       4
 //@}
 
 /** \brief Predefined EPOS error descriptions
@@ -83,7 +84,7 @@ extern config_t epos_default_config;
 /** \brief Structure defining an EPOS node
   */
 typedef struct epos_node_t {
-  epos_device_t dev;              //!< The EPOS node device.
+  epos_device_t dev;              //!< The EPOS device.
   epos_sensor_t sensor;           //!< The EPOS position sensor.
   epos_motor_t motor;             //!< The EPOS motor.
   epos_gear_t gear;               //!< The EPOS gear assembly.
@@ -94,30 +95,47 @@ typedef struct epos_node_t {
 } epos_node_t, *epos_node_p;
 
 /** \brief Initialize EPOS node
+  * \note The node will be initialized using default configuration parameters.
   * \param[in] node The EPOS node to be initialized.
   * \param[in] can_dev The CAN communication device of the EPOS node. If
   *   null, a device will be created from default parameters.
-  * \param[in] config The optional EPOS configuration parameters. Can be null.
   */
 void epos_init(
+  epos_node_p node,
+  can_device_p can_dev);
+
+/** \brief Initialize EPOS node from configuration
+  * \param[in] node The EPOS node to be initialized.
+  * \param[in] can_dev The CAN communication device of the EPOS node. If
+  *   null, a device will be created from default parameters.
+  * \param[in] config The EPOS configuration parameters.
+  * \return The resulting error code.
+  */
+int epos_init_config(
   epos_node_p node,
   can_device_p can_dev,
   config_p config);
 
-/** \brief Initialize EPOS node from command line arguments
+/** \brief Initialize EPOS node by parsing command line arguments
   * \param[in] node The EPOS node to be initialized.
+  * \param[in] parser The initialized configuration parser which will
+  *   be used to parse the command line arguments into the EPOS node
+  *   configuration.
+  * \param[in] prefix An optional argument prefix for the EPOS node
+  *   configuration parameters. If null, the default prefix is chosen.
   * \param[in] argc The number of supplied command line arguments.
   * \param[in] argv The list of supplied command line arguments.
-  * \param[in] prefix An optional argument prefix.
-  * \param[in] args An optional string naming the expected arguments.
-  * \return The resulting configuration error code.
+  * \param[in] exit The exit policy of the parser in case of an error
+  *   or help request.
+  * \return The resulting error code.
   */
-int epos_init_arg(
+int epos_init_config_parse(
   epos_node_p node,
+  config_parser_p parser,
+  const char* prefix,
   int argc,
   char **argv,
-  const char* prefix,
-  const char* args);
+  config_parser_exit_t exit);
 
 /** \brief Destroy EPOS node
   * \note This method automatically destroys unused CAN communication devices.
@@ -152,6 +170,14 @@ float epos_get_position(
   * \return The angular velocity of the specified EPOS node in [rad/s].
   */
 float epos_get_velocity(
+  epos_node_p node);
+
+/** \brief Retrieve the angular acceleration of an EPOS node
+  * \param[in] node The opened EPOS node to retrieve the angular
+  *   acceleration for.
+  * \return The angular acceleration of the specified EPOS node in [rad/s^2].
+  */
+float epos_get_acceleration(
   epos_node_p node);
 
 /** \brief Retrieve the current of an EPOS node

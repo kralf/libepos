@@ -49,6 +49,9 @@ typedef struct epos_velocity_profile_t {
   float deceleration;            //!< The profile acceleration in [rad/s^2].
 
   epos_profile_type_t type;      //!< The velocity profile type.
+
+  float start_value;             //!< The profile's start velocity in [rad].
+  double start_time;             //!< The start time of the profile in [s].
 } epos_velocity_profile_t, *epos_velocity_profile_p;
 
 /** \brief Initialize EPOS velocity profile control operation
@@ -84,6 +87,16 @@ int epos_velocity_profile_start(
   */
 int epos_velocity_profile_stop(
   epos_node_p node);
+
+/** \brief Estimate the velocity of an EPOS velocity profile
+  * \param[in] profile The EPOS velocity profile control operation to
+  *   estimate the velocity of.
+  * \param[in] time The absolute time to estimate the velocity at in [s].
+  * \return The estimated velocity in [rad/s].
+  */
+float epos_velocity_profile_estimate(
+  epos_velocity_profile_p profile,
+  double time);
 
 /** \brief Set the velocity profile target velocity of an EPOS device
   * \param[in] dev The EPOS device to set the target velocity for.

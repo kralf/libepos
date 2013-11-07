@@ -21,7 +21,7 @@
 #ifndef EPOS_DEVICE_H
 #define EPOS_DEVICE_H
 
-#include <libcan/can.h>
+#include <can.h>
 
 #include "global.h"
 
@@ -34,6 +34,7 @@
   */
 //@{
 #define EPOS_DEVICE_WAIT_FOREVER                -1.0
+#define EPOS_DEVICE_CAN_BIT_RATE_AUTO           -1
 //@}
 
 /** \name Object Indexes
@@ -46,8 +47,8 @@
 #define EPOS_DEVICE_INDEX_RESTORE               0x1011
 #define EPOS_DEVICE_SUBINDEX_RESTORE            0x01
 #define EPOS_DEVICE_INDEX_ID                    0x2000
-#define EPOS_DEVICE_INDEX_CAN_BITRATE           0x2001
-#define EPOS_DEVICE_INDEX_RS232_BAUDRATE        0x2002
+#define EPOS_DEVICE_INDEX_CAN_BIT_RATE          0x2001
+#define EPOS_DEVICE_INDEX_RS232_BAUD_RATE       0x2002
 #define EPOS_DEVICE_INDEX_VERSION               0x2003
 #define EPOS_DEVICE_INDEX_MISC_CONFIGURATION    0x2008
 #define EPOS_DEVICE_SUBINDEX_SOFTWARE_VERSION   0x01
@@ -86,8 +87,8 @@
 #define EPOS_DEVICE_ERROR_INTERNAL              7
 #define EPOS_DEVICE_ERROR_READ                  8
 #define EPOS_DEVICE_ERROR_WRITE                 9
-#define EPOS_DEVICE_ERROR_INVALID_BITRATE       10
-#define EPOS_DEVICE_ERROR_INVALID_BAURATE       11
+#define EPOS_DEVICE_ERROR_INVALID_BIT_RATE      10
+#define EPOS_DEVICE_ERROR_INVALID_BAUD_RATE     11
 #define EPOS_DEVICE_ERROR_WAIT_TIMEOUT          12
 //@}
 
@@ -129,8 +130,8 @@ typedef struct epos_device_t {
 
   int reset;                  //!< Reset the EPOS device after opening.
 
-  int can_bitrate;            //!< The CAN bitrate in [kbit/s].
-  int rs232_baudrate;         //!< The RS-232 baudrate in [Baud].
+  int can_bit_rate;           //!< The CAN bit rate in [kbit/s].
+  int rs232_baud_rate;        //!< The RS232 baud rate in [baud].
 
   short hardware_version;     //!< The hardware version of the EPOS device.
   short software_version;     //!< The software version of the EPOS device.
@@ -145,7 +146,8 @@ typedef struct epos_device_t {
 /** \brief Initialize EPOS device
   * \param[in] dev The EPOS device to be initialized.
   * \param[in] can_dev The CAN device of the EPOS device.
-  * \param[in] node_id The identifier of the EPOS node to be initialized.
+  * \param[in] node_id The node identifier of the EPOS device to be
+  *   initialized.
   * \param[in] reset Reset the EPOS device after opening.
   */
 void epos_device_init(
@@ -223,7 +225,7 @@ int epos_device_write(
   unsigned char* data,
   ssize_t num);
 
-/** \brief Store persistant parameters on an EPOS device
+/** \brief Store persistent parameters on an EPOS device
   * \param[in] dev The EPOS device to store the parameters on.
   * \return The resulting error code.
   */
@@ -244,39 +246,46 @@ int epos_device_restore_parameters(
 int epos_device_get_id(
   epos_device_p dev);
 
-/** \brief Retrieve CAN bitrate of an EPOS device
-  * \param[in] dev The EPOS device to retrieve the CAN bitrate for.
-  * \return The CAN bitrate of the specified EPOS device in [kbit/s].
+/** \brief Retrieve CAN bit rate of an EPOS device
+  * \note Starting from the second hardware generation, automatic bit rate
+  *   detection is supported by the EPOS devices.
+  * \param[in] dev The EPOS device to retrieve the CAN bit rate for.
+  * \return The CAN bit rate of the specified EPOS device in [kbit/s] or
+  *   EPOS_DEVICE_CAN_BIT_RATE_AUTO if the device is in automatic bit rate
+  *   detection mode.
   */
-int epos_device_get_can_bitrate(
+int epos_device_get_can_bit_rate(
   epos_device_p dev);
 
-/** \brief Set CAN bitrate of an EPOS device
-  * \param[in] dev The EPOS device to set the CAN bitrate for.
-  * \param[in] bitrate The new CAN bitrate of the specified EPOS
-  *   device in [kbit/s].
+/** \brief Set CAN bit rate of an EPOS device
+  * \note Starting from the second hardware generation, automatic bit rate
+  *   detection is supported by the EPOS devices.
+  * \param[in] dev The EPOS device to set the CAN bit rate for.
+  * \param[in] bit_rate The new CAN bit rate of the specified EPOS
+  *   device in [kbit/s] or EPOS_DEVICE_CAN_BIT_RATE_AUTO to put the
+  *   device in automatic bit rate detection mode.
   * \return The resulting error code.
   */
-int epos_device_set_can_bitrate(
+int epos_device_set_can_bit_rate(
   epos_device_p dev,
-  int bitrate);
+  int bit_rate);
 
-/** \brief Retrieve RS232 baudrate of an EPOS device
-  * \param[in] dev The EPOS device to retrieve the RS232 baudrate for.
-  * \return The RS-232 baudrate of the specified EPOS device in [Baud].
+/** \brief Retrieve RS232 baud rate of an EPOS device
+  * \param[in] dev The EPOS device to retrieve the RS232 baud rate for.
+  * \return The RS232 baud rate of the specified EPOS device in [baud].
   */
-int epos_device_get_rs232_baudrate(
+int epos_device_get_rs232_baud_rate(
   epos_device_p dev);
 
-/** \brief Set RS232 baudrate of an EPOS device
-  * \param[in] dev The EPOS device to set the RS232 baudrate for.
-  * \param[in] baudrate The new RS-232 baudrate of the specified EPOS
-  *   device in [Baud].
+/** \brief Set RS232 baud rate of an EPOS device
+  * \param[in] dev The EPOS device to set the RS232 baud rate for.
+  * \param[in] baud_rate The new RS232 baud rate of the specified EPOS
+  *   device in [baud].
   * \return The resulting error code.
   */
-int epos_device_set_rs232_baudrate(
+int epos_device_set_rs232_baud_rate(
   epos_device_p dev,
-  int baudrate);
+  int baud_rate);
 
 /** \brief Retrieve hardware version of an EPOS device
   * \param[in] dev The EPOS device to retrieve the hardware version for.

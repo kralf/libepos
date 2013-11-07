@@ -21,6 +21,8 @@
 #include <stdio.h>
 #include <signal.h>
 
+#include <config/parser.h>
+
 #include "epos.h"
 #include "home.h"
 
@@ -31,10 +33,18 @@ void epos_signaled(int signal) {
 }
 
 int main(int argc, char **argv) {
+  config_parser_t parser;
   epos_node_t node;
 
-  if (epos_init_arg(&node, argc, argv, 0, 0))
-    return -1;
+  config_parser_init_default(&parser,
+    "Start EPOS controller in homing mode",
+    "Establish the communication with a connected EPOS device and attempt to "
+    "start the controller in homing mode. The controller will be stopped "
+    "if SIGINT is received or the homing operation is completed. The "
+    "communication interface depends on the momentarily selected alternative "
+    "of the underlying CANopen library.");  
+  epos_init_config_parse(&node, &parser, 0, argc, argv,
+    config_parser_exit_both);
   
   signal(SIGINT, epos_signaled);
 

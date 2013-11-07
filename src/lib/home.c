@@ -23,6 +23,23 @@
 #include "home.h"
 #include "gear.h"
 
+char epos_home_methods[] = {
+  11,
+   7,
+  27,
+  23,
+   1,
+   2,
+  17,
+  18,
+  -1,
+  -2,
+  -3,
+  -4,
+  34,
+  33,
+};
+
 void epos_home_init(epos_home_p home, epos_home_method_t method, float current,
   float velocity, float acceleration, float position) {
   home->method = method;
@@ -48,7 +65,7 @@ int epos_home_start(epos_node_p node, epos_home_p home) {
   int offset = epos_gear_from_angle(&node->gear, home->offset);
   int pos = epos_gear_from_angle(&node->gear, home->position);
 
-  if (!(result = epos_control_set_type(&node->control, epos_control_homing)) &&
+  if (!(result = epos_control_set_mode(&node->control, epos_control_homing)) &&
     !(result = epos_home_set_method(&node->dev, home->method)) &&
     !(result = epos_home_set_current_threshold(&node->dev,
       home->current*1e3)) &&
@@ -83,8 +100,8 @@ int epos_home_wait(epos_node_p node, double timeout) {
 }
 
 int epos_home_set_method(epos_device_p dev, epos_home_method_t method) {
-  unsigned char m = method;
-  return epos_device_write(dev, EPOS_HOME_INDEX_METHOD, 0, &m, 1);
+  return epos_device_write(dev, EPOS_HOME_INDEX_METHOD, 0,
+    (unsigned char*)&epos_home_methods[method], 1);
 }
 
 int epos_home_set_current_threshold(epos_device_p dev, short current) {
@@ -93,14 +110,14 @@ int epos_home_set_current_threshold(epos_device_p dev, short current) {
 }
 
 int epos_home_set_switch_search_velocity(epos_device_p dev, unsigned int
-  velocity) {
+    velocity) {
   return epos_device_write(dev, EPOS_HOME_INDEX_VELOCITIES,
     EPOS_HOME_SUBINDEX_SWITCH_SEARCH_VELOCITY, (unsigned char*)&velocity,
     sizeof(unsigned int));
 }
 
 int epos_home_set_zero_search_velocity(epos_device_p dev, unsigned int
-  velocity) {
+    velocity) {
   return epos_device_write(dev, EPOS_HOME_INDEX_VELOCITIES,
     EPOS_HOME_SUBINDEX_ZERO_SEARCH_VELOCITY, (unsigned char*)&velocity,
     sizeof(unsigned int));

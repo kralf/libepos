@@ -21,6 +21,8 @@
 #include <stdio.h>
 #include <signal.h>
 
+#include <config/parser.h>
+
 #include "epos.h"
 #include "position.h"
 
@@ -31,21 +33,36 @@ void epos_signaled(int signal) {
 }
 
 int main(int argc, char **argv) {
+  config_parser_t parser;
   epos_node_t node;
   epos_position_t pos;
 
-  if (epos_init_arg(&node, argc, argv, 0, "POSITION"))
-    return -1;
-  float target_value = deg_to_rad(atof(argv[1]));
-
+  config_parser_init_default(&parser,
+    "Start EPOS controller in position mode",
+    "Establish the communication with a connected EPOS device and attempt to "
+    "start the controller in position mode. The controller will be stopped "
+    "if SIGINT is received. The communication interface depends on the "
+    "momentarily selected alternative of the underlying CANopen library.");  
+  config_param_p position_param = config_set_param_value_range(
+    &parser.arguments,
+    "POSITION",
+    config_param_type_float,
+    "",
+    "(-inf, inf)",
+    "The demanded angular position in [deg]");
+  epos_init_config_parse(&node, &parser, 0, argc, argv,
+    config_parser_exit_both);
+  
   signal(SIGINT, epos_signaled);
 
   if (epos_open(&node))
     return -1;
+  
+  float target_value = deg_to_rad(config_param_get_float(position_param));
   epos_position_init(&pos, target_value);
   if (!epos_position_start(&node, &pos)) {
     while (!quit) {
-      fprintf(stdout, "\rEPOS angular position: %8.2f deg",
+      fprintf(stdout, "\rAngular position: %8.2f deg",
         rad_to_deg(epos_get_position(&node)));
       fflush(stdout);
     }

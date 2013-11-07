@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#include <tulibs/timer.h>
+#include <timer/timer.h>
 
 #include "position_profile.h"
 #include "gear.h"
@@ -55,7 +55,7 @@ int epos_position_profile_start(epos_node_p node, epos_position_profile_p
     EPOS_POSITION_PROFILE_CONTROL_SET_RELATIVE :
     EPOS_POSITION_PROFILE_CONTROL_SET_ABSOLUTE;
 
-  if (!(result = epos_control_set_type(&node->control, 
+  if (!(result = epos_control_set_mode(&node->control, 
       epos_control_profile_pos)) &&
     !(result = epos_position_profile_set_velocity(&node->dev, vel)) &&
     !(result = epos_profile_set_acceleration(&node->dev, acc)) &&

@@ -19,24 +19,52 @@
  ***************************************************************************/
 
 #include <stdio.h>
+#include <signal.h>
+
+#include <config/parser.h>
 
 #include "epos.h"
 
-int main(int argc, char **argv) {
-  epos_node_t node;
-  
-  if (epos_init_arg(&node, argc, argv, 0, 0))
-    return -1;
+int quit = 0;
 
+void epos_signaled(int signal) {
+  quit = 1;
+}
+
+int main(int argc, char **argv) {
+  config_parser_t parser;
+  epos_node_t node;
+
+  config_parser_init_default(&parser,
+    "Print input functionalities and states of an EPOS device",
+    "Establish the communication with a connected EPOS device and attempt "
+    "to retrieve its input functionalities and states until receiving SIGINT. "
+    "The communication interface depends on the momentarily selected "
+    "alternative of the underlying CANopen library.");
+  epos_init_config_parse(&node, &parser, 0, argc, argv,
+    config_parser_exit_both);
+  
+  signal(SIGINT, epos_signaled);
+  
   if (epos_open(&node))
     return -1;
-  int i;
-  printf("%5s  %5s  %5s  %5s  %5s  %5s\n", "type", "chan", "pol", "exec", 
-    "mask", "state");
-  for (i = 0; i < sizeof(node.input.funcs)/sizeof(epos_input_func_t); ++i)
-    printf("%5d  %5d  %5d  %5d  %5d  %5d\n", i, node.input.funcs[i].channel,
-    node.input.funcs[i].polarity, node.input.funcs[i].execute,
-    node.input.funcs[i].enabled, epos_input_get_func_state(&node.input, i));
+
+  fprintf(stdout, "%5s  %5s  %5s  %5s  %5s  %5s\n", "Type", "Chan", "Pol",
+    "Exec", "Mask", "State");
+  int num_inputs = sizeof(node.input.funcs)/sizeof(epos_input_func_t);
+  while (!quit) {
+    int i;    
+    for (i = 0; i < num_inputs; ++i)
+      fprintf(stdout, "\r%5d  %5d  %5d  %5d  %5d  %5d%s", i,
+        node.input.funcs[i].channel,
+        node.input.funcs[i].polarity,
+        node.input.funcs[i].execute,
+        node.input.funcs[i].enabled,
+        epos_input_get_func_state(&node.input, i),
+        (i+1 < num_inputs) ? "\n" : "");
+    fprintf(stdout, "%c[%dA\r", 0x1B, num_inputs-1);
+  }
+  fprintf(stdout, "%c[%dB\n", 0x1B, num_inputs-1);
   epos_close(&node);
 
   epos_destroy(&node);

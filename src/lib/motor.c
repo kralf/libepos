@@ -23,8 +23,14 @@
 #include "motor.h"
 
 const char* epos_motor_errors[] = {
-  "success",
-  "error setting EPOS motor parameters",
+  "Success",
+  "Error setting EPOS motor parameters",
+};
+
+short epos_motor_types[] = {
+   1,
+  10,
+  11,
 };
 
 void epos_motor_init(epos_motor_p motor, epos_device_p dev, epos_motor_type_t
@@ -57,13 +63,17 @@ epos_motor_type_t epos_motor_get_type(epos_motor_p motor) {
   epos_device_read(motor->dev, EPOS_MOTOR_INDEX_TYPE, 0,
     (unsigned char*)&type, sizeof(short));
 
+  int i;
+  for (i = 0; i < sizeof(epos_motor_types)/sizeof(short); ++i)
+    if (epos_motor_types[i] == type)
+      return i;
+    
   return type;
 }
 
 int epos_motor_set_type(epos_motor_p motor, epos_motor_type_t type) {
-  short t = type;
   int result = epos_device_write(motor->dev, EPOS_MOTOR_INDEX_TYPE, 0,
-    (unsigned char*)&t, sizeof(short));
+    (unsigned char*)&epos_motor_types[type], sizeof(short));
 
   if (!result)
     motor->type = type;

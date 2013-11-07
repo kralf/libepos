@@ -41,7 +41,7 @@ int epos_velocity_start(epos_node_p node, epos_velocity_p velocity) {
   int vel = epos_gear_from_angular_velocity(&node->gear,
     velocity->target_value);
 
-  if (!(result = epos_control_set_type(&node->control, 
+  if (!(result = epos_control_set_mode(&node->control, 
       epos_control_velocity)) &&
     !(result = epos_control_start(&node->control)))
     result = epos_velocity_set_demand(&node->dev, vel);

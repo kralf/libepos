@@ -20,19 +20,29 @@
 
 #include <stdio.h>
 
+#include <config/parser.h>
+
 #include "epos.h"
 
 int main(int argc, char **argv) {
+  config_parser_t parser;
   epos_node_t node;
 
-  if (epos_init_arg(&node, argc, argv, 0, 0))
-    return -1;
+  config_parser_init_default(&parser,
+    "Print version information about an EPOS device",
+    "Establish the communication with a connected EPOS device and attempt "
+    "to retrieve its hardware and software version. The communication "
+    "interface depends on the momentarily selected alternative of the "
+    "underlying CANopen library.");
+  epos_init_config_parse(&node, &parser, 0, argc, argv,
+    config_parser_exit_both);
 
   if (epos_open(&node))
     return -1;
-  printf("EPOS hardware version: 0x%04X (%s)\n", node.dev.hardware_version,
+  
+  printf("Hardware version: 0x%04X (%s)\n", node.dev.hardware_version,
     epos_device_names[node.dev.type]);
-  printf("EPOS software version: 0x%04X\n", node.dev.software_version);
+  printf("Software version: 0x%04X\n", node.dev.software_version);
   epos_close(&node);
 
   epos_destroy(&node);

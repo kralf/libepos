@@ -39,7 +39,7 @@ int epos_current_start(epos_node_p node, epos_current_p current) {
   int result;
   short curr = current->target_value*1e3;
 
-  if (!(result = epos_control_set_type(&node->control, 
+  if (!(result = epos_control_set_mode(&node->control, 
       epos_control_current)) &&
     !(result = epos_control_start(&node->control)))
     result = epos_current_set_demand(&node->dev, curr);

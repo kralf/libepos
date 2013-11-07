@@ -60,7 +60,7 @@ int epos_position_start(epos_node_p node, epos_position_p position) {
   unsigned int max_error = abs(epos_gear_from_angle(&node->gear,
     position->max_error));
 
-  if (!(result = epos_control_set_type(&node->control, 
+  if (!(result = epos_control_set_mode(&node->control, 
       epos_control_position)) &&
     !(result = epos_position_set_limits(&node->dev, min_pos, max_pos)) &&
     !(result = epos_position_set_max_error(&node->dev, max_error)) &&

@@ -27,19 +27,19 @@
 #include "error.h"
 
 const char* epos_device_errors[] = {
-  "success",
-  "error opening EPOS device",
-  "error closing EPOS device",
-  "invalid EPOS object size",
-  "error sending to EPOS device",
-  "error receiving from EPOS device",
+  "Success",
+  "Error opening EPOS device",
+  "Error closing EPOS device",
+  "Invalid EPOS object size",
+  "Error sending to EPOS device",
+  "Error receiving from EPOS device",
   "EPOS communication error (abort error)",
   "EPOS internal device error",
-  "error reading from EPOS device",
-  "error writing to EPOS device",
-  "invalid CAN bitrate",
-  "invalid RS232 baudrate",
-  "wait operation timed out",
+  "Error reading from EPOS device",
+  "Error writing to EPOS device",
+  "Invalid CAN bit rate",
+  "Invalid RS232 baud rate",
+  "Wait operation timed out",
 };
 
 short epos_device_hardware_versions[] = {
@@ -73,30 +73,43 @@ const char* epos_device_names[] = {
   "EPOS2 50/5",
   "EPOS2 70/10",
   "EPOS2 Module 36/2",
-  "unknown",
+  "Unknown",
 };
 
-int epos_device_can_bitrates[] = {
+int epos_device_can_bit_rates[] = {
   1000,
-  800,
-  500,
-  250,
-  125,
-  50,
-  20,
+   800,
+   500,
+   250,
+   125,
+    50,
+    20,
 };
 
-int epos_device_rs232_baudrates[] = {
-  9600,
-  14400,
-  19200,
-  38400,
-  57600,
+int epos2_device_can_bit_rates[] = {
+  1000,
+   800,
+   500,
+   250,
+   125,
+     0,
+    50,
+    20,
+    10,
+  EPOS_DEVICE_CAN_BIT_RATE_AUTO,
+};
+
+int epos_device_rs232_baud_rates[] = {
+    9600,
+   14400,
+   19200,
+   38400,
+   57600,
   115200,
 };
 
 void epos_device_init(epos_device_p dev, can_device_p can_dev, int node_id,
-  int reset) {
+    int reset) {
   dev->can_dev = can_dev;
   dev->node_id = node_id;
 
@@ -121,8 +134,8 @@ int epos_device_open(epos_device_p dev) {
 
     dev->node_id = epos_device_get_id(dev);
 
-    dev->can_bitrate = epos_device_get_can_bitrate(dev);
-    dev->rs232_baudrate = epos_device_get_rs232_baudrate(dev);
+    dev->can_bit_rate = epos_device_get_can_bit_rate(dev);
+    dev->rs232_baud_rate = epos_device_get_rs232_baud_rate(dev);
 
     dev->hardware_version = epos_device_get_hardware_version(dev);
     dev->software_version = epos_device_get_software_version(dev);
@@ -155,7 +168,7 @@ int epos_device_send_message(epos_device_p dev, can_message_p message) {
 int epos_device_receive_message(epos_device_p dev, can_message_p message) {
   if (!can_receive_message(dev->can_dev, message)) {
     if ((message->id >= CAN_COB_ID_SDO_EMERGENCY) &&
-      (message->id <= CAN_COB_ID_SDO_EMERGENCY+CAN_NODE_ID_MAX)) {
+        (message->id <= CAN_COB_ID_SDO_EMERGENCY+CAN_NODE_ID_MAX)) {
       short code;
 
       memcpy(&code, &message->content[0], sizeof(code));
@@ -197,9 +210,10 @@ int epos_device_read(epos_device_p dev, short index, unsigned char subindex,
   message.length = 8;
 
   if (!epos_device_send_message(dev, &message) &&
-    !epos_device_receive_message(dev, &message)) {
+      !epos_device_receive_message(dev, &message)) {
     memcpy(data, &message.content[4], num);
     ++dev->num_read;
+  
     return EPOS_DEVICE_ERROR_NONE;
   }
   else
@@ -230,7 +244,7 @@ int epos_device_write(epos_device_p dev, short index, unsigned char subindex,
   message.length = 8;
 
   if (!epos_device_send_message(dev, &message) &&
-    !epos_device_receive_message(dev, &message)) {
+      !epos_device_receive_message(dev, &message)) {
     ++dev->num_written;
     return EPOS_DEVICE_ERROR_NONE;
   }
@@ -240,12 +254,12 @@ int epos_device_write(epos_device_p dev, short index, unsigned char subindex,
 
 int epos_device_store_parameters(epos_device_p dev) {
   return epos_device_write(dev, EPOS_DEVICE_INDEX_STORE,
-    EPOS_DEVICE_SUBINDEX_STORE, (unsigned char*)"save", 4);
+    EPOS_DEVICE_SUBINDEX_STORE, (unsigned char*)"evas", 4);
 }
 
 int epos_device_restore_parameters(epos_device_p dev) {
-  return epos_device_write(dev, EPOS_DEVICE_INDEX_STORE,
-    EPOS_DEVICE_SUBINDEX_STORE, (unsigned char*)"load", 4);
+  return epos_device_write(dev, EPOS_DEVICE_INDEX_RESTORE,
+    EPOS_DEVICE_SUBINDEX_RESTORE, (unsigned char*)"daol", 4);
 }
 
 int epos_device_get_id(epos_device_p dev) {
@@ -255,40 +269,58 @@ int epos_device_get_id(epos_device_p dev) {
   return id;
 }
 
-int epos_device_get_can_bitrate(epos_device_p dev) {
-  short can_bitrate;
-  epos_device_read(dev, EPOS_DEVICE_INDEX_CAN_BITRATE, 0,
-    (unsigned char*)&can_bitrate, sizeof(short));
+int epos_device_get_can_bit_rate(epos_device_p dev) {
+  short can_bit_rate;
+  epos_device_read(dev, EPOS_DEVICE_INDEX_CAN_BIT_RATE, 0,
+    (unsigned char*)&can_bit_rate, sizeof(short));
 
-  return epos_device_can_bitrates[can_bitrate];
+  if (dev->hardware_generation == 1)
+    return epos_device_can_bit_rates[can_bit_rate];
+  else
+    return epos2_device_can_bit_rates[can_bit_rate];
 }
 
-int epos_device_set_can_bitrate(epos_device_p dev, int bitrate) {
+int epos_device_set_can_bit_rate(epos_device_p dev, int bit_rate) {
+  int* bit_rates = (dev->hardware_generation == 1) ?
+    epos_device_can_bit_rates : epos2_device_can_bit_rates;
+  size_t num_bit_rates = (dev->hardware_generation == 1) ?
+    sizeof(epos_device_can_bit_rates)/sizeof(int) :
+    sizeof(epos2_device_can_bit_rates)/sizeof(int);
   short b;
-  for (b = 0; b < sizeof(epos_device_can_bitrates)/sizeof(int); ++b)
-    if (epos_device_can_bitrates[b] == bitrate) {
-    return epos_device_write(dev, EPOS_DEVICE_INDEX_CAN_BITRATE, 0,
+  
+  for (b = 0; b < num_bit_rates; ++b)
+      if (bit_rate == bit_rates[b]) {
+    int result = epos_device_write(dev, EPOS_DEVICE_INDEX_CAN_BIT_RATE, 0,
       (unsigned char*)&b, sizeof(short));
+    if (!result)
+      dev->can_bit_rate = bit_rate;
+    
+    return result;
   }
-  return EPOS_DEVICE_ERROR_INVALID_BITRATE;
+  
+  return EPOS_DEVICE_ERROR_INVALID_BIT_RATE;
 }
 
-int epos_device_get_rs232_baudrate(epos_device_p dev) {
-  short rs232_baudrate;
-  epos_device_read(dev, EPOS_DEVICE_INDEX_RS232_BAUDRATE, 0,
-    (unsigned char*)&rs232_baudrate, sizeof(short));
+int epos_device_get_rs232_baud_rate(epos_device_p dev) {
+  short rs232_baud_rate;
+  epos_device_read(dev, EPOS_DEVICE_INDEX_RS232_BAUD_RATE, 0,
+    (unsigned char*)&rs232_baud_rate, sizeof(short));
 
-  return epos_device_rs232_baudrates[rs232_baudrate];
+  return epos_device_rs232_baud_rates[rs232_baud_rate];
 }
 
-int epos_device_set_rs232_baudrate(epos_device_p dev, int baudrate) {
+int epos_device_set_rs232_baud_rate(epos_device_p dev, int baud_rate) {
   short b;
-  for (b = 0; b < sizeof(epos_device_rs232_baudrates)/sizeof(int); ++b)
-    if (epos_device_rs232_baudrates[b] == baudrate) {
-    return epos_device_write(dev, EPOS_DEVICE_INDEX_RS232_BAUDRATE, 0,
+  for (b = 0; b < sizeof(epos_device_rs232_baud_rates)/sizeof(int); ++b)
+      if (epos_device_rs232_baud_rates[b] == baud_rate) {
+    int result = epos_device_write(dev, EPOS_DEVICE_INDEX_RS232_BAUD_RATE, 0,
       (unsigned char*)&b, sizeof(short));
+    if (!result)
+      dev->rs232_baud_rate = baud_rate;
+    
+    return result;
   }
-  return EPOS_DEVICE_ERROR_INVALID_BAURATE;
+  return EPOS_DEVICE_ERROR_INVALID_BAUD_RATE;
 }
 
 short epos_device_get_hardware_version(epos_device_p dev) {

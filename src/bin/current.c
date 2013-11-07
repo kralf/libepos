@@ -20,7 +20,8 @@
 
 #include <stdio.h>
 #include <signal.h>
-#include <math.h>
+
+#include <config/parser.h>
 
 #include "epos.h"
 #include "current.h"
@@ -32,21 +33,36 @@ void epos_signaled(int signal) {
 }
 
 int main(int argc, char **argv) {
+  config_parser_t parser;
   epos_node_t node;
   epos_current_t curr;
-  
-  if (epos_init_arg(&node, argc, argv, 0, "CURRENT"))
-    return -1;
-  float target_value = atof(argv[1]);
 
+  config_parser_init_default(&parser,
+    "Start EPOS controller in current mode",
+    "Establish the communication with a connected EPOS device and attempt to "
+    "start the controller in current mode. The controller will be stopped "
+    "if SIGINT is received. The communication interface depends on the "
+    "momentarily selected alternative of the underlying CANopen library.");  
+  config_param_p current_param = config_set_param_value_range(
+    &parser.arguments,
+    "CURRENT",
+    config_param_type_float,
+    "",
+    "[0.0, inf)",
+    "The demanded motor current in [A]");
+  epos_init_config_parse(&node, &parser, 0, argc, argv,
+    config_parser_exit_both);
+  
   signal(SIGINT, epos_signaled);
 
   if (epos_open(&node))
     return -1;
+  
+  float target_value = config_param_get_float(current_param);
   epos_current_init(&curr, target_value);
   if (!epos_current_start(&node, &curr)) {
     while (!quit) {
-      fprintf(stdout, "\rEPOS current: %8.4f A",
+      fprintf(stdout, "\rMotor current: %8.4f A",
         epos_get_current(&node));
       fflush(stdout);
     }

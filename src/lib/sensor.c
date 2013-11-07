@@ -23,8 +23,19 @@
 #include "sensor.h"
 
 const char* epos_sensor_errors[] = {
-  "success",
-  "error setting EPOS sensor parameters",
+  "Success",
+  "Error setting EPOS sensor parameters",
+};
+
+short epos_sensor_types[] = {
+  1,
+  2,
+  3,
+};
+
+short epos_sensor_polarities[] = {
+  0,
+  3,
 };
 
 void epos_sensor_init(epos_sensor_p sensor, epos_device_p dev,
@@ -57,14 +68,19 @@ epos_sensor_type_t epos_sensor_get_type(epos_sensor_p sensor) {
   short type;
   epos_device_read(sensor->dev, EPOS_SENSOR_INDEX_CONFIGURATION,
     EPOS_SENSOR_SUBINDEX_TYPE, (unsigned char*)&type, sizeof(short));
+  
+  int i;
+  for (i = 0; i < sizeof(epos_sensor_types)/sizeof(short); ++i)
+    if (epos_sensor_types[i] == type)
+      return i;
 
   return type;
 }
 
 int epos_sensor_set_type(epos_sensor_p sensor, epos_sensor_type_t type) {
-  short t = type;
   int result = epos_device_write(sensor->dev, EPOS_SENSOR_INDEX_CONFIGURATION,
-    EPOS_SENSOR_SUBINDEX_TYPE, (unsigned char*)&t, sizeof(short));
+    EPOS_SENSOR_SUBINDEX_TYPE, (unsigned char*)&epos_sensor_types[type],
+    sizeof(short));
 
   if (!result)
     sensor->type = type;
@@ -77,14 +93,19 @@ epos_sensor_polarity_t epos_sensor_get_polarity(epos_sensor_p sensor) {
   epos_device_read(sensor->dev, EPOS_SENSOR_INDEX_CONFIGURATION,
     EPOS_SENSOR_SUBINDEX_POLARITY, (unsigned char*)&polarity, sizeof(short));
 
+  int i;
+  for (i = 0; i < sizeof(epos_sensor_polarities)/sizeof(short); ++i)
+    if (epos_sensor_polarities[i] == polarity)
+      return i;
+  
   return polarity;
 }
 
 int epos_sensor_set_polarity(epos_sensor_p sensor, epos_sensor_polarity_t
-  polarity) {
-  short p = polarity;
+    polarity) {
   int result = epos_device_write(sensor->dev, EPOS_SENSOR_INDEX_CONFIGURATION,
-    EPOS_SENSOR_SUBINDEX_POLARITY, (unsigned char*)&p, sizeof(short));
+    EPOS_SENSOR_SUBINDEX_POLARITY,
+    (unsigned char*)&epos_sensor_polarities[polarity], sizeof(short));
 
   if (!result)
     sensor->polarity = polarity;
@@ -133,7 +154,7 @@ epos_sensor_supervision_t epos_sensor_get_supervision(epos_sensor_p sensor) {
 }
 
 int epos_sensor_set_supervision(epos_sensor_p sensor, epos_sensor_supervision_t
-  supervision) {
+    supervision) {
   short configuration = epos_device_get_configuration(sensor->dev);
   configuration = supervision | (0xFFFC & configuration);
 

@@ -20,30 +20,64 @@
 
 #include <stdio.h>
 
+#include <config/parser.h>
+
 #include "epos.h"
 
 int main(int argc, char **argv) {
+  config_parser_t parser;
   epos_node_t node;
-  
-  if (epos_init_arg(&node, argc, argv, 0, "BAUDRATE"))
-    return -1;
+
+  config_parser_init_default(&parser,
+    "Query or set the RS232 baud rate of an EPOS device",
+    "Establish the communication with a connected EPOS device and attempt to "
+    "query or set its RS232 baud rate. The communication interface depends "
+    "on the momentarily selected alternative of the underlying CANopen "
+    "library.");
+  config_param_p baud_rate_param = config_set_param_value_range(
+    &parser.arguments,
+    "BAUD_RATE",
+    config_param_type_int,
+    "0",
+    "[0, 115200]",
+    "The new RS232 baud rate of the EPOS device in [baud] or zero for "
+    "querying the current baud rate");
+  config_param_p store_param = config_set_param_value_range(
+    &parser.options,
+    "store",
+    config_param_type_bool,
+    "false",
+    "false|true",
+    "Persistently store the new RS232 baud rate on the EPOS device");
+  epos_init_config_parse(&node, &parser, 0, argc, argv,
+    config_parser_exit_both);
 
   if (epos_open(&node))
     return -1;
-  printf("current EPOS baudrate: %d Baud\n", node.dev.rs232_baudrate);
-  if (argc > 2) {
-    int error = epos_device_set_rs232_baudrate(&node.dev, atoi(argv[1]));
+  
+  fprintf(stdout, "Current RS232 baud rate: %d baud\n",
+    node.dev.rs232_baud_rate);
+  
+  int baud_rate = config_param_get_int(baud_rate_param);
+  if (baud_rate) {
+    int error = epos_device_set_rs232_baud_rate(&node.dev, baud_rate);
     if (error) {
-      printf("error setting new baudrate: %s\n", epos_device_errors[error]);
+      fprintf(stderr, "Error setting new RS232 baud rate: %s\n",
+        epos_device_errors[error]);
       return -1;
     }
-    error = epos_device_store_parameters(&node.dev);
+    fprintf(stdout, "New RS232 baud rate: %d baud\n",
+      node.dev.rs232_baud_rate);
+  }
+  
+  config_param_bool_t store = config_param_get_bool(store_param);
+  if (store) {
+    int error = epos_device_store_parameters(&node.dev);
     if (error) {
-      printf("error storing parameters: %s\n", epos_device_errors[error]);
+      fprintf(stderr, "Error storing parameters: %s\n",
+        epos_device_errors[error]);
       return -1;
     }
-
-    printf("new EPOS baudrate: %d Baud\n", atoi(argv[1]));
   }
   epos_close(&node);
 
