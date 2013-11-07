@@ -25,7 +25,7 @@
 #include <timer/timer.h>
 
 #include "epos.h"
-#include "position_profile.h"
+#include "velocity_profile.h"
 
 int quit = 0;
 
@@ -36,30 +36,23 @@ void epos_signaled(int signal) {
 int main(int argc, char **argv) {
   config_parser_t parser;
   epos_node_t node;
-  epos_position_profile_t profile;
+  epos_velocity_profile_t profile;
 
   config_parser_init_default(&parser,
-    "Start EPOS controller in profile position mode and calculate estimates",
+    "Start EPOS controller in profile velocity mode and evaluate the profile",
     "Establish the communication with a connected EPOS device, attempt to "
-    "start the controller in profile position mode, and concurrently calculate "
-    "trajectory points from the profile parameters and the time elapsed. "
+    "start the controller in profile velocity mode, and concurrently evaluate "
+    "trajectory gradients from the profile parameters and the time elapsed. "
     "The controller will be stopped if SIGINT is received or the motion "
     "profile is completed. The communication interface depends on the "
     "momentarily selected alternative of the underlying CANopen library.");  
-  config_param_p position_param = config_set_param_value_range(
-    &parser.arguments,
-    "POSITION",
-    config_param_type_float,
-    "",
-    "(-inf, inf)",
-    "The demanded angular position in [deg]");
   config_param_p velocity_param = config_set_param_value_range(
     &parser.arguments,
     "VELOCITY",
     config_param_type_float,
     "",
     "(-inf, inf)",
-    "The demanded maximum angular velocity in [deg/s]");
+    "The demanded angular velocity in [deg/s]");
   config_param_p acceleration_param = config_set_param_value_range(
     &parser.arguments,
     "ACCELERATION",
@@ -77,14 +70,6 @@ int main(int argc, char **argv) {
   config_parser_option_group_p profile_option_group =
     config_parser_add_option_group(&parser, 0, "profile-", "Profile options",
     "These options control the profile trajectory generator.");
-  config_param_p relative_param = config_set_param_value_range(
-    &profile_option_group->options,
-    "relative",
-    config_param_type_bool,
-    "false",
-    "false|true",
-    "The demanded angular position is relative to the current angular "
-    "position");
   config_param_p type_param = config_set_param_value_range(
     &profile_option_group->options,
     "type",
@@ -95,40 +80,36 @@ int main(int argc, char **argv) {
     "or 'sinusoidal' velocity ramps");
   epos_init_config_parse(&node, &parser, 0, argc, argv,
     config_parser_exit_both);
-
+  
   signal(SIGINT, epos_signaled);
 
   if (epos_open(&node))
     return -1;
   
-  float pos = deg_to_rad(config_param_get_float(position_param));
   float vel = deg_to_rad(config_param_get_float(velocity_param));
   float acc = deg_to_rad(config_param_get_float(acceleration_param));
   float dec = deg_to_rad(config_param_get_float(deceleration_param));
-  config_param_bool_t rel = config_param_get_bool(relative_param);
-  epos_profile_type_t type = config_param_get_enum(type_param);  
-  epos_position_profile_init(&profile, pos, vel, acc, dec, type);  
-  profile.relative = rel;
+  epos_profile_type_t type = config_param_get_enum(type_param);
+  epos_velocity_profile_init(&profile, vel, acc, dec, type);
   
-  if (!epos_position_profile_start(&node, &profile)) {
+  if (!epos_velocity_profile_start(&node, &profile)) {
     while (!quit) {
       double time;
       
       timer_start(&time);
-      float pos_a = rad_to_deg(epos_get_position(&node));
+      float vel_a = rad_to_deg(epos_get_velocity(&node));
       timer_correct(&time);
-      float pos_e = rad_to_deg(epos_position_profile_estimate(
-        &profile, time));
+      float vel_e = rad_to_deg(epos_velocity_profile_eval(&profile, time));
       
-      fprintf(stdout, "\rAngular position (act): %8.2f deg\n", pos_a);
-      fprintf(stdout, "\rAngular position (est): %8.2f deg", pos_e);
+      fprintf(stdout, "\rAngular velocity (act): %8.2f deg/s\n", vel_a);
+      fprintf(stdout, "\rAngular velocity (est): %8.2f deg/s", vel_e);
       fprintf(stdout, "%c[1A\r", 0x1B);
-      
+
       if (!epos_profile_wait(&node, 0.1))
-        break;
+        break;      
     }
     fprintf(stdout, "%c[1B\n", 0x1B);
-    epos_position_profile_stop(&node);
+    epos_velocity_profile_stop(&node);
   }
   epos_close(&node);
 

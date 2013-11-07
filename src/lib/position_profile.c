@@ -76,8 +76,8 @@ int epos_position_profile_stop(epos_node_p node) {
   return epos_control_stop(&node->control);
 }
 
-float epos_position_profile_estimate(epos_position_profile_p profile,
-  double time) {
+float epos_position_profile_eval(epos_position_profile_p profile, double
+    time) {
   float s_0 = profile->start_value;
   float s_1 = (profile->relative) ? s_0+profile->target_value :
     profile->target_value;

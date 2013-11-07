@@ -66,8 +66,8 @@ int epos_velocity_profile_stop(epos_node_p node) {
   return epos_control_stop(&node->control);
 }
 
-float epos_velocity_profile_estimate(epos_velocity_profile_p profile,
-  double time) {
+float epos_velocity_profile_eval(epos_velocity_profile_p profile, double
+    time) {
   float v_0 = profile->start_value;
   float v_1 = profile->target_value;
   float d_v = 0.0;

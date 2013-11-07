@@ -1,3 +1,11 @@
+libepos (0.2-69) unstable; urgency=low
+
+  * Renamed profile utilities
+  * Renamed *_profile_estimate() to *_profile_eval() in order to prevent
+    misconception
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Thu, 07 Nov 2013 18:16:00 +0100
+
 libepos (0.2-68) unstable; urgency=low
 
   * Adapted initialization functions to revised tulibs config module

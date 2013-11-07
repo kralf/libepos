@@ -88,13 +88,15 @@ int epos_velocity_profile_start(
 int epos_velocity_profile_stop(
   epos_node_p node);
 
-/** \brief Estimate the velocity of an EPOS velocity profile
+/** \brief Evaluate the velocity of an EPOS velocity profile
+  * \note This function is intended to facilitate the computational
+  *   generation of motion trajectories.
   * \param[in] profile The EPOS velocity profile control operation to
-  *   estimate the velocity of.
-  * \param[in] time The absolute time to estimate the velocity at in [s].
-  * \return The estimated velocity in [rad/s].
+  *   evaluate the velocity for.
+  * \param[in] time The absolute time to evaluate the velocity at in [s].
+  * \return The evaluated velocity in [rad/s].
   */
-float epos_velocity_profile_estimate(
+float epos_velocity_profile_eval(
   epos_velocity_profile_p profile,
   double time);
 

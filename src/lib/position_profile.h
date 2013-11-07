@@ -94,14 +94,16 @@ int epos_position_profile_start(
 int epos_position_profile_stop(
   epos_node_p node);
 
-/** \brief Estimate the absolute position of an EPOS position profile
+/** \brief Evaluate the absolute position of an EPOS position profile
+  * \note This function is intended to facilitate the computational
+  *   generation of motion trajectories.
   * \param[in] profile The EPOS position profile control operation to
-  *   estimate the absolute position of.
-  * \param[in] time The absolute time to estimate the absolute position
+  *   evaluate the absolute position for.
+  * \param[in] time The absolute time to evaluate the absolute position
   *    at in [s].
-  * \return The estimated absolute position in [rad].
+  * \return The evaluated absolute position in [rad].
   */
-float epos_position_profile_estimate(
+float epos_position_profile_eval(
   epos_position_profile_p profile,
   double time);
 
