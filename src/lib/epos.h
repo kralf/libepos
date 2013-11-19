@@ -34,9 +34,9 @@
   * \brief EPOS convenience functions
   */
 
-/** \brief Predefined EPOS argument prefix
+/** \brief Predefined EPOS configuration parser option group
   */
-#define EPOS_ARG_PREFIX                       "epos-"
+#define EPOS_CONFIG_PARSER_OPTION_GROUP       "epos"
 
 /** \name Parameters
   * \brief Predefined EPOS parameters
@@ -121,8 +121,9 @@ int epos_init_config(
   * \param[in] parser The initialized configuration parser which will
   *   be used to parse the command line arguments into the EPOS node
   *   configuration.
-  * \param[in] prefix An optional argument prefix for the EPOS node
-  *   configuration parameters. If null, the default prefix is chosen.
+  * \param[in] option_group An optional name of the parser option group
+  *   containing the EPOS node configuration parameters. If null, the
+  *   default name is chosen.
   * \param[in] argc The number of supplied command line arguments.
   * \param[in] argv The list of supplied command line arguments.
   * \param[in] exit The exit policy of the parser in case of an error
@@ -132,7 +133,7 @@ int epos_init_config(
 int epos_init_config_parse(
   epos_node_p node,
   config_parser_p parser,
-  const char* prefix,
+  const char* option_group,
   int argc,
   char **argv,
   config_parser_exit_t exit);

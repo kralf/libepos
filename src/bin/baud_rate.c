@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
     "false|true",
     "Persistently store the new RS232 baud rate on the EPOS device");
   epos_init_config_parse(&node, &parser, 0, argc, argv,
-    config_parser_exit_both);
+    config_parser_exit_error);
 
   if (epos_open(&node))
     return -1;

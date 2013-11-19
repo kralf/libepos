@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
     "[0.0, inf)",
     "The demanded motor current in [A]");
   epos_init_config_parse(&node, &parser, 0, argc, argv,
-    config_parser_exit_both);
+    config_parser_exit_error);
   
   signal(SIGINT, epos_signaled);
 

@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
     "(-inf, inf)",
     "The demanded angular position in [deg]");
   epos_init_config_parse(&node, &parser, 0, argc, argv,
-    config_parser_exit_both);
+    config_parser_exit_error);
   
   signal(SIGINT, epos_signaled);
 

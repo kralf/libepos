@@ -1,0 +1,45 @@
+#!/bin/sh -e
+
+action="$1"
+
+if [ "$action" != "upgrade" ]; then
+  libname="libcan.so"
+  mansec=1
+  manpath="${CMAKE_INSTALL_PREFIX}/share/man/man$mansec"
+
+  altstat=`update-alternatives --quiet --query $libname | sed -n 's/Status: \(.\+\)/\1/p'`
+  altval=`update-alternatives --quiet --query $libname | sed -n 's/Value: \(.\+\)/\1/p'`
+  
+  for altlib in ${LIBCAN_ALTERNATIVES}; do
+    genlib="`dirname $altlib`/$libname"
+    altesc=`echo $altlib | sed 's:/:\\\\/:g'`
+    altblock=`update-alternatives --quiet --query $libname | sed -n "/Alternative: $altesc/,/^$/p"`
+    altprio=`echo "$altblock" | sed -n 's/Priority: \([0-9]\+\)/\1/p'`
+    altslaves=`echo "$altblock" | sed -n "/Slaves:/,/^$/p" | grep -v "Slaves:" | sed 's/^\s*//'`
+    altext=`basename $altlib | sed -n 's/lib\(.\+\)\.so/\1/p'`
+
+    for target in ${LIBEPOS_UTILS_TARGETS}; do
+      manname="${LIBEPOS_EXECUTABLE_PREFIX}$target.$mansec.gz"
+      altslaves=`echo "$altslaves" | grep -v "^$manname .*$" || [ $? != 2 ]`
+    done
+    
+    unset altslaveskeep
+    OLDIFS=$IFS
+    IFS=$'\n'
+    for altslave in $altslaves; do
+      name=`echo "$altslave" | cut -f 1`
+      alt=`echo "$altslave" | cut -f 2`
+      gen="`dirname $alt`/$name"
+      altslaveskeep="$altslaveskeep --slave $gen $name $alt"
+    done
+    IFS=$OLDIFS
+    update-alternatives --quiet --remove $libname $altlib
+    update-alternatives --quiet --install $genlib $libname $altlib $altprio $altslaveskeep
+  done
+  
+  if [ "$altstat" = "manual" ]; then
+    update-alternatives --quiet --set $libname $altval
+  fi
+fi
+
+exit 0

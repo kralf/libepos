@@ -177,11 +177,13 @@ int epos_init_config(epos_node_p node, can_device_p can_dev, config_p config) {
 }
 
 int epos_init_config_parse(epos_node_p node, config_parser_p parser,
-    const char* prefix, int argc, char **argv, config_parser_exit_t exit) {
+    const char* option_group, int argc, char **argv, config_parser_exit_t
+    exit) {
   can_device_p can_dev = malloc(sizeof(can_device_t));
   
   config_p config = &config_parser_add_option_group(parser,
-    &epos_default_config, prefix ? prefix : EPOS_ARG_PREFIX, "EPOS options", 
+    option_group ? option_group : EPOS_CONFIG_PARSER_OPTION_GROUP,
+    &epos_default_config, "EPOS options", 
     "These options control the settings for the EPOS node and all maxon "
     "hardware connected to it.")->options;
   

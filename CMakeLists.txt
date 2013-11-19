@@ -15,6 +15,11 @@ remake_project(
   INSTALL /usr
 )
 
+remake_debian_get_alternatives(
+  libcan.so
+  OUTPUT LIBCAN_ALTERNATIVES
+)
+
 remake_component(
   udev
   CONFIGURATION_DESTINATION /etc/udev
@@ -24,8 +29,11 @@ remake_add_directories(
   COMPONENT udev
 )
 remake_doc(
+  man INSTALL share
   html
 )
+
+remake_project_get(DOCUMENTATION_DESTINATION DESTINATION)
 
 remake_pack_deb(
   DEPENDS tulibs libcan
@@ -34,6 +42,7 @@ remake_pack_deb(
   COMPONENT utils
   DESCRIPTION "utilities"
   DEPENDS libepos
+  EXTRA debian/utils/*
 )
 remake_pack_deb(
   COMPONENT dev

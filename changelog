@@ -1,3 +1,12 @@
+libepos (0.2-70) unstable; urgency=low
+
+  * Executable targets now generate alternative-dependent documentation
+  * Debian extra scripts adapted for adding/removing slave alternatives
+    to/from libcan.so (slave removal not supported per se by
+    update-alternatives)
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Tue, 19 Nov 2013 15:13:00 +0100
+
 libepos (0.2-69) unstable; urgency=low
 
   * Renamed profile utilities

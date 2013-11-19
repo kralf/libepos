@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
     "interface depends on the momentarily selected alternative of the "
     "underlying CANopen library.");
   epos_init_config_parse(&node, &parser, 0, argc, argv,
-    config_parser_exit_both);  
+    config_parser_exit_error);  
 
   signal(SIGINT, epos_signaled);
 

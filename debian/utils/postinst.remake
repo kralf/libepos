@@ -1,0 +1,30 @@
+#!/bin/sh -e
+
+action="$1"
+oldversion="$2"
+
+if [ "$action" = "configure" ] || [ "$action" = "abort-upgrade" ]; then
+  libname="libcan.so"
+  mansec=1
+  manpath="${CMAKE_INSTALL_PREFIX}/share/man/man$mansec"
+  altpath="${DOCUMENTATION_DESTINATION}/man/man$mansec"
+  
+  for altlib in ${LIBCAN_ALTERNATIVES}; do
+    genlib="`dirname $altlib`/$libname"
+    altesc=`echo $altlib | sed 's:/:\\\\/:g'`
+    altblock=`update-alternatives --quiet --query $libname | sed -n "/Alternative: $altesc/,/^$/p"`
+    altprio=`echo "$altblock" | sed -n 's/Priority: \([0-9]\+\)/\1/p'`
+    altext=`basename $altlib | sed -n 's/lib\(.\+\)\.so/\1/p'`
+  
+    unset altslaves
+    for target in ${LIBEPOS_UTILS_TARGETS}; do
+      manname="${LIBEPOS_EXECUTABLE_PREFIX}$target.$mansec.gz"
+      genman="$manpath/$manname"
+      altman="$altpath/${LIBEPOS_EXECUTABLE_PREFIX}$target.$altext.$mansec.gz"
+      altslaves="$altslaves --slave $genman $manname $altman"
+    done
+    update-alternatives --quiet --install $genlib $libname $altlib $altprio $altslaves
+  done
+fi
+
+exit 0

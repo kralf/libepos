@@ -68,7 +68,7 @@ int main(int argc, char **argv) {
     "[0.0, inf)",
     "The demanded maximum angular deceleration in [deg/s^2]");
   config_parser_option_group_p profile_option_group =
-    config_parser_add_option_group(&parser, 0, "profile-", "Profile options",
+    config_parser_add_option_group(&parser, "profile", 0, "Profile options",
     "These options control the profile trajectory generator.");
   config_param_p type_param = config_set_param_value_range(
     &profile_option_group->options,
@@ -79,7 +79,7 @@ int main(int argc, char **argv) {
     "The type of motion profile, which may represent either 'linear' "
     "or 'sinusoidal' velocity ramps");
   epos_init_config_parse(&node, &parser, 0, argc, argv,
-    config_parser_exit_both);
+    config_parser_exit_error);
   
   signal(SIGINT, epos_signaled);
 
