@@ -35,38 +35,46 @@ int main(int argc, char **argv) {
   config_parser_t parser;
   epos_node_t node;
 
-  config_parser_init_default(&parser,
+  config_parser_init(&parser,
     "Print input functionalities and states of an EPOS device",
     "Establish the communication with a connected EPOS device and attempt "
     "to retrieve its input functionalities and states until receiving SIGINT. "
     "The communication interface depends on the momentarily selected "
     "alternative of the underlying CANopen library.");
-  epos_init_config_parse(&node, &parser, 0, argc, argv,
+  epos_node_init_config_parse(&node, &parser, 0, argc, argv,
     config_parser_exit_error);
-  
+  config_parser_destroy(&parser);
+
   signal(SIGINT, epos_signaled);
   
-  if (epos_open(&node))
-    return -1;
+  epos_node_connect(&node);
+  error_exit(&node.error);
 
   fprintf(stdout, "%5s  %5s  %5s  %5s  %5s  %5s\n", "Type", "Chan", "Pol",
     "Exec", "Mask", "State");
   int num_inputs = sizeof(node.input.funcs)/sizeof(epos_input_func_t);
+  
   while (!quit) {
     int i;    
-    for (i = 0; i < num_inputs; ++i)
+    for (i = 0; i < num_inputs; ++i) {
+      int state = epos_input_get_func_state(&node.input, i);
+      error_exit(&node.dev.error);
+      
       fprintf(stdout, "\r%5d  %5d  %5d  %5d  %5d  %5d%s", i,
         node.input.funcs[i].channel,
         node.input.funcs[i].polarity,
         node.input.funcs[i].execute,
         node.input.funcs[i].enabled,
-        epos_input_get_func_state(&node.input, i),
+        state,
         (i+1 < num_inputs) ? "\n" : "");
+    }
     fprintf(stdout, "%c[%dA\r", 0x1B, num_inputs-1);
   }
   fprintf(stdout, "%c[%dB\n", 0x1B, num_inputs-1);
-  epos_close(&node);
+  
+  epos_node_disconnect(&node);
+  error_exit(&node.error);
 
-  epos_destroy(&node);
+  epos_node_destroy(&node);
   return 0;
 }

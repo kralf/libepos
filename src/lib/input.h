@@ -47,18 +47,6 @@
 #define EPOS_INPUT_FUNC_DUMMY               65535
 //@}
 
-/** \name Error Codes
-  * \brief Predefined EPOS input error codes
-  */
-//@{
-#define EPOS_INPUT_ERROR_NONE               0
-#define EPOS_INPUT_ERROR_SETUP              1
-//@}
-
-/** \brief Predefined EPOS input error descriptions
-  */
-extern const char* epos_input_errors[];
-
 /** \brief Predefined EPOS input channel masks
   */
 extern short epos_input_channel_masks[];
@@ -66,18 +54,18 @@ extern short epos_input_channel_masks[];
 /** \brief EPOS input functionalities
   */
 typedef enum {
-  epos_input_neg_limit,
-  epos_input_pos_limit,
-  epos_input_home_switch,
-  epos_input_pos_marker,
-  epos_input_dev_enable
+  epos_input_neg_limit,            //!< Negative limit switch.
+  epos_input_pos_limit,            //!< Positive limit switch.
+  epos_input_home_switch,          //!< Home switch.
+  epos_input_pos_marker,           //!< Position marker.
+  epos_input_dev_enable            //!< Device enable.
 } epos_input_func_type_t;
 
 /** \brief EPOS input polarities
   */
 typedef enum {
-  epos_input_high,
-  epos_input_low
+  epos_input_high,                 //!< High active.
+  epos_input_low                   //!< Low active.
 } epos_input_polarity_t;
 
 /** \brief Structure defining an EPOS input functionalities
@@ -88,12 +76,12 @@ typedef struct epos_input_func_t {
   int execute;                     //!< The input functionality's execution.
 
   int enabled;                     //!< The input functionality's enabled flag.
-} epos_input_func_t, *epos_input_func_p;
+} epos_input_func_t;
 
 /** \brief Structure defining the EPOS input module
   */
 typedef struct epos_input_t {
-  epos_device_p dev;                   //!< The EPOS device of the input module.
+  epos_device_t* dev;                  //!< The EPOS device of the input module.
 
   short channel_mask;                  //!< The EPOS input channel mask.
 
@@ -103,15 +91,15 @@ typedef struct epos_input_t {
   short enabled;                       //!< The EPOS input enabled mask.
 
   epos_input_func_t funcs[5]  ;        //!< The EPOS input functionalities.
-} epos_input_t, *epos_input_p;
+} epos_input_t;
 
 /** \brief Initialize EPOS input module
   * \param[in] input The EPOS input module to be initialized.
   * \param[in] dev The EPOS device of the input module.
   */
 void epos_input_init(
-  epos_input_p input,
-  epos_device_p dev);
+  epos_input_t* input,
+  epos_device_t* dev);
 
 /** \brief Initialize EPOS input functionality
   * \param[in] func The input functionality to be initialized.
@@ -121,7 +109,7 @@ void epos_input_init(
   * \param[in] enabled The input functionality's enabled flag.
   */
 void epos_input_init_func(
-  epos_input_func_p func,
+  epos_input_func_t* func,
   int channel,
   epos_input_polarity_t polarity,
   int execute,
@@ -131,14 +119,14 @@ void epos_input_init_func(
   * \param[in] input The EPOS input module to be destroyed.
   */
 void epos_input_destroy(
-  epos_input_p input);
+  epos_input_t* input);
 
 /** \brief Set EPOS input parameters
   * \param[in] input The EPOS input module to set the parameters for.
-  * \return The resulting error code.
+  * \return The resulting device error code.
   */
 int epos_input_setup(
-  epos_input_p input);
+  epos_input_t* input);
 
 /** \brief Retrieve EPOS input functionality parameters
   * \param[in] input The EPOS input module to retrieve the functionality 
@@ -148,9 +136,9 @@ int epos_input_setup(
   * \param[out] func The retrieved input functionality parameters.
   */
 void epos_input_get_func(
-  epos_input_p input,
+  epos_input_t* input,
   epos_input_func_type_t type,
-  epos_input_func_p func);
+  epos_input_func_t* func);
 
 /** \brief Set EPOS input functionality parameters
   * \param[in] input The EPOS input module to set the functionality 
@@ -160,18 +148,19 @@ void epos_input_get_func(
   * \return The resulting device error code.
   */
 int epos_input_set_func(
-  epos_input_p input,
+  epos_input_t* input,
   epos_input_func_type_t type,
-  epos_input_func_p func);
+  epos_input_func_t* func);
 
 /** \brief Retrieve EPOS input functionality state
   * \param[in] input The EPOS input module to retrieve the functionality 
   *   state for.
   * \param[in] type The input functionality type to retrieve the state for.
-  * \return func The retrieved input functionality state.
+  * \return func The retrieved input functionality state. On error, the
+  *   return value will be 0 and the error code set in input->dev->error.
   */
 int epos_input_get_func_state(
-  epos_input_p input,
+  epos_input_t* input,
   epos_input_func_type_t type);
 
 /** \brief Retrieve EPOS input functionality channel
@@ -181,7 +170,7 @@ int epos_input_get_func_state(
   * \return The input channel of the specified functionality.
   */
 int epos_input_get_func_channel(
-  epos_input_p input,
+  epos_input_t* input,
   epos_input_func_type_t type);
 
 /** \brief Set EPOS input functionality channel
@@ -192,7 +181,7 @@ int epos_input_get_func_channel(
   * \return The resulting device error code.
   */
 int epos_input_set_func_channel(
-  epos_input_p input,
+  epos_input_t* input,
   epos_input_func_type_t type,
   int channel);
 
@@ -203,7 +192,7 @@ int epos_input_set_func_channel(
   * \return The input polarity of the specified functionality.
   */
 epos_input_polarity_t epos_input_get_func_polarity(
-  epos_input_p input,
+  epos_input_t* input,
   epos_input_func_type_t type);
 
 /** \brief Set EPOS input functionality polarity
@@ -214,7 +203,7 @@ epos_input_polarity_t epos_input_get_func_polarity(
   * \return The resulting device error code.
   */
 int epos_input_set_func_polarity(
-  epos_input_p input,
+  epos_input_t* input,
   epos_input_func_type_t type,
   epos_input_polarity_t polarity);
 
@@ -226,7 +215,7 @@ int epos_input_set_func_polarity(
   * \return The execution flag of the specified functionality.
   */
 int epos_input_get_func_execute(
-  epos_input_p input,
+  epos_input_t* input,
   epos_input_func_type_t type);
 
 /** \brief Set EPOS input functionality execution flag
@@ -237,7 +226,7 @@ int epos_input_get_func_execute(
   * \return The resulting device error code.
   */
 int epos_input_set_func_execute(
-  epos_input_p input,
+  epos_input_t* input,
   epos_input_func_type_t type,
   int execute);
 
@@ -249,7 +238,7 @@ int epos_input_set_func_execute(
   * \return The enabled flag of the specified functionality.
   */
 int epos_input_get_func_enabled(
-  epos_input_p input,
+  epos_input_t* input,
   epos_input_func_type_t type);
 
 /** \brief Set EPOS input functionality enabled flag
@@ -260,7 +249,7 @@ int epos_input_get_func_enabled(
   * \return The resulting device error code.
   */
 int epos_input_set_func_enabled(
-  epos_input_p input,
+  epos_input_t* input,
   epos_input_func_type_t type,
   int enabled);
 

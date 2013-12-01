@@ -60,19 +60,33 @@
   */
 typedef enum {
   epos_home_neg_switch_index = 11,
+  //!< Home switch negative speed and index.
   epos_home_pos_switch_index = 7,
+  //!< Home switch positive speed and index.
   epos_home_neg_switch = 27,
+  //!< Home switch negative speed.
   epos_home_pos_switch = 23,
+  //!< Home switch positive speed.
   epos_home_neg_limit_index = 1,
+  //!< Negative limit switch and index.
   epos_home_pos_limit_index = 2,
+  //!< Positive limit switch and index.
   epos_home_neg_limit = 17,
+  //!< Negative limit switch.
   epos_home_pos_limit = 18,
-  epos_home_pos_current_index = -1,
+  //!< Positive limit switch.
+  epos_home_pos_current_index = -1, 
+  //!< Current threshold positive speed and index.
   epos_home_neg_current_index = -2,
+  //!< Current threshold negative speed and index.
   epos_home_pos_current = -3,
+  //!< Current threshold positive speed.
   epos_home_neg_current = -4,
+  //!< Current threshold negative speed.
   epos_home_pos_index = 34,
-  epos_home_neg_index = 33
+  //!< Index positive speed.
+  epos_home_neg_index = 33,
+  //!< Index negative speed.
 } epos_home_method_t;
 
 /** \brief Structure defining an EPOS homing operation
@@ -88,7 +102,7 @@ typedef struct epos_home_t {
 
   float offset;                //!< The home offset from the switch in [rad].
   float position;              //!< The home position in [rad].
-} epos_home_t, *epos_home_p;
+} epos_home_t;
 
 /** \brief Initialize EPOS homing operation
   * \param[in] home The EPOS homing operation to be initialized.
@@ -99,7 +113,7 @@ typedef struct epos_home_t {
   * \param[in] position The home position to be set in [rad].
   */
 void epos_home_init(
-  epos_home_p home,
+  epos_home_t* home,
   epos_home_method_t method,
   float current,
   float velocity,
@@ -112,15 +126,15 @@ void epos_home_init(
   * \return The resulting device error code.
   */
 int epos_home_start(
-  epos_node_p node,
-  epos_home_p home);
+  epos_node_t* node,
+  const epos_home_t* home);
 
 /** \brief Stop EPOS homing operation
   * \param[in] node The EPOS node to stop the homing operation for.
   * \return The resulting device error code.
   */
 int epos_home_stop(
-  epos_node_p node);
+  epos_node_t* node);
 
 /** \brief Wait for completion of an EPOS homing operation
   * \param[in] node The EPOS node to complete the homing operation.
@@ -128,7 +142,7 @@ int epos_home_stop(
   * \return The resulting device error code.
   */
 int epos_home_wait(
-  epos_node_p node,
+  epos_node_t* node,
   double timeout);
 
 /** \brief Set EPOS homing method
@@ -137,7 +151,7 @@ int epos_home_wait(
   * \return The resulting device error code.
   */
 int epos_home_set_method(
-  epos_device_p dev,
+  epos_device_t* dev,
   epos_home_method_t method);
 
 /** \brief Set EPOS homing current threshold
@@ -146,7 +160,7 @@ int epos_home_set_method(
   * \return The resulting device error code.
   */
 int epos_home_set_current_threshold(
-  epos_device_p dev,
+  epos_device_t* dev,
   short current);
 
 /** \brief Set EPOS homing switch search velocity
@@ -156,7 +170,7 @@ int epos_home_set_current_threshold(
   * \return The resulting device error code.
   */
 int epos_home_set_switch_search_velocity(
-  epos_device_p dev,
+  epos_device_t* dev,
   unsigned int velocity);
 
 /** \brief Set EPOS homing zero search velocity
@@ -165,7 +179,7 @@ int epos_home_set_switch_search_velocity(
   * \return The resulting device error code.
   */
 int epos_home_set_zero_search_velocity(
-  epos_device_p dev,
+  epos_device_t* dev,
   unsigned int velocity);
 
 /** \brief Set EPOS homing acceleration
@@ -174,7 +188,7 @@ int epos_home_set_zero_search_velocity(
   * \return The resulting device error code.
   */
 int epos_home_set_acceleration(
-  epos_device_p dev,
+  epos_device_t* dev,
   unsigned int acceleration);
 
 /** \brief Set EPOS homing offset
@@ -183,7 +197,7 @@ int epos_home_set_acceleration(
   * \return The resulting device error code.
   */
 int epos_home_set_offset(
-  epos_device_p dev,
+  epos_device_t* dev,
   int offset);
 
 /** \brief Set EPOS home position
@@ -192,7 +206,7 @@ int epos_home_set_offset(
   * \return The resulting device error code.
   */
 int epos_home_set_position(
-  epos_device_p dev,
+  epos_device_t* dev,
   int position);
 
 #endif

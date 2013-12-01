@@ -52,7 +52,7 @@ typedef struct epos_velocity_profile_t {
 
   float start_value;             //!< The profile's start velocity in [rad].
   double start_time;             //!< The start time of the profile in [s].
-} epos_velocity_profile_t, *epos_velocity_profile_p;
+} epos_velocity_profile_t;
 
 /** \brief Initialize EPOS velocity profile control operation
   * \param[in] profile The EPOS velocity profile control operation to be
@@ -63,7 +63,7 @@ typedef struct epos_velocity_profile_t {
   * \param[in] type The velocity profile type.
   */
 void epos_velocity_profile_init(
-  epos_velocity_profile_p profile,
+  epos_velocity_profile_t* profile,
   float target_value,
   float acceleration,
   float deceleration,
@@ -77,8 +77,8 @@ void epos_velocity_profile_init(
   * \return The resulting device error code.
   */
 int epos_velocity_profile_start(
-  epos_node_p node,
-  epos_velocity_profile_p profile);
+  epos_node_t* node,
+  epos_velocity_profile_t* profile);
 
 /** \brief Stop EPOS velocity profile control operation
   * \param[in] node The EPOS node to stop the velocity profile control
@@ -86,18 +86,20 @@ int epos_velocity_profile_start(
   * \return The resulting device error code.
   */
 int epos_velocity_profile_stop(
-  epos_node_p node);
+  epos_node_t* node);
 
-/** \brief Evaluate the velocity of an EPOS velocity profile
-  * \note This function is intended to facilitate the computational
-  *   generation of motion trajectories.
+/** \brief Evaluate the values of an EPOS velocity profile
   * \param[in] profile The EPOS velocity profile control operation to
-  *   evaluate the velocity for.
-  * \param[in] time The absolute time to evaluate the velocity at in [s].
-  * \return The evaluated velocity in [rad/s].
+  *   evaluate the absolute values for.
+  * \param[in] time The absolute time to evaluate the absolute profile
+  *   values at in [s].
+  * \return The evaluated absolute profile values.
+  * 
+  * This function is intended to facilitate the computational generation
+  * of motion trajectories.
   */
-float epos_velocity_profile_eval(
-  epos_velocity_profile_p profile,
+epos_profile_value_t epos_velocity_profile_eval(
+  const epos_velocity_profile_t* profile,
   double time);
 
 /** \brief Set the velocity profile target velocity of an EPOS device
@@ -107,7 +109,7 @@ float epos_velocity_profile_eval(
   * \return The resulting device error code.
   */
 int epos_velocity_profile_set_target(
-  epos_device_p dev,
+  epos_device_t* dev,
   int velocity);
 
 #endif

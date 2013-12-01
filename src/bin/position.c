@@ -25,6 +25,22 @@
 
 #include "epos.h"
 #include "position.h"
+#include "macros.h"
+
+#define EPOS_POSITION_PARAMETER_POSITION        "POSITION"
+
+config_param_t epos_position_default_arguments_params[] = {
+  {EPOS_POSITION_PARAMETER_POSITION,
+    config_param_type_float,
+    "",
+    "(-inf, inf)",
+    "The demanded angular position in [deg]"},
+};
+
+const config_default_t epos_position_default_arguments = {
+  epos_position_default_arguments_params,
+  sizeof(epos_position_default_arguments_params)/sizeof(config_param_t),
+};
 
 int quit = 0;
 
@@ -35,42 +51,47 @@ void epos_signaled(int signal) {
 int main(int argc, char **argv) {
   config_parser_t parser;
   epos_node_t node;
-  epos_position_t pos;
+  epos_position_t position;
 
-  config_parser_init_default(&parser,
+  config_parser_init_default(&parser, &epos_position_default_arguments, 0,
     "Start EPOS controller in position mode",
     "Establish the communication with a connected EPOS device and attempt to "
     "start the controller in position mode. The controller will be stopped "
     "if SIGINT is received. The communication interface depends on the "
     "momentarily selected alternative of the underlying CANopen library.");  
-  config_param_p position_param = config_set_param_value_range(
-    &parser.arguments,
-    "POSITION",
-    config_param_type_float,
-    "",
-    "(-inf, inf)",
-    "The demanded angular position in [deg]");
-  epos_init_config_parse(&node, &parser, 0, argc, argv,
+  epos_node_init_config_parse(&node, &parser, 0, argc, argv,
     config_parser_exit_error);
+  
+  float target_value = config_get_float(&parser.arguments,
+    EPOS_POSITION_PARAMETER_POSITION);
   
   signal(SIGINT, epos_signaled);
 
-  if (epos_open(&node))
-    return -1;
+  epos_node_connect(&node);
+  error_exit(&node.error);
   
-  float target_value = deg_to_rad(config_param_get_float(position_param));
-  epos_position_init(&pos, target_value);
-  if (!epos_position_start(&node, &pos)) {
-    while (!quit) {
-      fprintf(stdout, "\rAngular position: %8.2f deg",
-        rad_to_deg(epos_get_position(&node)));
-      fflush(stdout);
-    }
-    fprintf(stdout, "\n");
-    epos_position_stop(&node);
+  epos_position_init(&position, target_value);
+  epos_position_start(&node, &position);
+  error_exit(&node.dev.error);
+  
+  while (!quit) {
+    float actual_value = epos_node_get_position(&node);
+    error_exit(&node.error);
+    
+    fprintf(stdout, "\rAngular position: %8.2f deg",
+      rad_to_deg(actual_value));
+    fflush(stdout);
   }
-  epos_close(&node);
+  fprintf(stdout, "\n");
+  
+  epos_position_stop(&node);
+  error_exit(&node.dev.error);
 
-  epos_destroy(&node);
+  epos_node_disconnect(&node);
+  error_exit(&node.error);
+
+  epos_node_destroy(&node);
+  config_parser_destroy(&parser);
+  
   return 0;
 }

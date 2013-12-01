@@ -23,10 +23,13 @@
 
 #include <can.h>
 
-#include "global.h"
+#include <error/error.h>
 
 /** \file device.h
-  * \brief EPOS device functions
+  * \brief EPOS device interface
+  * 
+  * The EPOS device interface provides the low-level communication with
+  * an EPOS node via the CANopen protocol.
   */
 
 /** \name Constants
@@ -34,7 +37,8 @@
   */
 //@{
 #define EPOS_DEVICE_WAIT_FOREVER                -1.0
-#define EPOS_DEVICE_CAN_BIT_RATE_AUTO           -1
+#define EPOS_DEVICE_CAN_BIT_RATE_RESERVED       1
+#define EPOS_DEVICE_CAN_BIT_RATE_AUTO           0
 //@}
 
 /** \name Object Indexes
@@ -78,18 +82,27 @@
   */
 //@{
 #define EPOS_DEVICE_ERROR_NONE                  0
+//!< Success
 #define EPOS_DEVICE_ERROR_OPEN                  1
+//!< Failed to open EPOS device
 #define EPOS_DEVICE_ERROR_CLOSE                 2
+//!< Failed to close EPOS device
 #define EPOS_DEVICE_ERROR_INVALID_SIZE          3
+//!< Invalid EPOS object size
 #define EPOS_DEVICE_ERROR_SEND                  4
+//!< Failed to send to EPOS device
 #define EPOS_DEVICE_ERROR_RECEIVE               5
+//!< Failed to receive from EPOS device
 #define EPOS_DEVICE_ERROR_ABORT                 6
+//!< EPOS communication error (abort)
 #define EPOS_DEVICE_ERROR_INTERNAL              7
-#define EPOS_DEVICE_ERROR_READ                  8
-#define EPOS_DEVICE_ERROR_WRITE                 9
-#define EPOS_DEVICE_ERROR_INVALID_BIT_RATE      10
-#define EPOS_DEVICE_ERROR_INVALID_BAUD_RATE     11
-#define EPOS_DEVICE_ERROR_WAIT_TIMEOUT          12
+//!< EPOS internal device error
+#define EPOS_DEVICE_ERROR_INVALID_BIT_RATE      8
+//!< Invalid EPOS CAN bit rate
+#define EPOS_DEVICE_ERROR_INVALID_BAUD_RATE     9
+//!< Invalid EPOS RS232 baud rate
+#define EPOS_DEVICE_ERROR_WAIT_TIMEOUT          10
+//!< EPOS device timeout
 //@}
 
 /** \brief Predefined EPOS device error descriptions
@@ -111,21 +124,21 @@ extern const char* epos_device_names[];
 /** \brief EPOS device types
   */
 typedef enum {
-  epos_device_epos_24_1,
-  epos_device_epos_24_5,
-  epos_device_epos_70_10,
-  epos_device_mcd_epos_60_w,
-  epos_device_epos2_24_5,
-  epos_device_epos2_50_5,
-  epos_device_epos2_70_10,
-  epos_device_epos2_module_36_2,
-  epos_device_unknown
+  epos_device_epos_24_1,              //!< EPOS 24/1.
+  epos_device_epos_24_5,              //!< EPOS 24/5.
+  epos_device_epos_70_10,             //!< EPOS 70/10.
+  epos_device_mcd_epos_60_w,          //!< MCD EPOS 60W.
+  epos_device_epos2_24_5,             //!< EPOS2 24/5.
+  epos_device_epos2_50_5,             //!< EPOS2 50/5.
+  epos_device_epos2_70_10,            //!< EPOS2 70/10.
+  epos_device_epos2_module_36_2,      //!< EPOS2 Module 36/2.
+  epos_device_unknown                 //!< Unknown device.
 } epos_device_type_t;
 
 /** \brief Structure defining an EPOS device
   */
 typedef struct epos_device_t {
-  can_device_p can_dev;       //!< The CAN device of the EPOS device.
+  can_device_t* can_dev;      //!< The CAN device of the EPOS device.
   int node_id;                //!< The node identifier of the EPOS device.
 
   int reset;                  //!< Reset the EPOS device after opening.
@@ -139,9 +152,11 @@ typedef struct epos_device_t {
   epos_device_type_t type;    //!< The type of the EPOS device.
   short hardware_generation;  //!< The hardware generation of the EPOS device.
 
-  ssize_t num_read;           //!< The number of message read from the EPOS.
-  ssize_t num_written;        //!< The number of message written to the EPOS.
-} epos_device_t, *epos_device_p;
+  size_t num_read;            //!< The number of messages read from the EPOS.
+  size_t num_written;         //!< The number of messages written to the EPOS.
+  
+  error_t error;              //!< The most recent EPOS device error.
+} epos_device_t;
 
 /** \brief Initialize EPOS device
   * \param[in] dev The EPOS device to be initialized.
@@ -151,8 +166,8 @@ typedef struct epos_device_t {
   * \param[in] reset Reset the EPOS device after opening.
   */
 void epos_device_init(
-  epos_device_p dev,
-  can_device_p can_dev,
+  epos_device_t* dev,
+  can_device_t* can_dev,
   int node_id,
   int reset);
 
@@ -160,22 +175,23 @@ void epos_device_init(
   * \param[in] dev The EPOS device to be destroyed.
   */
 void epos_device_destroy(
-  epos_device_p dev);
+  epos_device_t* dev);
 
 /** \brief Open EPOS device communication
-  * \note This method also reads basic setup parameters from the EPOS node.
   * \param[in] dev The initialized EPOS device to be opened.
   * \return The resulting error code.
+  * 
+  * This method also reads basic setup parameters from the EPOS node.
   */
 int epos_device_open(
-  epos_device_p dev);
+  epos_device_t* dev);
 
 /** \brief Close EPOS device communication
   * \param[in] dev The opened EPOS device to be closed.
   * \return The resulting error code.
   */
 int epos_device_close(
-  epos_device_p dev);
+  epos_device_t* dev);
 
 /** \brief Send EPOS CAN protocol message to a device
   * \param[in] dev The EPOS device the CAN message will be sent to.
@@ -183,8 +199,8 @@ int epos_device_close(
   * \return The resulting error code.
   */
 int epos_device_send_message(
-  epos_device_p dev,
-  can_message_p message);
+  epos_device_t* dev,
+  const can_message_t* message);
 
 /** \brief Receive EPOS CAN protocol message from a device
   * \param[in] dev The EPOS device the CAN message shall be received from.
@@ -192,8 +208,8 @@ int epos_device_send_message(
   * \return The resulting error code.
   */
 int epos_device_receive_message(
-  epos_device_p dev,
-  can_message_p message);
+  epos_device_t* dev,
+  can_message_t* message);
 
 /** \brief Read an EPOS device data object
   * \param[in] dev The EPOS device the data object will be read from.
@@ -201,14 +217,14 @@ int epos_device_receive_message(
   * \param[in] subindex The subindex of the EPOS data object.
   * \param[out] data The array the read EPOS data object shall be stored to.
   * \param[in] num The size of the EPOS data object to be read.
-  * \return The resulting error code.
+  * \return The number of data object bytes read or the negative error code.
   */
 int epos_device_read(
-  epos_device_p dev,
+  epos_device_t* dev,
   short index,
   unsigned char subindex,
   unsigned char* data,
-  ssize_t num);
+  size_t num);
 
 /** \brief Write an EPOS device data object
   * \param[in] dev The EPOS device the data object will be written to.
@@ -216,66 +232,72 @@ int epos_device_read(
   * \param[in] subindex The subindex of the EPOS data object.
   * \param[in] data The array representing the EPOS data object to be written.
   * \param[in] num The size of the EPOS data object to be written.
-  * \return The resulting error code.
+  * \return The number of data object bytes written or the negative error code.
   */
 int epos_device_write(
-  epos_device_p dev,
+  epos_device_t* dev,
   short index,
   unsigned char subindex,
   unsigned char* data,
-  ssize_t num);
+  size_t num);
 
 /** \brief Store persistent parameters on an EPOS device
   * \param[in] dev The EPOS device to store the parameters on.
   * \return The resulting error code.
   */
 int epos_device_store_parameters(
-  epos_device_p dev);
+  epos_device_t* dev);
 
 /** \brief Restore default parameters on an EPOS device
   * \param[in] dev The EPOS device to restore the parameters on.
   * \return The resulting error code.
   */
 int epos_device_restore_parameters(
-  epos_device_p dev);
+  epos_device_t* dev);
 
 /** \brief Retrieve EPOS device node identifier
   * \param[in] dev The EPOS device to retrieve the node identifier for.
-  * \return The node identifier of the specified EPOS device in.
+  * \return The node identifier of the specified EPOS device. On error, the
+  *   return value will be zero and the error code set in dev->error.
   */
 int epos_device_get_id(
-  epos_device_p dev);
+  epos_device_t* dev);
 
 /** \brief Retrieve CAN bit rate of an EPOS device
-  * \note Starting from the second hardware generation, automatic bit rate
-  *   detection is supported by the EPOS devices.
   * \param[in] dev The EPOS device to retrieve the CAN bit rate for.
   * \return The CAN bit rate of the specified EPOS device in [kbit/s] or
   *   EPOS_DEVICE_CAN_BIT_RATE_AUTO if the device is in automatic bit rate
-  *   detection mode.
+  *   detection mode. On error, the return value will be zero and the error
+  *   code set in dev->error.
+  * 
+  * Automatic bit rate detection is supported by EPOS devices of the second
+  * hardware generation or newer.
   */
 int epos_device_get_can_bit_rate(
-  epos_device_p dev);
+  epos_device_t* dev);
 
 /** \brief Set CAN bit rate of an EPOS device
-  * \note Starting from the second hardware generation, automatic bit rate
-  *   detection is supported by the EPOS devices.
   * \param[in] dev The EPOS device to set the CAN bit rate for.
   * \param[in] bit_rate The new CAN bit rate of the specified EPOS
   *   device in [kbit/s] or EPOS_DEVICE_CAN_BIT_RATE_AUTO to put the
   *   device in automatic bit rate detection mode.
   * \return The resulting error code.
+  * 
+  * Automatic bit rate detection is supported by EPOS devices of the second
+  * hardware generation or newer.
   */
 int epos_device_set_can_bit_rate(
-  epos_device_p dev,
+  epos_device_t* dev,
   int bit_rate);
 
 /** \brief Retrieve RS232 baud rate of an EPOS device
   * \param[in] dev The EPOS device to retrieve the RS232 baud rate for.
   * \return The RS232 baud rate of the specified EPOS device in [baud].
+  *   On error, the return value will be zero and the error code set in
+  *   dev->error.
   */
 int epos_device_get_rs232_baud_rate(
-  epos_device_p dev);
+  epos_device_t* dev);
 
 /** \brief Set RS232 baud rate of an EPOS device
   * \param[in] dev The EPOS device to set the RS232 baud rate for.
@@ -284,29 +306,32 @@ int epos_device_get_rs232_baud_rate(
   * \return The resulting error code.
   */
 int epos_device_set_rs232_baud_rate(
-  epos_device_p dev,
+  epos_device_t* dev,
   int baud_rate);
 
 /** \brief Retrieve hardware version of an EPOS device
   * \param[in] dev The EPOS device to retrieve the hardware version for.
-  * \return The hardware version of the specified EPOS device.
+  * \return The hardware version of the specified EPOS device. On error,
+  *   the return value will be zero and the error code set in dev->error.
   */
 short epos_device_get_hardware_version(
-  epos_device_p dev);
+  epos_device_t* dev);
 
 /** \brief Retrieve software version of an EPOS device
   * \param[in] dev The EPOS device to retrieve the software version for.
-  * \return The software version of the specified EPOS device.
+  * \return The software version of the specified EPOS device. On error,
+  *   the return value will be zero and the error code set in dev->error.
   */
 short epos_device_get_software_version(
-  epos_device_p dev);
+  epos_device_t* dev);
 
 /** \brief Retrieve status information of an EPOS device
   * \param[in] dev The EPOS device to retrieve the status information for.
-  * \return The status word of the specified EPOS device.
+  * \return The status word of the specified EPOS device. On error, the 
+  *   return value will be zero and the error code set in dev->error.
   */
 short epos_device_get_status(
-  epos_device_p dev);
+  epos_device_t* dev);
 
 /** \brief Wait for an EPOS device status
   * \param[in] dev The EPOS device to wait for.
@@ -316,16 +341,17 @@ short epos_device_get_status(
   * \return The resulting error code.
   */
 int epos_device_wait_status(
-  epos_device_p dev,
+  epos_device_t* dev,
   short status,
   double timeout);
 
 /** \brief Retrieve control information of an EPOS device
   * \param[in] dev The EPOS device to retrieve the control information for.
-  * \return The control word of the specified EPOS device.
+  * \return The control word of the specified EPOS device. On error, the
+  *   return value will be zero and the error code set in dev->error.
   */
 short epos_device_get_control(
-  epos_device_p dev);
+  epos_device_t* dev);
 
 /** \brief Set control information of an EPOS device
   * \param[in] dev The EPOS device to set the control information for.
@@ -333,16 +359,18 @@ short epos_device_get_control(
   * \return The resulting error code.
   */
 int epos_device_set_control(
-  epos_device_p dev,
+  epos_device_t* dev,
   short control);
 
 /** \brief Retrieve miscellaneous configuration of an EPOS device
   * \param[in] dev The EPOS device to retrieve the miscellaneous
   *   configuration for.
   * \return The miscellaneous configuration word of the specified EPOS device.
+  *   On error, the return value will be zero and the error code set in
+  *   dev->error.
   */
 short epos_device_get_configuration(
-  epos_device_p dev);
+  epos_device_t* dev);
 
 /** \brief Set miscellaneous configuration of an EPOS device
   * \param[in] dev The EPOS device to set the miscellaneous configuration for.
@@ -351,28 +379,29 @@ short epos_device_get_configuration(
   * \return The resulting error code.
   */
 int epos_device_set_configuration(
-  epos_device_p dev,
+  epos_device_t* dev,
   short configuration);
 
 /** \brief Retrieve EPOS device error register
   * \param[in] dev The EPOS device to retrieve the error register for.
-  * \return The error register value of the specified EPOS device.
+  * \return The error register value of the specified EPOS device. On error,
+  *   the return value will be zero and the error code set in dev->error.
   */
 unsigned char epos_device_get_error(
-  epos_device_p dev);
+  epos_device_t* dev);
 
 /** \brief Shutdown EPOS device
   * \param[in] dev The EPOS device to be shut down.
   * \return The resulting error code.
   */
 int epos_device_shutdown(
-  epos_device_p dev);
+  epos_device_t* dev);
 
 /** \brief Reset EPOS device in fault state
   * \param[in] dev The EPOS device to be reset.
   * \return The resulting error code.
   */
 int epos_device_reset(
-  epos_device_p dev);
+  epos_device_t* dev);
 
 #endif

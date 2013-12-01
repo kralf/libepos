@@ -22,19 +22,14 @@
 
 #include "motor.h"
 
-const char* epos_motor_errors[] = {
-  "Success",
-  "Error setting EPOS motor parameters",
-};
-
 short epos_motor_types[] = {
    1,
   10,
   11,
 };
 
-void epos_motor_init(epos_motor_p motor, epos_device_p dev, epos_motor_type_t
-  type, float max_current) {
+void epos_motor_init(epos_motor_t* motor, epos_device_t* dev,
+    epos_motor_type_t type, float max_current) {
   motor->dev = dev;
 
   motor->type = type;
@@ -43,46 +38,45 @@ void epos_motor_init(epos_motor_p motor, epos_device_p dev, epos_motor_type_t
   motor->num_poles = 1;
 }
 
-void epos_motor_destroy(epos_motor_p motor) {
+void epos_motor_destroy(epos_motor_t* motor) {
   motor->dev = 0;
 }
 
-int epos_motor_setup(epos_motor_p motor) {
+int epos_motor_setup(epos_motor_t* motor) {
   if (!epos_motor_set_type(motor, motor->type) &&
-    !epos_motor_set_max_continuous_current(motor,
-      motor->max_cont_current*1e3) &&
-    !epos_motor_set_max_output_current(motor, motor->max_out_current*1e3)) {
-    return EPOS_MOTOR_ERROR_NONE;
-  }
-  else
-    return EPOS_MOTOR_ERROR_SETUP;
+      !epos_motor_set_max_continuous_current(motor,
+        motor->max_cont_current*1e3) &&
+    epos_motor_set_max_output_current(motor, motor->max_out_current*1e3));
+
+  return motor->dev->error.code;
 }
 
-epos_motor_type_t epos_motor_get_type(epos_motor_p motor) {
-  short type;
-  epos_device_read(motor->dev, EPOS_MOTOR_INDEX_TYPE, 0,
-    (unsigned char*)&type, sizeof(short));
-
-  int i;
-  for (i = 0; i < sizeof(epos_motor_types)/sizeof(short); ++i)
-    if (epos_motor_types[i] == type)
-      return i;
+epos_motor_type_t epos_motor_get_type(epos_motor_t* motor) {
+  short type = 0;
+  
+  if (epos_device_read(motor->dev, EPOS_MOTOR_INDEX_TYPE, 0,
+      (unsigned char*)&type, sizeof(short)) > 0) {
+    int i;
+    for (i = 0; i < sizeof(epos_motor_types)/sizeof(short); ++i)
+      if (epos_motor_types[i] == type)
+        return i;
+  }
+  else
+    return -1;
     
   return type;
 }
 
-int epos_motor_set_type(epos_motor_p motor, epos_motor_type_t type) {
-  int result = epos_device_write(motor->dev, EPOS_MOTOR_INDEX_TYPE, 0,
-    (unsigned char*)&epos_motor_types[type], sizeof(short));
-
-  if (!result)
+int epos_motor_set_type(epos_motor_t* motor, epos_motor_type_t type) {
+  if (epos_device_write(motor->dev, EPOS_MOTOR_INDEX_TYPE, 0,
+      (unsigned char*)&epos_motor_types[type], sizeof(short)) > 0)
     motor->type = type;
 
-  return result;
+  return motor->dev->error.code;
 }
 
-short epos_motor_get_max_continuous_current(epos_motor_p motor) {
-  short current;
+short epos_motor_get_max_continuous_current(epos_motor_t* motor) {
+  short current = 0;
   epos_device_read(motor->dev, EPOS_MOTOR_INDEX_DATA,
     EPOS_MOTOR_SUBINDEX_MAX_CONTINUOUS_CURRENT, (unsigned char*)&current,
     sizeof(short));
@@ -90,19 +84,17 @@ short epos_motor_get_max_continuous_current(epos_motor_p motor) {
   return current;
 }
 
-int epos_motor_set_max_continuous_current(epos_motor_p motor, short current) {
-  int result = epos_device_write(motor->dev, EPOS_MOTOR_INDEX_DATA,
-    EPOS_MOTOR_SUBINDEX_MAX_CONTINUOUS_CURRENT, (unsigned char*)&current,
-    sizeof(short));
-
-  if (!result)
+int epos_motor_set_max_continuous_current(epos_motor_t* motor, short current) {
+  if (epos_device_write(motor->dev, EPOS_MOTOR_INDEX_DATA,
+      EPOS_MOTOR_SUBINDEX_MAX_CONTINUOUS_CURRENT, (unsigned char*)&current,
+      sizeof(short)) > 0)
     motor->max_cont_current = current*1e-3;
 
-  return result;
+  return motor->dev->error.code;
 }
 
-short epos_motor_get_max_output_current(epos_motor_p motor) {
-  short current;
+short epos_motor_get_max_output_current(epos_motor_t* motor) {
+  short current = 0;
   epos_device_read(motor->dev, EPOS_MOTOR_INDEX_DATA,
     EPOS_MOTOR_SUBINDEX_MAX_OUTPUT_CURRENT, (unsigned char*)&current,
     sizeof(short));
@@ -110,19 +102,17 @@ short epos_motor_get_max_output_current(epos_motor_p motor) {
   return current;
 }
 
-int epos_motor_set_max_output_current(epos_motor_p motor, short current) {
-  int result = epos_device_write(motor->dev, EPOS_MOTOR_INDEX_DATA,
-    EPOS_MOTOR_SUBINDEX_MAX_OUTPUT_CURRENT, (unsigned char*)&current,
-    sizeof(short));
-
-  if (!result)
+int epos_motor_set_max_output_current(epos_motor_t* motor, short current) {
+  if (epos_device_write(motor->dev, EPOS_MOTOR_INDEX_DATA,
+      EPOS_MOTOR_SUBINDEX_MAX_OUTPUT_CURRENT, (unsigned char*)&current,
+      sizeof(short)) > 0)
     motor->max_out_current = current*1e-3;
 
-  return result;
+  return motor->dev->error.code;
 }
 
-short epos_motor_get_num_poles(epos_motor_p motor) {
-  short num_poles;
+short epos_motor_get_num_poles(epos_motor_t* motor) {
+  short num_poles = 0;
   epos_device_read(motor->dev, EPOS_MOTOR_INDEX_DATA,
     EPOS_MOTOR_SUBINDEX_NUM_POLES, (unsigned char*)&num_poles,
     sizeof(short));
@@ -130,13 +120,11 @@ short epos_motor_get_num_poles(epos_motor_p motor) {
   return num_poles;
 }
 
-int epos_motor_set_num_poles(epos_motor_p motor, short num_poles) {
-  int result = epos_device_write(motor->dev, EPOS_MOTOR_INDEX_DATA,
-    EPOS_MOTOR_SUBINDEX_NUM_POLES, (unsigned char*)&num_poles,
-    sizeof(short));
-
-  if (!result)
+int epos_motor_set_num_poles(epos_motor_t* motor, short num_poles) {
+  if (epos_device_write(motor->dev, EPOS_MOTOR_INDEX_DATA,
+      EPOS_MOTOR_SUBINDEX_NUM_POLES, (unsigned char*)&num_poles,
+      sizeof(short)) > 0)
     motor->num_poles = num_poles;
 
-  return result;
+  return motor->dev->error.code;
 }

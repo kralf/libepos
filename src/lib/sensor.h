@@ -38,14 +38,6 @@
 #define EPOS_SENSOR_INDEX_POSITION              0x2020
 //@}
 
-/** \name Error Codes
-  * \brief Predefined EPOS sensor error codes
-  */
-//@{
-#define EPOS_SENSOR_ERROR_NONE                  0
-#define EPOS_SENSOR_ERROR_SETUP                 1
-//@}
-
 /** \brief Predefined EPOS sensor error descriptions
   */
 extern const char* epos_sensor_errors[];
@@ -53,31 +45,31 @@ extern const char* epos_sensor_errors[];
 /** \brief EPOS position sensor types
   */
 typedef enum {
-  epos_sensor_3chan,
-  epos_sensor_2chan,
-  epos_sensor_hall
+  epos_sensor_3chan,                //!< 3-channel incremental encoder.
+  epos_sensor_2chan,                //!< 2-channel incremental encoder.
+  epos_sensor_hall                  //!< Hall sensor.
 } epos_sensor_type_t;
 
 /** \brief EPOS position sensor polarity
   */
 typedef enum {
-  epos_sensor_normal,
-  epos_sensor_inverted
+  epos_sensor_normal,               //!< Normal polarity.
+  epos_sensor_inverted              //!< Inverted polarity.
 } epos_sensor_polarity_t;
 
 /** \brief EPOS position sensor supervision
   */
 typedef enum {
-  epos_sensor_fully_supervised,
-  epos_sensor_hardware_supervised,
-  epos_sensor_software_supervised,
-  epos_sensor_unsupervised
+  epos_sensor_fully_supervised,     //!< Hardware and software supervised.
+  epos_sensor_hardware_supervised,  //!< Hardware supervised.
+  epos_sensor_software_supervised,  //!< Software supervised.
+  epos_sensor_unsupervised          //!< Not supervised.
 } epos_sensor_supervision_t;
 
 /** \brief Structure defining an EPOS position sensor
   */
 typedef struct epos_sensor_t {
-  epos_device_p dev;               //!< The EPOS device of the sensor.
+  epos_device_t* dev;              //!< The EPOS device of the sensor.
 
   epos_sensor_type_t type;         //!< The position sensor type.
   epos_sensor_polarity_t polarity; //!< The position sensor polarity.
@@ -85,7 +77,7 @@ typedef struct epos_sensor_t {
 
   epos_sensor_supervision_t
     supervision;                   //!< The position sensor's supervision.
-} epos_sensor_t, *epos_sensor_p;
+} epos_sensor_t;
 
 /** \brief Initialize EPOS position sensor
   * \param[in] sensor The EPOS position sensor to be initialized.
@@ -96,8 +88,8 @@ typedef struct epos_sensor_t {
   * \param[in] supervision The sensor's supervision.
   */
 void epos_sensor_init(
-  epos_sensor_p sensor,
-  epos_device_p dev,
+  epos_sensor_t* sensor,
+  epos_device_t* dev,
   epos_sensor_type_t type,
   epos_sensor_polarity_t polarity,
   int num_pulses,
@@ -107,21 +99,22 @@ void epos_sensor_init(
   * \param[in] sensor The EPOS position sensor to be destroyed.
   */
 void epos_sensor_destroy(
-  epos_sensor_p sensor);
+  epos_sensor_t* sensor);
 
 /** \brief Set EPOS sensor parameters
   * \param[in] sensor The EPOS sensor to set the parameters for.
-  * \return The resulting error code.
+  * \return The resulting device error code.
   */
 int epos_sensor_setup(
-  epos_sensor_p sensor);
+  epos_sensor_t* sensor);
 
 /** \brief Retrieve EPOS position sensor type
   * \param[in] sensor The EPOS position sensor to retrieve the type for.
-  * \return The type of the specified EPOS position sensor.
+  * \return The type of the specified EPOS position sensor. On error, the
+  *   return value will be -1 and the error code set in sensor->dev->error.
   */
 epos_sensor_type_t epos_sensor_get_type(
-  epos_sensor_p sensor);
+  epos_sensor_t* sensor);
 
 /** \brief Set EPOS position sensor type
   * \param[in] sensor The EPOS position sensor to set the type for.
@@ -129,15 +122,16 @@ epos_sensor_type_t epos_sensor_get_type(
   * \return The resulting device error code.
   */
 int epos_sensor_set_type(
-  epos_sensor_p sensor,
+  epos_sensor_t* sensor,
   epos_sensor_type_t type);
 
 /** \brief Retrieve EPOS position sensor polarity
   * \param[in] sensor The EPOS position sensor to retrieve the polarity for.
-  * \return The polarity of the specified EPOS position sensor.
+  * \return The polarity of the specified EPOS position sensor. On error, the
+  *   return value will be -1 and the error code set in sensor->dev->error.
   */
 epos_sensor_polarity_t epos_sensor_get_polarity(
-  epos_sensor_p sensor);
+  epos_sensor_t* sensor);
 
 /** \brief Set EPOS position sensor polarity
   * \param[in] sensor The EPOS position sensor to set the polarity for.
@@ -145,16 +139,18 @@ epos_sensor_polarity_t epos_sensor_get_polarity(
   * \return The resulting device error code.
   */
 int epos_sensor_set_polarity(
-  epos_sensor_p sensor,
+  epos_sensor_t* sensor,
   epos_sensor_polarity_t polarity);
 
 /** \brief Retrieve an EPOS position sensor's number of pulses per revolution
   * \param[in] sensor The EPOS position sensor to retrieve the number of
   *   revolutions for.
   * \return The number of pulses of the specified EPOS position sensor.
+  *   On error, the return value will be zero and the error code set in
+  *   sensor->dev->error.
   */
 int epos_sensor_get_pulses(
-  epos_sensor_p sensor);
+  epos_sensor_t* sensor);
 
 /** \brief Set an EPOS position sensor's number of pulses per revolution
   * \param[in] sensor The EPOS position sensor to set the number of
@@ -164,15 +160,17 @@ int epos_sensor_get_pulses(
   * \return The resulting device error code.
   */
 int epos_sensor_set_pulses(
-  epos_sensor_p sensor,
+  epos_sensor_t* sensor,
   int num_pulses);
 
 /** \brief Retrieve an EPOS position sensor's supervision
   * \param[in] sensor The EPOS position sensor to retrieve the supervision for.
   * \return The number of pulses of the specified EPOS position sensor.
+  *   On error, the return value will be -1 and the error code set in
+  *   sensor->dev->error.
   */
 epos_sensor_supervision_t epos_sensor_get_supervision(
-  epos_sensor_p sensor);
+  epos_sensor_t* sensor);
 
 /** \brief Set an EPOS position sensor's supervision
   * \param[in] sensor The EPOS position sensor to set the supervision for.
@@ -181,14 +179,16 @@ epos_sensor_supervision_t epos_sensor_get_supervision(
   * \return The resulting device error code.
   */
 int epos_sensor_set_supervision(
-  epos_sensor_p sensor,
+  epos_sensor_t* sensor,
   epos_sensor_supervision_t supervision);
 
 /** \brief Retrieve an EPOS position sensor's position
   * \param[in] sensor The EPOS position sensor to retrieve the position for.
   * \return The position of the specified EPOS position sensor in [steps].
+  *   On error, the return value will be zero and the error code set in
+  *   sensor->dev->error
   */
 short epos_sensor_get_position(
-  epos_sensor_p sensor);
+  epos_sensor_t* sensor);
 
 #endif

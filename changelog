@@ -1,3 +1,12 @@
+libepos (0.3-71) unstable; urgency=low
+
+  * First revision accounting for tulibs and libcan changes
+  * Revised epos_position_profile_eval() and epos_velocity_profile_eval()
+  * Revised utilities
+  * Increased minor version
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Sun, 01 Dec 2013 15:23:00 +0100
+
 libepos (0.2-70) unstable; urgency=low
 
   * Executable targets now generate alternative-dependent documentation

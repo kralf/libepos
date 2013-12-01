@@ -35,26 +35,33 @@ int main(int argc, char **argv) {
   config_parser_t parser;
   epos_node_t node;
 
-  config_parser_init_default(&parser,
+  config_parser_init(&parser,
     "Start EPOS controller in the selected operation mode",
     "Establish the communication with a connected EPOS device and attempt to "
     "start the controller in the selected operation mode. The controller will "
     "be stopped if SIGINT is received. The communication interface depends "
     "on the momentarily selected alternative of the underlying CANopen "
     "library.");
-  epos_init_config_parse(&node, &parser, 0, argc, argv,
+  epos_node_init_config_parse(&node, &parser, 0, argc, argv,
     config_parser_exit_error);  
+  config_parser_destroy(&parser);
   
   signal(SIGINT, epos_signaled);
 
-  if (epos_open(&node))
-    return -1;
+  epos_node_connect(&node);
+  error_exit(&node.error);
   
   epos_control_start(&node.control);
+  error_exit(&node.error);
+  
   while (!quit);
+  
   epos_control_stop(&node.control);
-  epos_close(&node);
+  error_exit(&node.error);
+  
+  epos_node_disconnect(&node);
+  error_exit(&node.error);
 
-  epos_destroy(&node);
+  epos_node_destroy(&node);
   return 0;
 }

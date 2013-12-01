@@ -54,7 +54,7 @@ typedef struct epos_position_config_t {
   short d_gain;         //!< The position controller's D-gain.
   short vel_factor;     //!< The controller's velocity feed-forward factor.
   short acc_factor;     //!< The controller's acceleration feed-forward factor.
-} epos_position_config_t, *epos_position_config_p;
+} epos_position_config_t;
 
 /** \brief Structure defining an EPOS position control operation
   */
@@ -64,14 +64,14 @@ typedef struct epos_position_t {
   float min_value;      //!< The minimum position limit in [rad].
   float max_value;      //!< The maximum position limit in [rad].
   float max_error;      //!< The maximum position following error in [rad].
-} epos_position_t, *epos_position_p;
+} epos_position_t;
 
 /** \brief Initialize EPOS position control operation
   * \param[in] position The EPOS position control operation to be initialized.
   * \param[in] target_value The target position in [rad].
   */
 void epos_position_init(
-  epos_position_p position,
+  epos_position_t* position,
   float target_value);
 
 /** \brief Initialize EPOS position control operation involving limits
@@ -82,7 +82,7 @@ void epos_position_init(
   * \param[in] max_error The maximum following error in [rad].
   */
 void epos_position_init_limits(
-  epos_position_p position,
+  epos_position_t* position,
   float target_value,
   float min_value,
   float max_value,
@@ -95,8 +95,8 @@ void epos_position_init_limits(
   * \return The resulting device error code.
   */
 int epos_position_setup(
-  epos_node_p node,
-  epos_position_config_p config);
+  epos_node_t* node,
+  const epos_position_config_t* config);
 
 /** \brief Start EPOS position control operation
   * \param[in] node The EPOS node to start the position control operation for.
@@ -104,15 +104,15 @@ int epos_position_setup(
   * \return The resulting device error code.
   */
 int epos_position_start(
-  epos_node_p node,
-  epos_position_p position);
+  epos_node_t* node,
+  const epos_position_t* position);
 
 /** \brief Stop EPOS position control operation
   * \param[in] node The EPOS node to stop the position control operation for.
   * \return The resulting device error code.
   */
 int epos_position_stop(
-  epos_node_p node);
+  epos_node_t* node);
 
 /** \brief Update the position control operation of an EPOS device
   * \param[in] node The EPOS node to update the position control operation for.
@@ -120,8 +120,8 @@ int epos_position_stop(
   * \return The resulting device error code.
   */
 int epos_position_update(
-  epos_node_p node,
-  epos_position_p position);
+  epos_node_t* node,
+  epos_position_t* position);
 
 /** \brief Set EPOS software position limits
   * \param[in] dev The EPOS device to set the software position limits for.
@@ -130,16 +130,18 @@ int epos_position_update(
   * \return The resulting device error code.
   */
 int epos_position_set_limits(
-  epos_device_p dev,
+  epos_device_t* dev,
   int min_pos,
   int max_pos);
 
 /** \brief Retrieve the actual position of an EPOS device
   * \param[in] dev The EPOS device to retrieve the actual position for.
   * \return The actual position of the specified EPOS device in [pu].
+  *   On error, the return value will be zero and the error code set in
+  *   dev->error.
   */
 int epos_position_get_actual(
-  epos_device_p dev);
+  epos_device_t* dev);
 
 /** \brief Set the demanded position of an EPOS device
   * \param[in] dev The EPOS device to set the demanded position for.
@@ -148,15 +150,17 @@ int epos_position_get_actual(
   * \return The resulting device error code.
   */
 int epos_position_set_demand(
-  epos_device_p dev,
+  epos_device_t* dev,
   int position);
 
 /** \brief Retrieve the demanded position of an EPOS device
   * \param[in] dev The EPOS device to retrieve the demanded position for.
   * \return The demanded position of the specified EPOS device in [pu].
+  *   On error, the return value will be zero and the error code set in
+  *   dev->error.
   */
 int epos_position_get_demand(
-  epos_device_p dev);
+  epos_device_t* dev);
 
 /** \brief Set the maximum position following error of an EPOS device
   * \param[in] dev The EPOS device to set the maximum following error for.
@@ -165,7 +169,7 @@ int epos_position_get_demand(
   * \return The resulting device error code.
   */
 int epos_position_set_max_error(
-  epos_device_p dev,
+  epos_device_t* dev,
   unsigned int max_error);
 
 /** \brief Set the position control P-gain of an EPOS device
@@ -175,7 +179,7 @@ int epos_position_set_max_error(
   * \return The resulting device error code.
   */
 int epos_position_set_p_gain(
-  epos_device_p dev,
+  epos_device_t* dev,
   short p_gain);
 
 /** \brief Set the position control I-gain of an EPOS device
@@ -185,7 +189,7 @@ int epos_position_set_p_gain(
   * \return The resulting device error code.
   */
 int epos_position_set_i_gain(
-  epos_device_p dev,
+  epos_device_t* dev,
   short i_gain);
 
 /** \brief Set the position control D-gain of an EPOS device
@@ -195,7 +199,7 @@ int epos_position_set_i_gain(
   * \return The resulting device error code.
   */
 int epos_position_set_d_gain(
-  epos_device_p dev,
+  epos_device_t* dev,
   short d_gain);
 
 /** \brief Set the velocity feed-forward factor of an EPOS device
@@ -205,7 +209,7 @@ int epos_position_set_d_gain(
   * \return The resulting device error code.
   */
 int epos_position_set_velocity_factor(
-  epos_device_p dev,
+  epos_device_t* dev,
   short vel_factor);
 
 /** \brief Set the acceleration feed-forward factor of an EPOS device
@@ -216,7 +220,7 @@ int epos_position_set_velocity_factor(
   * \return The resulting device error code.
   */
 int epos_position_set_acceleration_factor(
-  epos_device_p dev,
+  epos_device_t* dev,
   short acc_factor);
 
 #endif

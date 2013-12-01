@@ -25,6 +25,52 @@
 
 #include "epos.h"
 #include "velocity_profile.h"
+#include "macros.h"
+
+#define EPOS_VELOCITY_PROFILE_PARAMETER_VELOCITY      "VELOCITY"
+#define EPOS_VELOCITY_PROFILE_PARAMETER_ACCELERATION  "ACCELERATION"
+#define EPOS_VELOCITY_PROFILE_PARAMETER_DECELERATION  "DECELERATION"
+
+#define EPOS_PROFILE_PARSER_OPTION_GROUP              "epos-profile"
+#define EPOS_PROFILE_PARAMETER_TYPE                   "type"
+
+config_param_t epos_velocity_profile_default_arguments_params[] = {
+  {EPOS_VELOCITY_PROFILE_PARAMETER_VELOCITY,
+    config_param_type_float,
+    "",
+    "(-inf, inf)",
+    "The demanded angular velocity in [deg/s]"},
+  {EPOS_VELOCITY_PROFILE_PARAMETER_ACCELERATION,
+    config_param_type_float,
+    "",
+    "[0.0, inf)",
+    "The demanded maximum angular acceleration in [deg/s^2]"},
+  {EPOS_VELOCITY_PROFILE_PARAMETER_DECELERATION,
+    config_param_type_float,
+    "",
+    "[0.0, inf)",
+    "The demanded maximum angular deceleration in [deg/s^2]"},
+};
+
+const config_default_t epos_velocity_profile_default_arguments = {
+  epos_velocity_profile_default_arguments_params,
+  sizeof(epos_velocity_profile_default_arguments_params)/
+    sizeof(config_param_t),
+};
+
+config_param_t epos_profile_default_options_params[] = {
+  {EPOS_PROFILE_PARAMETER_TYPE,
+    config_param_type_enum,
+    "linear",
+    "linear|sinusoidal",
+    "The type of motion profile, which may represent either 'linear' "
+    "or 'sinusoidal' velocity ramps"},
+};
+
+const config_default_t epos_profile_default_options = {
+  epos_profile_default_options_params,
+  sizeof(epos_profile_default_options_params)/sizeof(config_param_t),
+};
 
 int quit = 0;
 
@@ -38,75 +84,68 @@ int main(int argc, char **argv) {
   epos_velocity_profile_t profile;
 
   config_parser_init_default(&parser,
+    &epos_velocity_profile_default_arguments, 0,
     "Start EPOS controller in profile velocity mode",
     "Establish the communication with a connected EPOS device and attempt to "
     "start the controller in profile velocity mode. The controller will be "
     "stopped if SIGINT is received or the motion profile is completed. The "
     "communication interface depends on the momentarily selected alternative "
-    "of the underlying CANopen library.");  
-  config_param_p velocity_param = config_set_param_value_range(
-    &parser.arguments,
-    "VELOCITY",
-    config_param_type_float,
-    "",
-    "(-inf, inf)",
-    "The demanded angular velocity in [deg/s]");
-  config_param_p acceleration_param = config_set_param_value_range(
-    &parser.arguments,
-    "ACCELERATION",
-    config_param_type_float,
-    "",
-    "[0.0, inf)",
-    "The demanded maximum angular acceleration in [deg/s^2]");
-  config_param_p deceleration_param = config_set_param_value_range(
-    &parser.arguments,
-    "DECELERATION",
-    config_param_type_float,
-    "",
-    "[0.0, inf)",
-    "The demanded maximum angular deceleration in [deg/s^2]");
-  config_parser_option_group_p profile_option_group =
-    config_parser_add_option_group(&parser, "profile", 0, "Profile options",
+    "of the underlying CANopen library.");
+  config_parser_add_option_group(&parser, EPOS_PROFILE_PARSER_OPTION_GROUP,
+    &epos_profile_default_options, "EPOS profile options",
     "These options control the profile trajectory generator.");
-  config_param_p type_param = config_set_param_value_range(
-    &profile_option_group->options,
-    "type",
-    config_param_type_enum,
-    "linear",
-    "linear|sinusoidal",
-    "The type of motion profile, which may represent either 'linear' "
-    "or 'sinusoidal' velocity ramps");
-  epos_init_config_parse(&node, &parser, 0, argc, argv,
+  epos_node_init_config_parse(&node, &parser, 0, argc, argv,
     config_parser_exit_error);
+  
+  float target_value = deg_to_rad(config_get_float(&parser.arguments,
+    EPOS_VELOCITY_PROFILE_PARAMETER_VELOCITY));
+  float acceleration = deg_to_rad(config_get_float(&parser.arguments,
+    EPOS_VELOCITY_PROFILE_PARAMETER_ACCELERATION));
+  float deceleration = deg_to_rad(config_get_float(&parser.arguments,
+    EPOS_VELOCITY_PROFILE_PARAMETER_DECELERATION));
+  
+  config_parser_option_group_t* epos_profile_option_group =
+    config_parser_get_option_group(&parser, EPOS_PROFILE_PARSER_OPTION_GROUP);
+  epos_profile_type_t profile_type = config_get_enum(
+    &epos_profile_option_group->options, EPOS_PROFILE_PARAMETER_TYPE);
   
   signal(SIGINT, epos_signaled);
 
-  if (epos_open(&node))
-    return -1;
+  epos_node_connect(&node);
+  error_exit(&node.error);
   
-  float vel = deg_to_rad(config_param_get_float(velocity_param));
-  float acc = deg_to_rad(config_param_get_float(acceleration_param));
-  float dec = deg_to_rad(config_param_get_float(deceleration_param));
-  epos_profile_type_t type = config_param_get_enum(type_param);
-  epos_velocity_profile_init(&profile, vel, acc, dec, type);
-  
-  if (!epos_velocity_profile_start(&node, &profile)) {
-    while (!quit) {
-      float pos = rad_to_deg(epos_get_position(&node));
-      vel = rad_to_deg(epos_get_velocity(&node));
-      
-      fprintf(stdout, "\rAngular position: %8.2f deg\n", pos);
-      fprintf(stdout, "\rAngular velocity: %8.2f deg/s", vel);
-      fprintf(stdout, "%c[1A\r", 0x1B);
-
-      if (!epos_profile_wait(&node, 0.1))
-        break;      
+  epos_velocity_profile_init(&profile, target_value, acceleration,
+    deceleration, profile_type);  
+  epos_velocity_profile_start(&node, &profile);
+  error_exit(&node.dev.error);
+    
+  while (!quit) {
+    float position = epos_node_get_position(&node);
+    error_exit(&node.error);
+    float actual_value = epos_node_get_velocity(&node);
+    error_exit(&node.error);
+    
+    fprintf(stdout, "\rAngular position: %8.2f deg\n",
+      rad_to_deg(position));
+    fprintf(stdout, "\rAngular velocity: %8.2f deg/s",
+      rad_to_deg(actual_value));
+    fprintf(stdout, "%c[1A\r", 0x1B);
+    
+    if (epos_profile_wait(&node, 0.1) != EPOS_DEVICE_ERROR_WAIT_TIMEOUT) {
+      error_exit(&node.dev.error);
+      break;
     }
-    fprintf(stdout, "%c[1B\n", 0x1B);
-    epos_velocity_profile_stop(&node);
   }
-  epos_close(&node);
+  fprintf(stdout, "%c[1B\n", 0x1B);
+  
+  epos_velocity_profile_stop(&node);
+  error_exit(&node.dev.error);
 
-  epos_destroy(&node);
+  epos_node_disconnect(&node);
+  error_exit(&node.error);
+
+  epos_node_destroy(&node);
+  config_parser_destroy(&parser);
+  
   return 0;
 }

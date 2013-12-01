@@ -28,19 +28,21 @@ int main(int argc, char **argv) {
   config_parser_t parser;
   epos_node_t node;
 
-  config_parser_init_default(&parser,
+  config_parser_init(&parser,
     "Initialize an EPOS device",
     "Establish the communication with a connected EPOS device and attempt "
     "to initialize it. The communication interface depends on the momentarily "
     "selected alternative of the underlying CANopen library.");
-  epos_init_config_parse(&node, &parser, 0, argc, argv,
+  epos_node_init_config_parse(&node, &parser, 0, argc, argv,
     config_parser_exit_error);
-  
-  if (epos_open(&node))
-    return -1;
-  
-  epos_close(&node);
+  config_parser_destroy(&parser);
 
-  epos_destroy(&node);
+  epos_node_connect(&node);
+  error_exit(&node.error);
+  
+  epos_node_disconnect(&node);
+  error_exit(&node.error);
+
+  epos_node_destroy(&node);
   return 0;
 }

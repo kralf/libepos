@@ -45,20 +45,20 @@
 typedef struct epos_velocity_config_t {
   short p_gain;         //!< The velocity controller's P-gain.
   short i_gain;         //!< The velocity controller's I-gain.
-} epos_velocity_config_t, *epos_velocity_config_p;
+} epos_velocity_config_t;
 
 /** \brief Structure defining an EPOS velocity control operation
   */
 typedef struct epos_velocity_t {
   float target_value;            //!< The target angular velocity in [rad/s].
-} epos_velocity_t, *epos_velocity_p;
+} epos_velocity_t;
 
 /** \brief Initialize EPOS velocity control operation
   * \param[in] velocity The EPOS velocity control operation to be initialized.
   * \param[in] target_value The target angular velocity in [rad/s].
   */
 void epos_velocity_init(
-  epos_velocity_p velocity,
+  epos_velocity_t* velocity,
   float target_value);
 
 /** \brief Setup EPOS velocity control
@@ -68,8 +68,8 @@ void epos_velocity_init(
   * \return The resulting device error code.
   */
 int epos_velocity_setup(
-  epos_node_p node,
-  epos_velocity_config_p config);
+  epos_node_t* node,
+  const epos_velocity_config_t* config);
 
 /** \brief Start EPOS velocity control operation
   * \param[in] node The EPOS node to start the velocity control operation for.
@@ -77,15 +77,15 @@ int epos_velocity_setup(
   * \return The resulting device error code.
   */
 int epos_velocity_start(
-  epos_node_p node,
-  epos_velocity_p velocity);
+  epos_node_t* node,
+  const epos_velocity_t* velocity);
 
 /** \brief Stop EPOS velocity control operation
   * \param[in] node The EPOS node to stop the velocity control operation for.
   * \return The resulting device error code.
   */
 int epos_velocity_stop(
-  epos_node_p node);
+  epos_node_t* node);
 
 /** \brief Update the velocity control operation of an EPOS device
   * \param[in] node The EPOS node to update the velocity control 
@@ -94,22 +94,26 @@ int epos_velocity_stop(
   * \return The resulting device error code.
   */
 int epos_velocity_update(
-  epos_node_p node,
-  epos_velocity_p velocity);
+  epos_node_t* node,
+  epos_velocity_t* velocity);
 
 /** \brief Retrieve the actual velocity of an EPOS device
   * \param[in] dev The EPOS device to retrieve the actual velocity for.
   * \return The actual velocity of the specified EPOS device in [vu].
+  *   On error, the return value will be zero and the error code set in
+  *   dev->error.
   */
 int epos_velocity_get_actual(
-  epos_device_p dev);
+  epos_device_t* dev);
 
 /** \brief Retrieve the average velocity of an EPOS device
   * \param[in] dev The EPOS device to retrieve the average velocity for.
   * \return The average velocity of the specified EPOS device in [vu].
+  *   On error, the return value will be zero and the error code set in
+  *   dev->error.
   */
 int epos_velocity_get_average(
-  epos_device_p dev);
+  epos_device_t* dev);
 
 /** \brief Set the demanded velocity of an EPOS device
   * \param[in] dev The EPOS device to set the demanded velocity for.
@@ -118,15 +122,17 @@ int epos_velocity_get_average(
   * \return The resulting device error code.
   */
 int epos_velocity_set_demand(
-  epos_device_p dev,
+  epos_device_t* dev,
   int velocity);
 
 /** \brief Retrieve the demanded velocity of an EPOS device
   * \param[in] dev The EPOS device to retrieve the demanded velocity for.
   * \return The demanded velocity of the specified EPOS device in [vu].
+  *   On error, the return value will be zero and the error code set in
+  *   dev->error.
   */
 int epos_velocity_get_demand(
-  epos_device_p dev);
+  epos_device_t* dev);
 
 /** \brief Set the velocity control P-gain of an EPOS device
   * \param[in] dev The EPOS device to set the velocity control P-gain for.
@@ -135,7 +141,7 @@ int epos_velocity_get_demand(
   * \return The resulting device error code.
   */
 int epos_velocity_set_p_gain(
-  epos_device_p dev,
+  epos_device_t* dev,
   short p_gain);
 
 /** \brief Set the velocity control I-gain of an EPOS device
@@ -145,7 +151,7 @@ int epos_velocity_set_p_gain(
   * \return The resulting device error code.
   */
 int epos_velocity_set_i_gain(
-  epos_device_p dev,
+  epos_device_t* dev,
   short i_gain);
 
 #endif

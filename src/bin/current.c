@@ -26,6 +26,21 @@
 #include "epos.h"
 #include "current.h"
 
+#define EPOS_CURRENT_PARAMETER_CURRENT        "CURRENT"
+
+config_param_t epos_current_default_arguments_params[] = {
+  {EPOS_CURRENT_PARAMETER_CURRENT,
+    config_param_type_float,
+    "",
+    "[0.0, inf)",
+    "The demanded motor current in [A]"},
+};
+
+const config_default_t epos_current_default_arguments = {
+  epos_current_default_arguments_params,
+  sizeof(epos_current_default_arguments_params)/sizeof(config_param_t),
+};
+
 int quit = 0;
 
 void epos_signaled(int signal) {
@@ -35,42 +50,46 @@ void epos_signaled(int signal) {
 int main(int argc, char **argv) {
   config_parser_t parser;
   epos_node_t node;
-  epos_current_t curr;
+  epos_current_t current;
 
-  config_parser_init_default(&parser,
+  config_parser_init_default(&parser, &epos_current_default_arguments, 0,
     "Start EPOS controller in current mode",
     "Establish the communication with a connected EPOS device and attempt to "
     "start the controller in current mode. The controller will be stopped "
     "if SIGINT is received. The communication interface depends on the "
     "momentarily selected alternative of the underlying CANopen library.");  
-  config_param_p current_param = config_set_param_value_range(
-    &parser.arguments,
-    "CURRENT",
-    config_param_type_float,
-    "",
-    "[0.0, inf)",
-    "The demanded motor current in [A]");
-  epos_init_config_parse(&node, &parser, 0, argc, argv,
+  epos_node_init_config_parse(&node, &parser, 0, argc, argv,
     config_parser_exit_error);
+
+  float target_value = config_get_float(&parser.arguments,
+    EPOS_CURRENT_PARAMETER_CURRENT);
   
   signal(SIGINT, epos_signaled);
 
-  if (epos_open(&node))
-    return -1;
-  
-  float target_value = config_param_get_float(current_param);
-  epos_current_init(&curr, target_value);
-  if (!epos_current_start(&node, &curr)) {
-    while (!quit) {
-      fprintf(stdout, "\rMotor current: %8.4f A",
-        epos_get_current(&node));
-      fflush(stdout);
-    }
-    fprintf(stdout, "\n");
-    epos_current_stop(&node);
-  }
-  epos_close(&node);
+  epos_node_connect(&node);
+  error_exit(&node.error);
 
-  epos_destroy(&node);
+  epos_current_init(&current, target_value);  
+  epos_current_start(&node, &current);
+  error_exit(&node.dev.error);
+  
+  while (!quit) {
+    float actual_value = epos_node_get_current(&node);
+    error_exit(&node.error);
+    
+    fprintf(stdout, "\rMotor current: %8.4f A", actual_value);
+    fflush(stdout);
+  }
+  fprintf(stdout, "\n");
+  
+  epos_current_stop(&node);
+  error_exit(&node.dev.error);
+
+  epos_node_disconnect(&node);
+  error_exit(&node.error);
+
+  epos_node_destroy(&node);
+  config_parser_destroy(&parser);
+  
   return 0;
 }

@@ -20,10 +20,11 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 #include "epos.h"
 
-#include "global.h"
+#include "macros.h"
 #include "home.h"
 #include "position.h"
 #include "velocity.h"
@@ -31,10 +32,12 @@
 
 const char* epos_errors[] = {
   "Success",
-  "Configuration error",
-  "Error opening EPOS",
-  "Error closing EPOS",
-  "Error homing EPOS",
+  "EPOS node configuration error",
+  "Failed to connect EPOS node",
+  "Failed to disconnect EPOS node",
+  "Failed to read from EPOS node",
+  "Failed to write to EPOS node",
+  "Failed to home EPOS node",
 };
 
 config_param_t epos_default_params[] = {
@@ -137,25 +140,61 @@ config_param_t epos_default_params[] = {
     "Home position in [rad]"},
 };
 
-config_t epos_default_config = {
+const config_default_t epos_default_config = {
   epos_default_params,
   sizeof(epos_default_params)/sizeof(config_param_t),
 };
 
-void epos_init(epos_node_p node, can_device_p can_dev) {
-  epos_init_config(node, can_dev, &epos_default_config);  
+void epos_node_init_components(epos_node_t* node, can_device_t* can_dev);
+
+void epos_node_init(epos_node_t* node, can_device_t* can_dev) {
+  config_init_default(&node->config, &epos_default_config);
+  error_init(&node->error, epos_errors);
+  
+  epos_node_init_components(node, can_dev);
 }
 
-int epos_init_config(epos_node_p node, can_device_p can_dev, config_p config) {
+int epos_node_init_config(epos_node_t* node, can_device_t* can_dev, const
+    config_t* config) {
+  config_init_default(&node->config, &epos_default_config);
+  error_init(&node->error, epos_errors);
+  
+  if (config_set(&node->config, config))
+    error_blame(&node->error, &node->config.error, EPOS_ERROR_CONFIG);
+  epos_node_init_components(node, can_dev);
+  
+  return node->error.code;
+}
+
+int epos_node_init_config_parse(epos_node_t* node, config_parser_t* parser,
+    const char* option_group, int argc, char **argv, config_parser_exit_t
+    exit) {
+  config_init_default(&node->config, &epos_default_config);
+  error_init(&node->error, epos_errors);
+  
+  option_group = option_group ? option_group : EPOS_CONFIG_PARSER_OPTION_GROUP;
+  config_parser_add_option_group(parser, option_group, &epos_default_config,
+    "EPOS options", 
+    "These options control the settings for the EPOS node and all maxon "
+    "motor hardware connected to it.");
+  
+  can_device_t* can_dev = malloc(sizeof(can_device_t));
+  if (can_device_init_config_parse(can_dev, parser, 0, argc, argv, exit))
+    error_blame(&node->error, &can_dev->error, EPOS_ERROR_CONFIG);
+  else if (config_set(&node->config, &config_parser_get_option_group(
+      parser, option_group)->options))
+    error_blame(&node->error, &node->config.error, EPOS_ERROR_CONFIG);
+  epos_node_init_components(node, can_dev);
+
+  return node->error.code;
+}
+
+void epos_node_init_components(epos_node_t* node, can_device_t* can_dev) {
   if (!can_dev) {
     can_dev = malloc(sizeof(can_device_t));
-    can_init(can_dev);
+    can_device_init(can_dev);
   }
-
-  config_init_copy(&node->config, &epos_default_config);
-  if ((config != &epos_default_config) && config_set(&node->config, config))
-    return EPOS_ERROR_CONFIG;
-
+  
   epos_device_init(&node->dev, can_dev,
     config_get_int(&node->config, EPOS_PARAMETER_DEVICE_NODE_ID),
     config_get_bool(&node->config, EPOS_PARAMETER_DEVICE_RESET));
@@ -172,31 +211,10 @@ int epos_init_config(epos_node_p node, can_device_p can_dev, config_p config) {
   epos_input_init(&node->input, &node->dev);
   epos_control_init(&node->control, &node->dev,
     config_get_int(&node->config, EPOS_PARAMETER_CONTROL_MODE));
-  
-  return EPOS_ERROR_NONE;
 }
 
-int epos_init_config_parse(epos_node_p node, config_parser_p parser,
-    const char* option_group, int argc, char **argv, config_parser_exit_t
-    exit) {
-  can_device_p can_dev = malloc(sizeof(can_device_t));
-  
-  config_p config = &config_parser_add_option_group(parser,
-    option_group ? option_group : EPOS_CONFIG_PARSER_OPTION_GROUP,
-    &epos_default_config, "EPOS options", 
-    "These options control the settings for the EPOS node and all maxon "
-    "hardware connected to it.")->options;
-  
-  if (can_init_config_parse(can_dev, parser, 0, argc, argv, exit)) {
-    free(can_dev);
-    return EPOS_ERROR_CONFIG;
-  }
-
-  return epos_init_config(node, can_dev, config);
-}
-
-void epos_destroy(epos_node_p node) {
-  can_device_p can_dev = node->dev.can_dev;
+void epos_node_destroy(epos_node_t* node) {
+  can_device_t* can_dev = node->dev.can_dev;
 
   epos_control_destroy(&node->control);
   epos_gear_destroy(&node->gear);
@@ -206,49 +224,75 @@ void epos_destroy(epos_node_p node) {
   epos_device_destroy(&node->dev);
 
   if (!can_dev->num_references)
-    can_destroy(can_dev);
+    can_device_destroy(can_dev);
 
   config_destroy(&node->config);
+  error_destroy(&node->error);
 }
 
-int epos_open(epos_node_p node) {
-  if (!epos_device_open(&node->dev) &&
-    !epos_motor_setup(&node->motor) &&
-    !epos_sensor_setup(&node->sensor) &&
-    !epos_input_setup(&node->input))
-    return EPOS_ERROR_NONE;
-  else
-    return EPOS_ERROR_OPEN;
+int epos_node_connect(epos_node_t* node) {
+  error_clear(&node->error);
+  
+  if (epos_device_open(&node->dev))
+    error_blame(&node->error, &node->dev.error, EPOS_ERROR_CONNECT);
+  else if (epos_motor_setup(&node->motor) ||
+      epos_sensor_setup(&node->sensor) ||
+      epos_input_setup(&node->input))
+    error_set(&node->error, EPOS_ERROR_CONNECT);
+
+  return node->error.code;
 }
 
-int epos_close(epos_node_p node) {
-  if (!epos_device_close(&node->dev))
-    return EPOS_ERROR_NONE;
-  else
-    return EPOS_ERROR_CLOSE;
+int epos_node_disconnect(epos_node_t* node) {
+  error_clear(&node->error);
+  
+  if (epos_device_close(&node->dev))
+    error_blame(&node->error, &node->dev.error, EPOS_ERROR_DISCONNECT);
+
+  return node->error.code;
 }
 
-float epos_get_position(epos_node_p node) {
+float epos_node_get_position(epos_node_t* node) {
+  error_clear(&node->error);
+  
   int pos = epos_position_get_actual(&node->dev);
-  return epos_gear_to_angle(&node->gear, pos);
+  if (node->dev.error.code) {
+    error_blame(&node->error, &node->dev.error, EPOS_ERROR_READ);
+    return NAN;
+  }
+  else  
+    return epos_gear_to_angle(&node->gear, pos);
 }
 
-float epos_get_velocity(epos_node_p node) {
+float epos_node_get_velocity(epos_node_t* node) {
+  error_clear(&node->error);
+  
   int vel = epos_velocity_get_average(&node->dev);
-  return epos_gear_to_angular_velocity(&node->gear, vel);
+  if (node->dev.error.code) {
+    error_blame(&node->error, &node->dev.error, EPOS_ERROR_READ);
+    return NAN;
+  }
+  else  
+    return epos_gear_to_angular_velocity(&node->gear, vel);
 }
 
-float epos_get_acceleration(epos_node_p node) {
-  int vel = epos_velocity_get_average(&node->dev);
-  return epos_gear_to_angular_velocity(&node->gear, vel);
+float epos_node_get_current(epos_node_t* node) {
+  error_clear(&node->error);
+  
+  short current = epos_current_get_average(&node->dev);
+  if (node->dev.error.code) {
+    error_blame(&node->error, &node->dev.error, EPOS_ERROR_READ);
+    return NAN;
+  }
+  else
+    return current*1e-3;
 }
 
-float epos_get_current(epos_node_p node) {
-  return 1e-3*epos_current_get_average(&node->dev);
-}
-
-int epos_home(epos_node_p node, double timeout) {
+int epos_node_home(epos_node_t* node, double timeout) {
   epos_home_t home;
+  
+  error_clear(&node->error);
+  
   epos_home_init(&home,
     config_get_int(&node->config, EPOS_PARAMETER_HOME_METHOD),
     config_get_float(&node->config, EPOS_PARAMETER_HOME_CURRENT),
@@ -256,14 +300,15 @@ int epos_home(epos_node_p node, double timeout) {
     deg_to_rad(config_get_float(&node->config, 
       EPOS_PARAMETER_HOME_ACCELERATION)),
     deg_to_rad(config_get_float(&node->config, EPOS_PARAMETER_HOME_POSITION)));
+  
   home.type = config_get_int(&node->config, EPOS_PARAMETER_HOME_TYPE);
   home.offset = deg_to_rad(config_get_float(&node->config, 
     EPOS_PARAMETER_HOME_OFFSET));
 
-  if (!epos_home_start(node, &home)) {
+  if (!epos_home_start(node, &home))
     epos_home_wait(node, timeout);
-    return EPOS_ERROR_NONE;
-  }
   else
-    return EPOS_ERROR_HOME;
+    error_set(&node->error, EPOS_ERROR_HOME);
+  
+  return node->error.code;
 }

@@ -19,45 +19,48 @@
  ***************************************************************************/
 
 #include <stdio.h>
-#include <math.h>
 #include <limits.h>
 #include <float.h>
 
 #include "gear.h"
+#include "macros.h"
 
-void epos_gear_init(epos_gear_p gear, epos_sensor_p sensor, float
-  transmission) {
+void epos_gear_init(epos_gear_t* gear, epos_sensor_t* sensor, float
+    transmission) {
   gear->sensor = sensor;
   gear->transmission = transmission;
 }
 
-void epos_gear_destroy(epos_gear_p gear) {
+void epos_gear_destroy(epos_gear_t* gear) {
   gear->sensor = 0;
 }
 
-float epos_gear_to_angle(epos_gear_p gear, int position) {
+float epos_gear_to_angle(const epos_gear_t* gear, int position) {
   return 2.0*M_PI*position/(4.0*gear->sensor->num_pulses*gear->transmission);
 }
 
-int epos_gear_from_angle(epos_gear_p gear, float angle) {
+int epos_gear_from_angle(const epos_gear_t* gear, float angle) {
   return clip(angle*4.0*gear->sensor->num_pulses*gear->transmission/(2.0*M_PI),
     INT_MIN, INT_MAX);
 }
 
-float epos_gear_to_angular_velocity(epos_gear_p gear, int velocity) {
+float epos_gear_to_angular_velocity(const epos_gear_t* gear, int velocity) {
   return 2.0*M_PI*velocity/(60.0*gear->transmission);
 }
 
-int epos_gear_from_angular_velocity(epos_gear_p gear, float angular_vel) {
+int epos_gear_from_angular_velocity(const epos_gear_t* gear, float
+    angular_vel) {
   return clip(angular_vel*60.0*gear->transmission/(2.0*M_PI),
     INT_MIN, INT_MAX);
 }
 
-float epos_gear_to_angular_acceleration(epos_gear_p gear, int acceleration) {
+float epos_gear_to_angular_acceleration(const epos_gear_t* gear, int
+    acceleration) {
   return 2.0*M_PI*acceleration/(60.0*gear->transmission);
 }
 
-int epos_gear_from_angular_acceleration(epos_gear_p gear, float angular_acc) {
+int epos_gear_from_angular_acceleration(const epos_gear_t* gear, float
+    angular_acc) {
   return clip(angular_acc*60.0*abs(gear->transmission)/(2.0*M_PI), 
     INT_MIN, INT_MAX);
 }

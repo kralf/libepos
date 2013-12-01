@@ -21,7 +21,9 @@
 #ifndef EPOS_H
 #define EPOS_H
 
-#include <tulibs/config/config.h>
+#include <config/config.h>
+
+#include <error/error.h>
 
 #include "device.h"
 #include "sensor.h"
@@ -67,10 +69,19 @@
   */
 //@{
 #define EPOS_ERROR_NONE                       0
+//!< Success
 #define EPOS_ERROR_CONFIG                     1
-#define EPOS_ERROR_OPEN                       2
-#define EPOS_ERROR_CLOSE                      3
-#define EPOS_ERROR_HOME                       4
+//!< EPOS node configuration error
+#define EPOS_ERROR_CONNECT                    2
+//!< Failed to connect EPOS node
+#define EPOS_ERROR_DISCONNECT                 3
+//!< Failed to disconnect EPOS node
+#define EPOS_ERROR_READ                       4
+//!< Failed to read from EPOS node
+#define EPOS_ERROR_WRITE                      5
+//!< Failed to write to EPOS node
+#define EPOS_ERROR_HOME                       6
+//!< Failed to home EPOS node
 //@}
 
 /** \brief Predefined EPOS error descriptions
@@ -79,7 +90,7 @@ extern const char* epos_errors[];
 
 /** \brief Predefined EPOS default configuration
   */
-extern config_t epos_default_config;
+extern const config_default_t epos_default_config;
 
 /** \brief Structure defining an EPOS node
   */
@@ -91,8 +102,10 @@ typedef struct epos_node_t {
   epos_input_t input;             //!< The EPOS input module.
   epos_control_t control;         //!< The EPOS controller.
 
-  config_t config;                //!< The EPOS configuration parameters.
-} epos_node_t, *epos_node_p;
+  config_t config;                //!< The EPOS node configuration parameters.
+  
+  error_t error;                  //!< The most recent EPOS node error.
+} epos_node_t;
 
 /** \brief Initialize EPOS node
   * \note The node will be initialized using default configuration parameters.
@@ -100,9 +113,9 @@ typedef struct epos_node_t {
   * \param[in] can_dev The CAN communication device of the EPOS node. If
   *   null, a device will be created from default parameters.
   */
-void epos_init(
-  epos_node_p node,
-  can_device_p can_dev);
+void epos_node_init(
+  epos_node_t* node,
+  can_device_t* can_dev);
 
 /** \brief Initialize EPOS node from configuration
   * \param[in] node The EPOS node to be initialized.
@@ -111,10 +124,10 @@ void epos_init(
   * \param[in] config The EPOS configuration parameters.
   * \return The resulting error code.
   */
-int epos_init_config(
-  epos_node_p node,
-  can_device_p can_dev,
-  config_p config);
+int epos_node_init_config(
+  epos_node_t* node,
+  can_device_t* can_dev,
+  const config_t* config);
 
 /** \brief Initialize EPOS node by parsing command line arguments
   * \param[in] node The EPOS node to be initialized.
@@ -130,9 +143,9 @@ int epos_init_config(
   *   or help request.
   * \return The resulting error code.
   */
-int epos_init_config_parse(
-  epos_node_p node,
-  config_parser_p parser,
+int epos_node_init_config_parse(
+  epos_node_t* node,
+  config_parser_t* parser,
   const char* option_group,
   int argc,
   char **argv,
@@ -142,59 +155,55 @@ int epos_init_config_parse(
   * \note This method automatically destroys unused CAN communication devices.
   * \param[in] node The EPOS node to be destroyed.
   */
-void epos_destroy(
-  epos_node_p node);
+void epos_node_destroy(
+  epos_node_t* node);
 
-/** \brief Open EPOS node
-  * \param[in] node The initialized EPOS node to be opened.
+/** \brief Connect EPOS node
+  * \param[in] node The initialized EPOS node to be connected.
   * \return The resulting error code.
   */
-int epos_open(
-  epos_node_p node);
+int epos_node_connect(
+  epos_node_t* node);
 
-/** \brief Close EPOS node
-  * \param[in] node The opened EPOS node to be closed.
+/** \brief Disconnect EPOS node
+  * \param[in] node The opened EPOS node to be disconnected.
   * \return The resulting error code.
   */
-int epos_close(
-  epos_node_p node);
+int epos_node_disconnect(
+  epos_node_t* node);
 
 /** \brief Retrieve the angular position of an EPOS node
   * \param[in] node The opened EPOS node to retrieve the angular position for.
-  * \return The angular position of the specified EPOS node in [rad].
+  * \return The angular position of the specified EPOS node in [rad]. On error,
+  *   the return value will be NaN and the error code set in node->error.
   */
-float epos_get_position(
-  epos_node_p node);
+float epos_node_get_position(
+  epos_node_t* node);
 
 /** \brief Retrieve the angular velocity of an EPOS node
   * \param[in] node The opened EPOS node to retrieve the angular velocity for.
-  * \return The angular velocity of the specified EPOS node in [rad/s].
+  * \return The angular velocity of the specified EPOS node in [rad/s]. On
+  *   error, the return value will be NaN and the error code set in
+  *   node->error.
   */
-float epos_get_velocity(
-  epos_node_p node);
-
-/** \brief Retrieve the angular acceleration of an EPOS node
-  * \param[in] node The opened EPOS node to retrieve the angular
-  *   acceleration for.
-  * \return The angular acceleration of the specified EPOS node in [rad/s^2].
-  */
-float epos_get_acceleration(
-  epos_node_p node);
+float epos_node_get_velocity(
+  epos_node_t* node);
 
 /** \brief Retrieve the current of an EPOS node
   * \param[in] node The opened EPOS node to retrieve the current for.
-  * \return The current of the specified EPOS node in [A].
+  * \return The current of the specified EPOS node in [A]. On error,
+  *   the return value will be NaN and the error code set in node->error.
   */
-float epos_get_current(
-  epos_node_p node);
+float epos_node_get_current(
+  epos_node_t* node);
 
 /** \brief Home an EPOS node from configuration settings
   * \param[in] node The opened EPOS node to be homed.
   * \param[in] timeout The timeout of the wait operation in [s].
   * \return The resulting error code.
   */
-int epos_home(
-  epos_node_p node,
+int epos_node_home(
+  epos_node_t* node,
   double timeout);
 
 #endif

@@ -25,6 +25,22 @@
 
 #include "epos.h"
 #include "velocity.h"
+#include "macros.h"
+
+#define EPOS_VELOCITY_PARAMETER_VELOCITY        "VELOCITY"
+
+config_param_t epos_velocity_default_arguments_params[] = {
+  {EPOS_VELOCITY_PARAMETER_VELOCITY,
+    config_param_type_float,
+    "",
+    "(-inf, inf)",
+    "The demanded angular velocity in [deg/s]"},
+};
+
+const config_default_t epos_velocity_default_arguments = {
+  epos_velocity_default_arguments_params,
+  sizeof(epos_velocity_default_arguments_params)/sizeof(config_param_t),
+};
 
 int quit = 0;
 
@@ -35,42 +51,47 @@ void epos_signaled(int signal) {
 int main(int argc, char **argv) {
   config_parser_t parser;
   epos_node_t node;
-  epos_velocity_t vel;
+  epos_velocity_t velocity;
 
-  config_parser_init_default(&parser,
+  config_parser_init_default(&parser, &epos_velocity_default_arguments, 0,
     "Start EPOS controller in velocity mode",
     "Establish the communication with a connected EPOS device and attempt to "
     "start the controller in velocity mode. The controller will be stopped "
     "if SIGINT is received. The communication interface depends on the "
     "momentarily selected alternative of the underlying CANopen library.");  
-  config_param_p velocity_param = config_set_param_value_range(
-    &parser.arguments,
-    "VELOCITY",
-    config_param_type_float,
-    "",
-    "(-inf, inf)",
-    "The demanded angular velocity in [deg/s]");
-  epos_init_config_parse(&node, &parser, 0, argc, argv,
+  epos_node_init_config_parse(&node, &parser, 0, argc, argv,
     config_parser_exit_error);
+  
+  float target_value = config_get_float(&parser.arguments,
+    EPOS_VELOCITY_PARAMETER_VELOCITY);
   
   signal(SIGINT, epos_signaled);
 
-  if (epos_open(&node))
-    return -1;
+  epos_node_connect(&node);
+  error_exit(&node.error);
   
-  float target_value = deg_to_rad(config_param_get_float(velocity_param));
-  epos_velocity_init(&vel, target_value);
-  if (!epos_velocity_start(&node, &vel)) {
-    while (!quit) {
-      fprintf(stdout, "\rAngular velocity: %8.2f deg/s",
-        rad_to_deg(epos_get_velocity(&node)));
-      fflush(stdout);
-    }
-    fprintf(stdout, "\n");
-    epos_velocity_stop(&node);
+  epos_velocity_init(&velocity, target_value);
+  epos_velocity_start(&node, &velocity);
+  error_exit(&node.dev.error);
+  
+  while (!quit) {
+    float actual_value = epos_node_get_velocity(&node);
+    error_exit(&node.error);
+    
+    fprintf(stdout, "\rAngular velocity: %8.2f deg/s",
+      rad_to_deg(actual_value));
+    fflush(stdout);
   }
-  epos_close(&node);
+  fprintf(stdout, "\n");
+  
+  epos_velocity_stop(&node);
+  error_exit(&node.dev.error);
 
-  epos_destroy(&node);
+  epos_node_disconnect(&node);
+  error_exit(&node.error);
+
+  epos_node_destroy(&node);
+  config_parser_destroy(&parser);
+  
   return 0;
 }

@@ -22,10 +22,57 @@
 #include <signal.h>
 
 #include <config/parser.h>
-#include <timer/timer.h>
+#include "string/string.h"
+#include "file/file.h"
 
-#include "epos.h"
 #include "position_profile.h"
+
+#define EPOS_POSITION_PROFILE_EVAL_PARAMETER_FILE         "FILE"
+#define EPOS_POSITION_PROFILE_EVAL_PARAMETER_STEP_SIZE    "STEP_SIZE"
+
+#define EPOS_PROFILE_PARSER_OPTION_GROUP                  "epos-profile"
+#define EPOS_PROFILE_PARAMETER_TYPE                       "type"
+#define EPOS_PROFILE_PARAMETER_OUTPUT                     "output"
+
+config_param_t epos_position_profile_eval_default_arguments_params[] = {
+  {EPOS_POSITION_PROFILE_EVAL_PARAMETER_FILE,
+    config_param_type_string,
+    "",
+    "",
+    "Read position profiles from the specified input file or '-' for stdin"},
+  {EPOS_POSITION_PROFILE_EVAL_PARAMETER_STEP_SIZE,
+    config_param_type_float,
+    "",
+    "(0.0, inf)",
+    "The step size used to generate equidistant locations of the profile "
+    "functions"},
+};
+
+const config_default_t epos_position_profile_eval_default_arguments = {
+  epos_position_profile_eval_default_arguments_params,
+  sizeof(epos_position_profile_eval_default_arguments_params)/
+    sizeof(config_param_t),
+};
+
+config_param_t epos_profile_default_options_params[] = {
+  {EPOS_PROFILE_PARAMETER_TYPE,
+    config_param_type_enum,
+    "linear",
+    "linear|sinusoidal",
+    "The type of motion profile, which may represent either 'linear' "
+    "or 'sinusoidal' velocity ramps"},
+  {EPOS_PROFILE_PARAMETER_OUTPUT,
+    config_param_type_string,
+    "-",
+    "",
+    "Write profile function values to the specified output file or '-' "
+    "for stdout"},
+};
+
+const config_default_t epos_profile_default_options = {
+  epos_profile_default_options_params,
+  sizeof(epos_profile_default_options_params)/sizeof(config_param_t),
+};
 
 int quit = 0;
 
@@ -35,102 +82,92 @@ void epos_signaled(int signal) {
 
 int main(int argc, char **argv) {
   config_parser_t parser;
-  epos_node_t node;
-  epos_position_profile_t profile;
+  file_t input_file, output_file;
 
   config_parser_init_default(&parser,
-    "Start EPOS controller in profile position mode and evaluate the profile",
-    "Establish the communication with a connected EPOS device, attempt to "
-    "start the controller in profile position mode, and concurrently evaluate "
-    "trajectory points from the profile parameters and the time elapsed. "
-    "The controller will be stopped if SIGINT is received or the motion "
-    "profile is completed. The communication interface depends on the "
-    "momentarily selected alternative of the underlying CANopen library.");  
-  config_param_p position_param = config_set_param_value_range(
-    &parser.arguments,
-    "POSITION",
-    config_param_type_float,
-    "",
-    "(-inf, inf)",
-    "The demanded angular position in [deg]");
-  config_param_p velocity_param = config_set_param_value_range(
-    &parser.arguments,
-    "VELOCITY",
-    config_param_type_float,
-    "",
-    "(-inf, inf)",
-    "The demanded maximum angular velocity in [deg/s]");
-  config_param_p acceleration_param = config_set_param_value_range(
-    &parser.arguments,
-    "ACCELERATION",
-    config_param_type_float,
-    "",
-    "[0.0, inf)",
-    "The demanded maximum angular acceleration in [deg/s^2]");
-  config_param_p deceleration_param = config_set_param_value_range(
-    &parser.arguments,
-    "DECELERATION",
-    config_param_type_float,
-    "",
-    "[0.0, inf)",
-    "The demanded maximum angular deceleration in [deg/s^2]");
-  config_parser_option_group_p profile_option_group =
-    config_parser_add_option_group(&parser, "profile", 0, "Profile options",
+    &epos_position_profile_eval_default_arguments, 0,
+    "Evaluate EPOS position profiles at equidistant locations",
+    "The command evaluates a sequence of EPOS position profiles at "
+    "equidistant locations and prints the corresponding profile function "
+    "values to a file or stdout. No communication with an EPOS node is "
+    "required to perform the evaluations.");
+  config_parser_add_option_group(&parser, EPOS_PROFILE_PARSER_OPTION_GROUP,
+    &epos_profile_default_options, "EPOS profile options",
     "These options control the profile trajectory generator.");
-  config_param_p relative_param = config_set_param_value_range(
-    &profile_option_group->options,
-    "relative",
-    config_param_type_bool,
-    "false",
-    "false|true",
-    "The demanded angular position is relative to the current angular "
-    "position");
-  config_param_p type_param = config_set_param_value_range(
-    &profile_option_group->options,
-    "type",
-    config_param_type_enum,
-    "linear",
-    "linear|sinusoidal",
-    "The type of motion profile, which may represent either 'linear' "
-    "or 'sinusoidal' velocity ramps");
-  epos_init_config_parse(&node, &parser, 0, argc, argv,
-    config_parser_exit_error);
+  config_parser_parse(&parser, argc, argv, config_parser_exit_error);
 
-  signal(SIGINT, epos_signaled);
+  const char* file = config_get_string(&parser.arguments,
+    EPOS_POSITION_PROFILE_EVAL_PARAMETER_FILE);
+  double step_size = config_get_float(&parser.arguments,
+    EPOS_POSITION_PROFILE_EVAL_PARAMETER_STEP_SIZE);
+  
+  config_parser_option_group_t* epos_profile_option_group =
+    config_parser_get_option_group(&parser, EPOS_PROFILE_PARSER_OPTION_GROUP);
+  epos_profile_type_t profile_type = config_get_enum(
+    &epos_profile_option_group->options, EPOS_PROFILE_PARAMETER_TYPE);
+  const char* output = config_get_string(
+    &epos_profile_option_group->options, EPOS_PROFILE_PARAMETER_OUTPUT);
 
-  if (epos_open(&node))
-    return -1;
+  file_init_name(&input_file, file);
+  if (string_equal(file, "-"))
+    file_open_stream(&input_file, stdin, file_mode_read);
+  else
+    file_open(&input_file, file_mode_read);
+  error_exit(&input_file.error);
+
+  char* line = 0;
+  epos_position_profile_t* profiles = 0;
+  size_t num_profiles = 0;
   
-  float pos = deg_to_rad(config_param_get_float(position_param));
-  float vel = deg_to_rad(config_param_get_float(velocity_param));
-  float acc = deg_to_rad(config_param_get_float(acceleration_param));
-  float dec = deg_to_rad(config_param_get_float(deceleration_param));
-  config_param_bool_t rel = config_param_get_bool(relative_param);
-  epos_profile_type_t type = config_param_get_enum(type_param);  
-  epos_position_profile_init(&profile, pos, vel, acc, dec, type);  
-  profile.relative = rel;
-  
-  if (!epos_position_profile_start(&node, &profile)) {
-    while (!quit) {
-      double time;
+  while (!file_eof(&input_file) &&
+      (file_read_line(&input_file, &line, 128) >= 0)) {
+    if (string_empty(line) || string_starts_with(line, "#"))
+      continue;
+    
+    double target_value, velocity, acceleration, deceleration;
+    if (string_scanf(line, "%lg %lg %lg %lg\n", &target_value, &velocity,
+          &acceleration, &deceleration) == 4) {
+      if (!(num_profiles % 64))
+        profiles = realloc(profiles, (num_profiles+64)*
+          sizeof(epos_position_profile_t));
+      epos_position_profile_init(&profiles[num_profiles], target_value,
+        velocity, acceleration, deceleration, profile_type, 0);
       
-      timer_start(&time);
-      float pos_a = rad_to_deg(epos_get_position(&node));
-      timer_correct(&time);
-      float pos_e = rad_to_deg(epos_position_profile_eval(&profile, time));
-      
-      fprintf(stdout, "\rAngular position (act): %8.2f deg\n", pos_a);
-      fprintf(stdout, "\rAngular position (est): %8.2f deg", pos_e);
-      fprintf(stdout, "%c[1A\r", 0x1B);
-      
-      if (!epos_profile_wait(&node, 0.1))
-        break;
+      ++num_profiles;
     }
-    fprintf(stdout, "%c[1B\n", 0x1B);
-    epos_position_profile_stop(&node);
   }
-  epos_close(&node);
-
-  epos_destroy(&node);
+  string_destroy(&line);
+  error_exit(&input_file.error);
+  file_destroy(&input_file);
+  
+  file_init_name(&output_file, output);
+  if (string_equal(output, "-"))
+    file_open_stream(&output_file, stdout, file_mode_write);
+  else
+    file_open(&output_file, file_mode_write);
+  error_exit(&output_file.error);
+  
+  size_t i = 0, j = 0;
+  double t = 0.0;
+  epos_profile_value_t values = {0.0, 0.0, 0.0};
+  
+  for (i = 0; i < num_profiles; ++i) {
+    profiles[i].start_value = values.position;
+    profiles[i].start_time = t;
+    
+    while (values.position != profiles[i].target_value) {
+      values = epos_position_profile_eval(&profiles[i], t);
+      file_printf(&output_file, "%10lg %10d %10g %10g, %10g\n",
+        t, i, values.position, values.velocity, values.acceleration);
+      error_exit(&output_file.error);
+        
+      ++j;
+      t = step_size*j;
+    };
+  }
+  
+  if (profiles)
+    free(profiles);
+  
   return 0;
 }

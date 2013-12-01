@@ -24,37 +24,59 @@
 
 #include "epos.h"
 
+
+#define EPOS_BIT_RATE_PARAMETER_BIT_RATE       "BIT_RATE"
+#define EPOS_BIT_RATE_PARAMETER_STORE          "store"
+
+config_param_t epos_bit_rate_default_arguments_params[] = {
+  {EPOS_BIT_RATE_PARAMETER_BIT_RATE,
+    config_param_type_int,
+    "-1",
+    "[-1, 1000]",
+    "The new CAN bit rate of the EPOS device in [kbit/s], zero for putting "
+    "the device in in automatic bit rate detection mode, or a negative value "
+    "for querying the current bit rate"},
+};
+
+const config_default_t epos_bit_rate_default_arguments = {
+  epos_bit_rate_default_arguments_params,
+  sizeof(epos_bit_rate_default_arguments_params)/sizeof(config_param_t),
+};
+
+config_param_t epos_bit_rate_default_options_params[] = {
+  {EPOS_BIT_RATE_PARAMETER_STORE,
+    config_param_type_bool,
+    "false",
+    "false|true",
+    "Persistently store the new CAN bit rate on the EPOS device"},
+};
+
+const config_default_t epos_bit_rate_default_options = {
+  epos_bit_rate_default_options_params,
+  sizeof(epos_bit_rate_default_options_params)/sizeof(config_param_t),
+};
+
 int main(int argc, char **argv) {
   config_parser_t parser;
   epos_node_t node;
 
-  config_parser_init_default(&parser,
+  config_parser_init_default(&parser, &epos_bit_rate_default_arguments,
+    &epos_bit_rate_default_options,
     "Query or set the CAN bit rate of an EPOS device",
     "Establish the communication with a connected EPOS device and attempt to "
     "query or set its CAN bit rate. The communication interface depends "
     "on the momentarily selected alternative of the underlying CANopen "
     "library.");
-  config_param_p bit_rate_param = config_set_param_value_range(
-    &parser.arguments,
-    "BIT_RATE",
-    config_param_type_int,
-    "0",
-    "[-1, 1000]",
-    "The new CAN bit rate of the EPOS device in [kbit/s], a negative value "
-    "for putting the device in in automatic bit rate detection mode, or zero "
-    "for querying the current bit rate");
-  config_param_p store_param = config_set_param_value_range(
-    &parser.options,
-    "store",
-    config_param_type_bool,
-    "false",
-    "false|true",
-    "Persistently store the new CAN bit rate on the EPOS device");
-  epos_init_config_parse(&node, &parser, 0, argc, argv,
+  epos_node_init_config_parse(&node, &parser, 0, argc, argv,
     config_parser_exit_error);
   
-  if (epos_open(&node))
-    return -1;
+  int bit_rate = config_get_int(&parser.arguments,
+    EPOS_BIT_RATE_PARAMETER_BIT_RATE);
+  config_param_bool_t store = config_get_bool(&parser.options,
+    EPOS_BIT_RATE_PARAMETER_STORE);
+  
+  epos_node_connect(&node);
+  error_exit(&node.error);
 
   if (node.dev.can_bit_rate != EPOS_DEVICE_CAN_BIT_RATE_AUTO)
     fprintf(stdout, "Current CAN bit rate: %d kbit/s\n",
@@ -62,14 +84,10 @@ int main(int argc, char **argv) {
   else
     fprintf(stdout, "Current CAN bit rate: auto detect\n");
   
-  int bit_rate = config_param_get_int(bit_rate_param);
   if (bit_rate) {
-    int error = epos_device_set_can_bit_rate(&node.dev, bit_rate);
-    if (error) {
-      fprintf(stderr, "Error setting new CAN bit rate: %s\n",
-        epos_device_errors[error]);
-      return -1;
-    }
+    epos_device_set_can_bit_rate(&node.dev, bit_rate);
+    error_exit(&node.dev.error);
+
     if (node.dev.can_bit_rate != EPOS_DEVICE_CAN_BIT_RATE_AUTO)
       fprintf(stdout, "New CAN bit rate: %d kbit/s\n",
         node.dev.can_bit_rate);
@@ -77,17 +95,16 @@ int main(int argc, char **argv) {
       fprintf(stdout, "New CAN bit rate: auto detect\n");
   }
 
-  config_param_bool_t store = config_param_get_bool(store_param);
   if (store) {
-    int error = epos_device_store_parameters(&node.dev);
-    if (error) {
-      fprintf(stderr, "Error storing parameters: %s\n",
-        epos_device_errors[error]);
-      return -1;
-    }
+    epos_device_store_parameters(&node.dev);
+    error_exit(&node.dev.error);
   }
-  epos_close(&node);
+  
+  epos_node_disconnect(&node);
+  error_exit(&node.error);
 
-  epos_destroy(&node);
+  epos_node_destroy(&node);
+  config_parser_destroy(&parser);
+  
   return 0;
 }

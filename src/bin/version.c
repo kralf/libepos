@@ -28,23 +28,28 @@ int main(int argc, char **argv) {
   config_parser_t parser;
   epos_node_t node;
 
-  config_parser_init_default(&parser,
+  config_parser_init(&parser,
     "Print version information about an EPOS device",
     "Establish the communication with a connected EPOS device and attempt "
     "to retrieve its hardware and software version. The communication "
     "interface depends on the momentarily selected alternative of the "
     "underlying CANopen library.");
-  epos_init_config_parse(&node, &parser, 0, argc, argv,
+  epos_node_init_config_parse(&node, &parser, 0, argc, argv,
     config_parser_exit_error);
+  config_parser_destroy(&parser);
 
-  if (epos_open(&node))
-    return -1;
+  epos_node_connect(&node);
+  error_exit(&node.error);
   
-  printf("Hardware version: 0x%04X (%s)\n", node.dev.hardware_version,
+  fprintf(stdout, "Hardware version: 0x%04X (%s)\n",
+    node.dev.hardware_version,
     epos_device_names[node.dev.type]);
-  printf("Software version: 0x%04X\n", node.dev.software_version);
-  epos_close(&node);
+  fprintf(stdout, "Software version: 0x%04X\n",
+    node.dev.software_version);
+  
+  epos_node_disconnect(&node);
+  error_exit(&node.error);
 
-  epos_destroy(&node);
+  epos_node_destroy(&node);
   return 0;
 }

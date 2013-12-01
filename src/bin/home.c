@@ -36,26 +36,37 @@ int main(int argc, char **argv) {
   config_parser_t parser;
   epos_node_t node;
 
-  config_parser_init_default(&parser,
+  config_parser_init(&parser,
     "Start EPOS controller in homing mode",
     "Establish the communication with a connected EPOS device and attempt to "
     "start the controller in homing mode. The controller will be stopped "
     "if SIGINT is received or the homing operation is completed. The "
     "communication interface depends on the momentarily selected alternative "
     "of the underlying CANopen library.");  
-  epos_init_config_parse(&node, &parser, 0, argc, argv,
+  epos_node_init_config_parse(&node, &parser, 0, argc, argv,
     config_parser_exit_error);
+  config_parser_destroy(&parser);
   
   signal(SIGINT, epos_signaled);
 
-  if (epos_open(&node))
-    return -1;
-  if (!epos_home(&node, 0.0)) {
-    while (!quit && epos_home_wait(&node, 0.1));
-    epos_home_stop(&node);
-  }
-  epos_close(&node);
+  epos_node_connect(&node);
+  error_exit(&node.error);
 
-  epos_destroy(&node);
+  epos_node_home(&node, 0.0);
+  if (node.dev.error.code != EPOS_DEVICE_ERROR_WAIT_TIMEOUT)
+    error_exit(&node.error);
+  
+  while (!quit) {
+    if (epos_home_wait(&node, 0.1) != EPOS_DEVICE_ERROR_WAIT_TIMEOUT)
+      error_exit(&node.dev.error);
+  };
+  
+  epos_home_stop(&node);
+  error_exit(&node.dev.error);
+  
+  epos_node_disconnect(&node);
+  error_exit(&node.error);
+
+  epos_node_destroy(&node);
   return 0;
 }

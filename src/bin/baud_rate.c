@@ -24,63 +24,79 @@
 
 #include "epos.h"
 
+#define EPOS_BAUD_RATE_PARAMETER_BAUD_RATE      "BAUD_RATE"
+#define EPOS_BAUD_RATE_PARAMETER_STORE          "store"
+
+config_param_t epos_baud_rate_default_arguments_params[] = {
+  {EPOS_BAUD_RATE_PARAMETER_BAUD_RATE,
+    config_param_type_int,
+    "0",
+    "[0, 115200]",
+    "The new RS232 baud rate of the EPOS device in [baud] or zero for "
+    "querying the current baud rate"},
+};
+
+const config_default_t epos_baud_rate_default_arguments = {
+  epos_baud_rate_default_arguments_params,
+  sizeof(epos_baud_rate_default_arguments_params)/sizeof(config_param_t),
+};
+
+config_param_t epos_baud_rate_default_options_params[] = {
+  {EPOS_BAUD_RATE_PARAMETER_STORE,
+    config_param_type_bool,
+    "false",
+    "false|true",
+    "Persistently store the new RS232 baud rate on the EPOS device"},
+};
+
+const config_default_t epos_baud_rate_default_options = {
+  epos_baud_rate_default_options_params,
+  sizeof(epos_baud_rate_default_options_params)/sizeof(config_param_t),
+};
+
 int main(int argc, char **argv) {
   config_parser_t parser;
   epos_node_t node;
 
-  config_parser_init_default(&parser,
+  config_parser_init_default(&parser, &epos_baud_rate_default_arguments,
+    &epos_baud_rate_default_options,
     "Query or set the RS232 baud rate of an EPOS device",
     "Establish the communication with a connected EPOS device and attempt to "
     "query or set its RS232 baud rate. The communication interface depends "
     "on the momentarily selected alternative of the underlying CANopen "
     "library.");
-  config_param_p baud_rate_param = config_set_param_value_range(
-    &parser.arguments,
-    "BAUD_RATE",
-    config_param_type_int,
-    "0",
-    "[0, 115200]",
-    "The new RS232 baud rate of the EPOS device in [baud] or zero for "
-    "querying the current baud rate");
-  config_param_p store_param = config_set_param_value_range(
-    &parser.options,
-    "store",
-    config_param_type_bool,
-    "false",
-    "false|true",
-    "Persistently store the new RS232 baud rate on the EPOS device");
-  epos_init_config_parse(&node, &parser, 0, argc, argv,
+  epos_node_init_config_parse(&node, &parser, 0, argc, argv,
     config_parser_exit_error);
 
-  if (epos_open(&node))
-    return -1;
+  int baud_rate = config_get_int(&parser.arguments,
+    EPOS_BAUD_RATE_PARAMETER_BAUD_RATE);
+  config_param_bool_t store = config_get_bool(&parser.options,
+    EPOS_BAUD_RATE_PARAMETER_STORE);
+  
+  epos_node_connect(&node);
+  error_exit(&node.error);
   
   fprintf(stdout, "Current RS232 baud rate: %d baud\n",
     node.dev.rs232_baud_rate);
   
-  int baud_rate = config_param_get_int(baud_rate_param);
   if (baud_rate) {
-    int error = epos_device_set_rs232_baud_rate(&node.dev, baud_rate);
-    if (error) {
-      fprintf(stderr, "Error setting new RS232 baud rate: %s\n",
-        epos_device_errors[error]);
-      return -1;
-    }
+    epos_device_set_rs232_baud_rate(&node.dev, baud_rate);
+    error_exit(&node.dev.error);
+
     fprintf(stdout, "New RS232 baud rate: %d baud\n",
       node.dev.rs232_baud_rate);
   }
   
-  config_param_bool_t store = config_param_get_bool(store_param);
   if (store) {
-    int error = epos_device_store_parameters(&node.dev);
-    if (error) {
-      fprintf(stderr, "Error storing parameters: %s\n",
-        epos_device_errors[error]);
-      return -1;
-    }
+    epos_device_store_parameters(&node.dev);
+    error_exit(&node.dev.error);
   }
-  epos_close(&node);
+  
+  epos_node_disconnect(&node);
+  error_exit(&node.error);
 
-  epos_destroy(&node);
+  epos_node_destroy(&node);
+  config_parser_destroy(&parser);
+  
   return 0;
 }

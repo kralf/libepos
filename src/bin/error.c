@@ -31,29 +31,35 @@ int main(int argc, char **argv) {
   epos_node_t node;
   int i;
 
-  config_parser_init_default(&parser,
+  config_parser_init(&parser,
     "Print error history of an EPOS device",
     "Establish the communication with a connected EPOS device and attempt to "
     "retrieve its error history. The communication interface depends on the "
     "momentarily selected alternative of the underlying CANopen library.");
-  epos_init_config_parse(&node, &parser, 0, argc, argv,
+  epos_node_init_config_parse(&node, &parser, 0, argc, argv,
     config_parser_exit_error);  
-  
-  if (epos_open(&node))
-    return -1;
+  config_parser_destroy(&parser);
+
+  epos_node_connect(&node);
+  error_exit(&node.error);
   
   int num_errors = epos_error_get_history_length(&node.dev);
+  error_exit(&node.dev.error);  
   fprintf(stdout, "Error history has length %d\n", num_errors);
 
   if (num_errors) {
     epos_error_device_t history[num_errors];
     epos_error_get_history(&node.dev, history);
+    error_exit(&node.dev.error);
+    
     for (i = 0; i < num_errors; ++i)
       fprintf(stdout, "%2d: (0x%04X) %s\n", i, history[i].code,
-      history[i].message);
+        history[i].message);
   }
-  epos_close(&node);
+  
+  epos_node_disconnect(&node);
+  error_exit(&node.error);
 
-  epos_destroy(&node);
+  epos_node_destroy(&node);
   return 0;
 }

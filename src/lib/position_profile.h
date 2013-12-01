@@ -51,8 +51,8 @@ typedef struct epos_position_profile_t {
   float acceleration;            //!< The profile acceleration in [rad/s^2].
   float deceleration;            //!< The profile acceleration in [rad/s^2].
 
-  int relative;                  //!< The profile position is relative.
   epos_profile_type_t type;      //!< The position profile type.
+  int relative;                  //!< The profile position is relative.
 
   float start_value;             //!< The start position of the profile in [s].
   double start_time;             //!< The start time of the profile in [s].
@@ -66,14 +66,18 @@ typedef struct epos_position_profile_t {
   * \param[in] acceleration The profile acceleration in [rad/s^2].
   * \param[in] deceleration The profile deceleration in [rad/s^2].
   * \param[in] type The position profile type.
+  * \param[in] relative If zero, the target position is absolute.
+  *   Otherwise, it specifies a position relative to the starting
+  *   position of the profile.
   */
 void epos_position_profile_init(
-  epos_position_profile_p profile,
+  epos_position_profile_t* profile,
   float target_value,
   float velocity,
   float acceleration,
   float deceleration,
-  epos_profile_type_t type);
+  epos_profile_type_t type,
+  int relative);
 
 /** \brief Start EPOS position profile control operation
   * \param[in] node The EPOS node to start the position profile control
@@ -83,8 +87,8 @@ void epos_position_profile_init(
   * \return The resulting device error code.
   */
 int epos_position_profile_start(
-  epos_node_p node,
-  epos_position_profile_p profile);
+  epos_node_t* node,
+  epos_position_profile_t* profile);
 
 /** \brief Stop EPOS position profile control operation
   * \param[in] node The EPOS node to stop the position profile control
@@ -92,19 +96,20 @@ int epos_position_profile_start(
   * \return The resulting device error code.
   */
 int epos_position_profile_stop(
-  epos_node_p node);
+  epos_node_t* node);
 
-/** \brief Evaluate the absolute position of an EPOS position profile
-  * \note This function is intended to facilitate the computational
-  *   generation of motion trajectories.
+/** \brief Evaluate the absolute values of an EPOS position profile
   * \param[in] profile The EPOS position profile control operation to
-  *   evaluate the absolute position for.
-  * \param[in] time The absolute time to evaluate the absolute position
-  *    at in [s].
-  * \return The evaluated absolute position in [rad].
+  *   evaluate the absolute values for.
+  * \param[in] time The absolute time to evaluate the absolute profile
+  *   values at in [s].
+  * \return The evaluated absolute profile values.
+  * 
+  * This function is intended to facilitate the computational generation of
+  * motion trajectories.
   */
-float epos_position_profile_eval(
-  epos_position_profile_p profile,
+epos_profile_value_t epos_position_profile_eval(
+  const epos_position_profile_t* profile,
   double time);
 
 /** \brief Set the position profile target position of an EPOS device
@@ -114,7 +119,7 @@ float epos_position_profile_eval(
   * \return The resulting device error code.
   */
 int epos_position_profile_set_target(
-  epos_device_p dev,
+  epos_device_t* dev,
   int position);
 
 /** \brief Set the position profile velocity of an EPOS device
@@ -124,7 +129,7 @@ int epos_position_profile_set_target(
   * \return The resulting device error code.
   */
 int epos_position_profile_set_velocity(
-  epos_device_p dev,
+  epos_device_t* dev,
   unsigned int velocity);
 
 #endif

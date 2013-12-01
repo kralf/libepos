@@ -23,11 +23,6 @@
 
 #include "input.h"
 
-const char* epos_input_errors[] = {
-  "Success",
-  "Error setting EPOS input parameters",
-};
-
 short epos_input_channel_masks[] = {
   0x003F,
   0x003F,
@@ -40,7 +35,21 @@ short epos_input_channel_masks[] = {
   0x0000,
 };
 
-void epos_input_init(epos_input_p input, epos_device_p dev) {
+epos_input_func_type_t epos_input_get_channel_func(epos_input_t* input,
+  int channel);
+int epos_input_set_channel_func(epos_input_t* input, int channel, 
+  epos_input_func_type_t type);
+
+short epos_input_get_polarity(epos_input_t* input);
+int epos_input_set_polarity(epos_input_t* input, short polarity);
+
+short epos_input_get_execute(epos_input_t* input);
+int epos_input_set_execute(epos_input_t* input, short execute);
+
+short epos_input_get_enabled(epos_input_t* input);
+int epos_input_set_enabled(epos_input_t* input, short enabled);
+
+void epos_input_init(epos_input_t* input, epos_device_t* dev) {
   int i;
 
   input->dev = dev;
@@ -59,7 +68,7 @@ void epos_input_init(epos_input_p input, epos_device_p dev) {
   }
 }
 
-void epos_input_init_func(epos_input_func_p func, int channel, 
+void epos_input_init_func(epos_input_func_t* func, int channel, 
   epos_input_polarity_t polarity, int execute, int enabled) {
   func->channel = channel;
   func->polarity = polarity;
@@ -68,123 +77,124 @@ void epos_input_init_func(epos_input_func_p func, int channel,
   func->enabled = enabled;
 }
 
-void epos_input_destroy(epos_input_p input) {
+void epos_input_destroy(epos_input_t* input) {
   input->dev = 0;
 }
 
-epos_input_func_type_t epos_input_get_channel_func(epos_input_p input, int 
-  channel) {
-  short type;
+epos_input_func_type_t epos_input_get_channel_func(epos_input_t* input, int 
+    channel) {
+  short type = 0;
   epos_device_read(input->dev, EPOS_INPUT_INDEX_CONFIG, channel, 
     (unsigned char*)&type, sizeof(short));
 
   return type;  
 }
 
-int epos_input_set_channel_func(epos_input_p input, int channel, 
-  epos_input_func_type_t type) {
-  int result = EPOS_DEVICE_ERROR_NONE;
+int epos_input_set_channel_func(epos_input_t* input, int channel, 
+    epos_input_func_type_t type) {
   short t = EPOS_INPUT_FUNC_RESERVED;
 
   if (input->funcs[type].channel) {
-    if (!(result = epos_device_write(input->dev, EPOS_INPUT_INDEX_CONFIG, 
-      input->funcs[type].channel, (unsigned char*)&t, sizeof(short)))) {
+    if (epos_device_write(input->dev, EPOS_INPUT_INDEX_CONFIG, 
+        input->funcs[type].channel, (unsigned char*)&t, sizeof(short)) > 0) {
       input->channels[input->funcs[type].channel-1] = EPOS_INPUT_FUNC_DUMMY;
       input->funcs[type].channel = 0;
     }
     else
-      return result;
+      return input->dev->error.code;
   }
 
   if (channel) {
     t = type;
 
-    if (!(result = epos_device_write(input->dev, EPOS_INPUT_INDEX_CONFIG, 
-      channel, (unsigned char*)&t, sizeof(short)))) {
+    if (epos_device_write(input->dev, EPOS_INPUT_INDEX_CONFIG, 
+        channel, (unsigned char*)&t, sizeof(short)) > 0) {
       input->channels[channel-1] = type;
       input->funcs[type].channel = channel;
     }
   }
 
-  return result;
+  return input->dev->error.code;
 }
 
-short epos_input_get_polarity(epos_input_p input) {
-  short polarity;
+short epos_input_get_polarity(epos_input_t* input) {
+  short polarity = 0;
   epos_device_read(input->dev, EPOS_INPUT_INDEX_FUNCS, 
     EPOS_INPUT_SUBINDEX_POLARITY, (unsigned char*)&polarity, sizeof(short));
 
   return polarity;
 }
 
-int epos_input_set_polarity(epos_input_p input, short polarity) {
-  int result;
-
-  if (!(result = epos_device_write(input->dev, EPOS_INPUT_INDEX_FUNCS, 
-    EPOS_INPUT_SUBINDEX_POLARITY, (unsigned char*)&polarity, sizeof(short))))
+int epos_input_set_polarity(epos_input_t* input, short polarity) {
+  if (epos_device_write(input->dev, EPOS_INPUT_INDEX_FUNCS, 
+      EPOS_INPUT_SUBINDEX_POLARITY, (unsigned char*)&polarity,
+      sizeof(short)) > 0)
     input->polarity = polarity;
 
-  return result;
+  return input->dev->error.code;
 }
 
-short epos_input_get_execute(epos_input_p input) {
-  short execute;
+short epos_input_get_execute(epos_input_t* input) {
+  short execute = 0;
   epos_device_read(input->dev, EPOS_INPUT_INDEX_FUNCS, 
     EPOS_INPUT_SUBINDEX_EXECUTE, (unsigned char*)&execute, sizeof(short));
 
   return execute;
 }
 
-int epos_input_set_execute(epos_input_p input, short execute) {
-  int result;
-
-  if (!(result = epos_device_write(input->dev, EPOS_INPUT_INDEX_FUNCS, 
-    EPOS_INPUT_SUBINDEX_EXECUTE, (unsigned char*)&execute, sizeof(short))))
+int epos_input_set_execute(epos_input_t* input, short execute) {
+  if (epos_device_write(input->dev, EPOS_INPUT_INDEX_FUNCS, 
+      EPOS_INPUT_SUBINDEX_EXECUTE, (unsigned char*)&execute,
+      sizeof(short)) > 0)
     input->execute = execute;
 
-  return result;
+  return input->dev->error.code;
 }
 
-short epos_input_get_enabled(epos_input_p input) {
-  short enabled;
+short epos_input_get_enabled(epos_input_t* input) {
+  short enabled = 0;
   epos_device_read(input->dev, EPOS_INPUT_INDEX_FUNCS, 
     EPOS_INPUT_SUBINDEX_MASK, (unsigned char*)&enabled, sizeof(short));
 
   return enabled;
 }
 
-int epos_input_set_enabled(epos_input_p input, short enabled) {
-  int result;
-
-  if (!(result = epos_device_write(input->dev, EPOS_INPUT_INDEX_FUNCS, 
-    EPOS_INPUT_SUBINDEX_MASK, (unsigned char*)&enabled, sizeof(short))))
+int epos_input_set_enabled(epos_input_t* input, short enabled) {
+  if (epos_device_write(input->dev, EPOS_INPUT_INDEX_FUNCS, 
+      EPOS_INPUT_SUBINDEX_MASK, (unsigned char*)&enabled,
+      sizeof(short)) > 0)
     input->enabled = enabled;
 
-  return result;
+  return input->dev->error.code;
 }
 
-int epos_input_setup(epos_input_p input) {
-  int i, result = EPOS_INPUT_ERROR_NONE;
-
+int epos_input_setup(epos_input_t* input) {
   input->channel_mask = epos_input_channel_masks[input->dev->type];
 
-  for (i = 0; i < sizeof(input->channels)/sizeof(epos_input_func_type_t); ++i) {
+  int i;
+  for (i = 0; i < sizeof(input->channels)/sizeof(epos_input_func_type_t);
+      ++i) {
     short c = (0x01 << i);
-    if (c & input->channel_mask)
+    if (c & input->channel_mask) {
       input->channels[i] = epos_input_get_channel_func(input, i+1);
+      error_return(&input->dev->error);
+    }
   }
   input->polarity = epos_input_get_polarity(input);
+  error_return(&input->dev->error);  
   input->execute = epos_input_get_execute(input);
+  error_return(&input->dev->error);
   input->enabled = epos_input_get_enabled(input);
+  error_return(&input->dev->error);
 
   for (i = 0; i < sizeof(input->funcs)/sizeof(epos_input_func_t); ++i)
     epos_input_get_func(input, i, &input->funcs[i]);
 
-  return result;
+  return input->dev->error.code;
 }
 
-void epos_input_get_func(epos_input_p input, epos_input_func_type_t type,
-  epos_input_func_p func) {
+void epos_input_get_func(epos_input_t* input, epos_input_func_type_t type,
+    epos_input_func_t* func) {
   input->funcs[type].channel = epos_input_get_func_channel(input, type);
   input->funcs[type].polarity = epos_input_get_func_polarity(input, type);
   input->funcs[type].execute = epos_input_get_func_execute(input, type);
@@ -192,36 +202,36 @@ void epos_input_get_func(epos_input_p input, epos_input_func_type_t type,
   input->funcs[type].enabled = epos_input_get_func_enabled(input, type);
 }
 
-int epos_input_set_func(epos_input_p input, epos_input_func_type_t type,
-  epos_input_func_p func) {
-  int result;
+int epos_input_set_func(epos_input_t* input, epos_input_func_type_t type,
+    epos_input_func_t* func) {
   short execute = input->execute;
 
-  if (!(result = epos_input_set_execute(input, 0)) &&
-    !(result = epos_input_set_func_channel(input, type, func->channel)) &&
-    !(result = epos_input_set_func_polarity(input, type, func->polarity)) &&
-    !(result = epos_input_set_func_enabled(input, type, func->enabled))) {
+  if (!epos_input_set_execute(input, 0) &&
+      !epos_input_set_func_channel(input, type, func->channel) &&
+      !epos_input_set_func_polarity(input, type, func->polarity) &&
+      !epos_input_set_func_enabled(input, type, func->enabled)) {
     short mask = 0x0001 << type;
     return epos_input_set_execute(input, (func->execute) ? execute | mask : 
       execute & ~mask);
   }
-  else
-    return result;
+
+  return input->dev->error.code;
 }
 
-int epos_input_get_func_state(epos_input_p input, epos_input_func_type_t 
-  type) {
+int epos_input_get_func_state(epos_input_t* input, epos_input_func_type_t 
+    type) {
   short mask = 0x0001 << type;
   short state = 0;
 
-  epos_device_read(input->dev, EPOS_INPUT_INDEX_FUNCS, 
-    EPOS_INPUT_SUBINDEX_STATE, (unsigned char*)&state, sizeof(short));
-
-  return ((state & mask) != 0);
+  if (epos_device_read(input->dev, EPOS_INPUT_INDEX_FUNCS, 
+      EPOS_INPUT_SUBINDEX_STATE, (unsigned char*)&state, sizeof(short)) > 0)
+    return ((state & mask) != 0);
+  else
+    return 0;
 }
 
-int epos_input_get_func_channel(epos_input_p input, epos_input_func_type_t 
-  type) {
+int epos_input_get_func_channel(epos_input_t* input, epos_input_func_type_t 
+    type) {
   int i;
   for (i = 0; i < sizeof(input->channels)/sizeof(epos_input_func_type_t); ++i)
     if (input->channels[i] == type) return i+1;
@@ -229,45 +239,45 @@ int epos_input_get_func_channel(epos_input_p input, epos_input_func_type_t
   return 0;
 }
 
-int epos_input_set_func_channel(epos_input_p input, epos_input_func_type_t 
-  type, int channel) {
+int epos_input_set_func_channel(epos_input_t* input, epos_input_func_type_t 
+    type, int channel) {
   return epos_input_set_channel_func(input, channel, type);
 }
 
-epos_input_polarity_t epos_input_get_func_polarity(epos_input_p input, 
-  epos_input_func_type_t type) {
+epos_input_polarity_t epos_input_get_func_polarity(epos_input_t* input, 
+    epos_input_func_type_t type) {
   short mask = 0x0001 << type;
   return ((input->polarity & mask) != 0);
 }
 
-int epos_input_set_func_polarity(epos_input_p input, epos_input_func_type_t 
-  type, epos_input_polarity_t polarity) {
+int epos_input_set_func_polarity(epos_input_t* input, epos_input_func_type_t 
+    type, epos_input_polarity_t polarity) {
   short mask = 0x0001 << type;
   return epos_input_set_polarity(input, (polarity) ? input->polarity | mask : 
     input->polarity & ~mask);
 }
 
-int epos_input_get_func_execute(epos_input_p input, epos_input_func_type_t 
-  type) {
+int epos_input_get_func_execute(epos_input_t* input, epos_input_func_type_t 
+    type) {
   short mask = 0x0001 << type;
   return ((input->execute & mask) != 0);
 }
 
-int epos_input_set_func_execute(epos_input_p input, epos_input_func_type_t
-  type, int execute) {
+int epos_input_set_func_execute(epos_input_t* input, epos_input_func_type_t
+    type, int execute) {
   short mask = 0x0001 << type;
   return epos_input_set_execute(input, (execute) ? input->execute | mask : 
     input->execute & ~mask);
 }
 
-int epos_input_get_func_enabled(epos_input_p input, epos_input_func_type_t 
-  type) {
+int epos_input_get_func_enabled(epos_input_t* input, epos_input_func_type_t 
+    type) {
   short mask = 0x0001 << type;
   return ((input->enabled & mask) != 0);
 }
 
-int epos_input_set_func_enabled(epos_input_p input, epos_input_func_type_t 
-  type, int enabled) {
+int epos_input_set_func_enabled(epos_input_t* input, epos_input_func_type_t 
+    type, int enabled) {
   short mask = 0x0001 << type;
   return epos_input_set_enabled(input, (enabled) ? input->enabled | mask : 
     input->enabled & ~mask);

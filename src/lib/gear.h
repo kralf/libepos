@@ -30,10 +30,10 @@
 /** \brief Structure defining an EPOS gear assembly
   */
 typedef struct epos_gear_t {
-  epos_sensor_p sensor;            //!< The EPOS position sensor of the gear.
+  epos_sensor_t* sensor;           //!< The EPOS position sensor of the gear.
 
   float transmission;              //!< The gear transmission factor.
-} epos_gear_t, *epos_gear_p;
+} epos_gear_t;
 
 /** \brief Initialize an EPOS gear assembly
   * \param[in] gear The EPOS gear assembly to be initialized.
@@ -43,15 +43,15 @@ typedef struct epos_gear_t {
   *   initialized.
   */
 void epos_gear_init(
-  epos_gear_p gear,
-  epos_sensor_p sensor,
+  epos_gear_t* gear,
+  epos_sensor_t* sensor,
   float transmission);
 
 /** \brief Destroy an EPOS gear assembly
   * \param[in] gear The EPOS gear assembly to be destroyed.
   */
 void epos_gear_destroy(
-  epos_gear_p gear);
+  epos_gear_t* gear);
 
 /** \brief Convert EPOS position units to radian space angle
   * \param[in] gear The EPOS gear assembly to be used for conversion.
@@ -61,7 +61,7 @@ void epos_gear_destroy(
   *   position units in [rad].
   */
 float epos_gear_to_angle(
-  epos_gear_p gear,
+  const epos_gear_t* gear,
   int position);
 
 /** \brief Convert radian space angle to EPOS position units
@@ -72,7 +72,7 @@ float epos_gear_to_angle(
   *   specified angle.
   */
 int epos_gear_from_angle(
-  epos_gear_p gear,
+  const epos_gear_t* gear,
   float angle);
 
 /** \brief Convert EPOS velocity units to radian space angular velocity
@@ -83,7 +83,7 @@ int epos_gear_from_angle(
   *   EPOS velocity units in [rad/s].
   */
 float epos_gear_to_angular_velocity(
-  epos_gear_p gear,
+  const epos_gear_t* gear,
   int velocity);
 
 /** \brief Convert radian space angular velocity to EPOS velocity units
@@ -94,7 +94,7 @@ float epos_gear_to_angular_velocity(
   *   specified angular velocity.
   */
 int epos_gear_from_angular_velocity(
-  epos_gear_p gear,
+  const epos_gear_t* gear,
   float angular_vel);
 
 /** \brief Convert EPOS acceleration units to radian space angular acceleration
@@ -105,7 +105,7 @@ int epos_gear_from_angular_velocity(
   *   EPOS velocity units in [rad/s^2].
   */
 float epos_gear_to_angular_acceleration(
-  epos_gear_p gear,
+  const epos_gear_t* gear,
   int acceleration);
 
 /** \brief Convert radian space angular acceleration to EPOS acceleration units
@@ -116,7 +116,7 @@ float epos_gear_to_angular_acceleration(
   *   specified angular acceleration.
   */
 int epos_gear_from_angular_acceleration(
-  epos_gear_p gear,
+  const epos_gear_t* gear,
   float angular_acc);
 
 #endif

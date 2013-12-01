@@ -105,31 +105,31 @@ const char* epos_error_comm(int code) {
 const char* epos_error_device(short code) {
   int i;
 
-  for (i = 0; i < sizeof(epos_errors_device)/ sizeof(epos_error_device_t); ++i)
+  for (i = 0; i < sizeof(epos_errors_device)/sizeof(epos_error_device_t); ++i)
     if (epos_errors_device[i].code == code)
     return epos_errors_device[i].message;
 
   return epos_error_device_undefined_message;
 }
 
-unsigned char epos_error_get_history_length(epos_device_p dev) {
-  unsigned char length;
+unsigned char epos_error_get_history_length(epos_device_t* dev) {
+  unsigned char length = 0;
   epos_device_read(dev, EPOS_ERROR_INDEX_HISTORY,
     EPOS_ERROR_SUBINDEX_HISTORY_LENGTH, &length, 1);
 
   return length;
 }
 
-unsigned char epos_error_get_history(epos_device_p dev,
-  epos_error_device_t history[]) {
+unsigned char epos_error_get_history(epos_device_t* dev, epos_error_device_t
+    history[]) {
   int i, num = 0;
   unsigned char length = epos_error_get_history_length(dev);
 
   for (i = 0; i < length; ++i) {
     int code;
-    if (!epos_device_read(dev, EPOS_ERROR_INDEX_HISTORY,
-      EPOS_ERROR_SUBINDEX_HISTORY_ENTRIES+i, (unsigned char*)&code,
-      sizeof(int))) {
+    if (epos_device_read(dev, EPOS_ERROR_INDEX_HISTORY,
+        EPOS_ERROR_SUBINDEX_HISTORY_ENTRIES+i, (unsigned char*)&code,
+        sizeof(int)) > 0) {
       history[num].code = code;
       history[num].reg = 0;
       history[num].message = epos_error_device(history[num].code);
@@ -141,8 +141,10 @@ unsigned char epos_error_get_history(epos_device_p dev,
   return num;
 }
 
-int epos_error_clear_history(epos_device_p dev) {
+int epos_error_clear_history(epos_device_t* dev) {
   unsigned char length = 0;
-  return epos_device_write(dev, EPOS_ERROR_INDEX_HISTORY,
+  epos_device_write(dev, EPOS_ERROR_INDEX_HISTORY,
     EPOS_ERROR_SUBINDEX_HISTORY_LENGTH, &length, 1);
+  
+  return dev->error.code;
 }

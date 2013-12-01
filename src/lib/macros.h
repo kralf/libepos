@@ -18,13 +18,13 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef EPOS_GLOBAL_H
-#define EPOS_GLOBAL_H
+#ifndef EPOS_MACROS_H
+#define EPOS_MACROS_H
 
 #include <math.h>
 
-/** \file global.h
-  * \brief EPOS global macros and functions
+/** \file macros.h
+  * \brief EPOS helper macros
   */
 
 #define min(a, b) (((a) < (b)) ? (a) : (b))

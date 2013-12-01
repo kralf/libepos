@@ -46,9 +46,17 @@
 /** \brief EPOS motion profile types
   */
 typedef enum {
-  epos_profile_linear,
-  epos_profile_sinusoidal
+  epos_profile_linear,            //!< Linear profile.
+  epos_profile_sinusoidal,        //!< Sinusoidal profile.
 } epos_profile_type_t;
+
+/** \brief Structure defining an EPOS motion profile value
+  */
+typedef struct epos_profile_value_t {
+  float position;                 //!< The profile position in [rad].
+  float velocity;                 //!< The profile velocity in [rad/s].
+  float acceleration;             //!< The profile acceleration in [rad/s^2].
+} epos_profile_value_t;
 
 /** \brief Wait for completion of an EPOS motion profile
   * \param[in] node The EPOS node to complete the motion profile.
@@ -56,7 +64,7 @@ typedef enum {
   * \return The resulting device error code.
   */
 int epos_profile_wait(
-  epos_node_p node,
+  epos_node_t* node,
   double timeout);
 
 /** \brief Set the profile acceleration of an EPOS device
@@ -66,7 +74,7 @@ int epos_profile_wait(
   * \return The resulting device error code.
   */
 int epos_profile_set_acceleration(
-  epos_device_p dev,
+  epos_device_t* dev,
   unsigned int acceleration);
 
 /** \brief Set the profile deceleration of an EPOS device
@@ -76,7 +84,7 @@ int epos_profile_set_acceleration(
   * \return The resulting device error code.
   */
 int epos_profile_set_deceleration(
-  epos_device_p dev,
+  epos_device_t* dev,
   unsigned int deceleration);
 
 /** \brief Set the motion profile type of an EPOS device
@@ -85,7 +93,7 @@ int epos_profile_set_deceleration(
   * \return The resulting device error code.
   */
 int epos_profile_set_type(
-  epos_device_p dev,
+  epos_device_t* dev,
   epos_profile_type_t type);
 
 #endif
