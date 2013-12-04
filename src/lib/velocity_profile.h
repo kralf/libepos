@@ -50,7 +50,7 @@ typedef struct epos_velocity_profile_t {
 
   epos_profile_type_t type;      //!< The velocity profile type.
 
-  float start_value;             //!< The profile's start velocity in [rad].
+  float start_value;             //!< The profile's start velocity in [rad/s].
   double start_time;             //!< The start time of the profile in [s].
 } epos_velocity_profile_t;
 
@@ -90,10 +90,9 @@ int epos_velocity_profile_stop(
 
 /** \brief Evaluate the values of an EPOS velocity profile
   * \param[in] profile The EPOS velocity profile control operation to
-  *   evaluate the absolute values for.
-  * \param[in] time The absolute time to evaluate the absolute profile
-  *   values at in [s].
-  * \return The evaluated absolute profile values.
+  *   evaluate the values for.
+  * \param[in] time The time to evaluate the profile values at in [s].
+  * \return The evaluated profile values.
   * 
   * This function is intended to facilitate the computational generation
   * of motion trajectories.

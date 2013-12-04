@@ -31,6 +31,7 @@
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #define clip(a, b, c) max(min(a, c), b)
 #define sqr(a) ((a)*(a))
+#define cub(a) ((a)*(a)*(a))
 
 #define rad_to_deg(a) ((a)*180.0/M_PI)
 #define deg_to_rad(a) ((a)*M_PI/180.0)

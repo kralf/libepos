@@ -17,7 +17,7 @@ if [ "$action" = "configure" ] || [ "$action" = "abort-upgrade" ]; then
     altext=`basename $altlib | sed -n 's/lib\(.\+\)\.so/\1/p'`
   
     unset altslaves
-    for target in ${LIBEPOS_UTILS_TARGETS}; do
+    for target in ${LIBEPOS_UTILS_ALTERNATIVE_TARGETS}; do
       manname="${LIBEPOS_EXECUTABLE_PREFIX}$target.$mansec.gz"
       genman="$manpath/$manname"
       altman="$altpath/${LIBEPOS_EXECUTABLE_PREFIX}$target.$altext.$mansec.gz"

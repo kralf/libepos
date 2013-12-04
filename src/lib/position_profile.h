@@ -46,17 +46,17 @@
 /** \brief Structure defining an EPOS position profile control operation
   */
 typedef struct epos_position_profile_t {
-  float target_value;            //!< The target position in [rad].
-  float velocity;                //!< The profile velocity in [rad/s].
-  float acceleration;            //!< The profile acceleration in [rad/s^2].
-  float deceleration;            //!< The profile acceleration in [rad/s^2].
+  float target_value;          //!< The target position in [rad].
+  float velocity;              //!< The profile velocity in [rad/s].
+  float acceleration;          //!< The profile acceleration in [rad/s^2].
+  float deceleration;          //!< The profile acceleration in [rad/s^2].
 
-  epos_profile_type_t type;      //!< The position profile type.
-  int relative;                  //!< The profile position is relative.
+  epos_profile_type_t type;    //!< The position profile type.
+  int relative;                //!< The profile position is relative.
 
-  float start_value;             //!< The start position of the profile in [s].
-  double start_time;             //!< The start time of the profile in [s].
-} epos_position_profile_t, *epos_position_profile_p;
+  float start_value;           //!< The start position of the profile in [rad].
+  double start_time;           //!< The start time of the profile in [s].
+} epos_position_profile_t;
 
 /** \brief Initialize EPOS position profile control operation
   * \param[in] profile The EPOS position profile control operation to be

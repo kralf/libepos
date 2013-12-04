@@ -1,3 +1,13 @@
+libepos (0.3-72) unstable; urgency=low
+
+  * Revised profile evaluation utilities
+  * Removed profile evaluation utilities from documentation generating
+    targets with libcan alternatives
+  * Added basic EPOS interpolated position support (without device
+    communication)
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Wed, 04 Dec 2013 18:39:00 +0100
+
 libepos (0.3-71) unstable; urgency=low
 
   * First revision accounting for tulibs and libcan changes

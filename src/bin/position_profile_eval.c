@@ -166,6 +166,7 @@ int main(int argc, char **argv) {
     };
   }
   
+  file_destroy(&output_file);
   if (profiles)
     free(profiles);
   

@@ -25,42 +25,36 @@
 #include "string/string.h"
 #include "file/file.h"
 
-#include "velocity_profile.h"
+#include "interpolated_position.h"
 
-#define EPOS_VELOCITY_PROFILE_EVAL_PARAMETER_FILE         "FILE"
-#define EPOS_VELOCITY_PROFILE_EVAL_PARAMETER_STEP_SIZE    "STEP_SIZE"
+#define EPOS_INTERPOLATED_POSITION_EVAL_PARAMETER_FILE        "FILE"
+#define EPOS_INTERPOLATED_POSITION_EVAL_PARAMETER_STEP_SIZE   "STEP_SIZE"
 
-#define EPOS_PROFILE_PARSER_OPTION_GROUP                  "epos-profile"
-#define EPOS_PROFILE_PARAMETER_TYPE                       "type"
-#define EPOS_PROFILE_PARAMETER_OUTPUT                     "output"
+#define EPOS_PROFILE_PARSER_OPTION_GROUP                      "epos-profile"
+#define EPOS_PROFILE_PARAMETER_OUTPUT                         "output"
 
-config_param_t epos_velocity_profile_eval_default_arguments_params[] = {
-  {EPOS_VELOCITY_PROFILE_EVAL_PARAMETER_FILE,
+config_param_t epos_interpolated_position_eval_default_arguments_params[] = {
+  {EPOS_INTERPOLATED_POSITION_EVAL_PARAMETER_FILE,
     config_param_type_string,
     "",
     "",
-    "Read velocity profiles from the specified input file or '-' for stdin"},
-  {EPOS_VELOCITY_PROFILE_EVAL_PARAMETER_STEP_SIZE,
+    "Read interpolated position profile from the specified input file "
+    "or '-' for stdin"},
+  {EPOS_INTERPOLATED_POSITION_EVAL_PARAMETER_STEP_SIZE,
     config_param_type_float,
     "",
     "(0.0, inf)",
     "The step size used to generate equidistant locations of the profile "
-    "functions"},
+    "function"},
 };
 
-const config_default_t epos_velocity_profile_eval_default_arguments = {
-  epos_velocity_profile_eval_default_arguments_params,
-  sizeof(epos_velocity_profile_eval_default_arguments_params)/
+const config_default_t epos_interpolated_position_eval_default_arguments = {
+  epos_interpolated_position_eval_default_arguments_params,
+  sizeof(epos_interpolated_position_eval_default_arguments_params)/
     sizeof(config_param_t),
 };
 
 config_param_t epos_profile_default_options_params[] = {
-  {EPOS_PROFILE_PARAMETER_TYPE,
-    config_param_type_enum,
-    "linear",
-    "linear|sinusoidal",
-    "The type of motion profile, which may represent either 'linear' "
-    "or 'sinusoidal' velocity ramps"},
   {EPOS_PROFILE_PARAMETER_OUTPUT,
     config_param_type_string,
     "-",
@@ -85,9 +79,9 @@ int main(int argc, char **argv) {
   file_t input_file, output_file;
 
   config_parser_init_default(&parser,
-    &epos_velocity_profile_eval_default_arguments, 0,
-    "Evaluate EPOS velocity profiles at equidistant locations",
-    "The command evaluates a sequence of EPOS velocity profiles at "
+    &epos_interpolated_position_eval_default_arguments, 0,
+    "Evaluate EPOS interpolated position profile at equidistant locations",
+    "The command evaluates an EPOS interpolated position profile at "
     "equidistant locations and prints the corresponding profile function "
     "values to a file or stdout. No communication with an EPOS node is "
     "required to perform the evaluations.");
@@ -97,14 +91,12 @@ int main(int argc, char **argv) {
   config_parser_parse(&parser, argc, argv, config_parser_exit_error);
 
   const char* file = config_get_string(&parser.arguments,
-    EPOS_VELOCITY_PROFILE_EVAL_PARAMETER_FILE);
+    EPOS_INTERPOLATED_POSITION_EVAL_PARAMETER_FILE);
   double step_size = config_get_float(&parser.arguments,
-    EPOS_VELOCITY_PROFILE_EVAL_PARAMETER_STEP_SIZE);
+    EPOS_INTERPOLATED_POSITION_EVAL_PARAMETER_STEP_SIZE);
   
   config_parser_option_group_t* epos_profile_option_group =
     config_parser_get_option_group(&parser, EPOS_PROFILE_PARSER_OPTION_GROUP);
-  epos_profile_type_t profile_type = config_get_enum(
-    &epos_profile_option_group->options, EPOS_PROFILE_PARAMETER_TYPE);
   const char* output = config_get_string(
     &epos_profile_option_group->options, EPOS_PROFILE_PARAMETER_OUTPUT);
 
@@ -116,29 +108,42 @@ int main(int argc, char **argv) {
   error_exit(&input_file.error);
 
   char* line = 0;
-  epos_velocity_profile_t* profiles = 0;
-  size_t num_profiles = 0;
+  epos_interpolated_position_knot_t* knots = 0;
+  size_t num_knots = 0;
   
   while (!file_eof(&input_file) &&
       (file_read_line(&input_file, &line, 128) >= 0)) {
     if (string_empty(line) || string_starts_with(line, "#"))
       continue;
     
-    double target_value, acceleration, deceleration;
-    if (string_scanf(line, "%lg %lg %lg\n", &target_value, &acceleration,
-        &deceleration) == 3) {
-      if (!(num_profiles % 64))
-        profiles = realloc(profiles, (num_profiles+64)*
-          sizeof(epos_velocity_profile_t));
-      epos_velocity_profile_init(&profiles[num_profiles], target_value,
-        acceleration, deceleration, profile_type);
-      
-      ++num_profiles;
+    double time;
+    float position, velocity;
+    if (string_scanf(line, "%lg %g %g\n", &time, &position, &velocity) == 3) {
+      if (!(num_knots % 64))
+        knots = realloc(knots, (num_knots+64)*
+          sizeof(epos_interpolated_position_knot_t));
+      knots[num_knots].time = time;
+      knots[num_knots].position = position;
+      knots[num_knots].velocity = velocity;
+        
+      ++num_knots;
     }
   }
   string_destroy(&line);
   error_exit(&input_file.error);
   file_destroy(&input_file);
+  
+  epos_interpolated_position_t profile;
+  epos_interpolated_position_init(&profile,
+    (num_knots > 1) ? &knots[1] : 0,
+    (num_knots > 1) ? num_knots-1 : 0);
+  if (num_knots) {
+    profile.start_knot.time = knots[0].time;
+    profile.start_knot.position = knots[0].position;
+    profile.start_knot.velocity = knots[0].velocity;
+  }
+  if (knots)
+    free(knots);
   
   file_init_name(&output_file, output);
   if (string_equal(output, "-"))
@@ -146,32 +151,25 @@ int main(int argc, char **argv) {
   else
     file_open(&output_file, file_mode_write);
   error_exit(&output_file.error);
-  
-  size_t i = 0, j = 0;
-  double t = 0.0;
-  float s = 0.0;
-  epos_profile_value_t values = {0.0, 0.0, 0.0};
-  
-  for (i = 0; i < num_profiles; ++i) {
-    profiles[i].start_value = values.velocity;
-    profiles[i].start_time = t;
-    
-    while (values.velocity != profiles[i].target_value) {
-      values = epos_velocity_profile_eval(&profiles[i], t);
+
+  if (profile.num_knots) {
+    size_t i = 0, j = 0;
+    double t = profile.start_knot.time;
+
+    while (t <= profile.knots[profile.num_knots-1].time) {
+      epos_profile_value_t values = epos_interpolated_position_eval_linear(
+        &profile, t, &i);
       file_printf(&output_file, "%10lg %10d %10g %10g, %10g\n",
-        t, i, s+values.position, values.velocity, values.acceleration);
+        t, i, values.position, values.velocity, values.acceleration);
       error_exit(&output_file.error);
         
       ++j;
       t = step_size*j;
-    };
-    
-    s += values.position;
+    }
   }
   
   file_destroy(&output_file);
-  if (profiles)
-    free(profiles);
+  epos_interpolated_position_destroy(&profile);
   
   return 0;
 }
