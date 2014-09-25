@@ -1,8 +1,15 @@
+libepos (0.3-74) unstable; urgency=low
+
+  * Fixed bug in build configuration (debian directory was not excluded from
+    source package)
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Thu, 25 Sep 2014 07:38:00 +0100
+ 
 libepos (0.3-73) unstable; urgency=low
 
   * Release distribution for Ubuntu Trusty Tahr
 
- -- Ralf Kaestner <ralf.kaestner@gmail.com>  Wed, 24 Sep 2013 14:59:00 +0100
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Wed, 24 Sep 2014 14:59:00 +0100
  
 libepos (0.3-72) unstable; urgency=low
 
